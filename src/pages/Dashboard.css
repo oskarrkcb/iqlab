@@ -134,3 +134,60 @@ label.db-checkin-lbl { font-size: 12px; color: var(--gray2); }
 .db-lb-ch-up { color: rgba(255,255,255,0.28); font-size: 10px; }
 .db-lb-ch-dn { color: rgba(255,255,255,0.18); font-size: 10px; }
 .db-lb-ch-flat { color: var(--gray3); font-size: 10px; }
+
+/* ── IQ label (next to gauge) ── */
+.db-iq-label-block { display: flex; flex-direction: column; gap: 4px; }
+.db-iq-label-text { font-size: 10px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray3); }
+.db-iq-big { font-family: var(--mono); font-size: 52px; font-weight: 900; letter-spacing: -0.04em; line-height: 1; color: var(--white); }
+
+/* ── Row 4 (3-col: scores + heatmap + radar) ── */
+.db-row4 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 1px; }
+
+/* ── Row 5 (full-width leaderboard) ── */
+.db-row5 { border: 1px solid var(--border); margin-bottom: 1px; }
+
+/* ── Chart labels ── */
+.db-chart-labels { display: flex; justify-content: space-between; margin-top: 8px; }
+.db-chart-labels span { font-size: 9px; color: var(--gray3); }
+
+/* ── Exercise / Game scores ── */
+.db-scores-empty { font-size: 12px; color: var(--gray4); }
+.db-scores-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.db-score-row { display: flex; align-items: center; gap: 10px; }
+.db-score-name { font-size: 11px; color: var(--gray4); width: 118px; flex-shrink: 0; }
+.db-score-track { flex: 1; height: 2px; background: rgba(255,255,255,0.05); border-radius: 1px; }
+.db-score-fill { height: 100%; background: rgba(59,130,246,0.4); border-radius: 1px; }
+.db-score-val { font-family: var(--mono); font-size: 10px; color: var(--gray4); width: 24px; text-align: right; }
+
+/* ── Heatmap (new class names) ── */
+.db-heatmap-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-top: 12px; }
+.db-heatmap-cell { border-radius: 4px; padding: 6px 4px; display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: default; background: rgba(255,255,255,0.03); }
+.db-heatmap-hour { font-size: 8px; color: var(--gray3); }
+.db-heatmap-val { font-family: var(--mono); font-size: 9px; color: var(--gray2); }
+.db-heatmap-legend { display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap; }
+.db-heatmap-legend span { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--gray4); }
+.db-legend-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── Radar chart ── */
+.db-radar-wrap { display: flex; justify-content: center; margin: 8px 0; }
+.db-radar-stats { display: flex; justify-content: space-around; margin-top: 4px; }
+.db-radar-stat { text-align: center; }
+.db-radar-stat-val { font-family: var(--mono); font-size: 16px; font-weight: 700; color: var(--accent); }
+.db-radar-stat-lbl { font-size: 9px; color: var(--gray3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.1em; }
+
+/* ── Leaderboard (div-based rows) ── */
+.db-lb-row { display: grid; grid-template-columns: 40px 1fr 80px; align-items: center; padding: 11px 22px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 12px; font-family: var(--mono); }
+.db-lb-row:last-child { border-bottom: none; }
+.db-lb-row.db-lb-you { background: rgba(59,130,246,0.06); }
+.db-lb-rank { color: var(--gray3); font-size: 11px; }
+.db-lb-name { color: var(--white); display: flex; align-items: center; gap: 6px; }
+.db-lb-country { font-size: 10px; color: var(--gray4); }
+.db-lb-you-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: rgba(59,130,246,0.12); padding: 1px 6px; border-radius: 2px; }
+.db-lb-elo { color: var(--white); text-align: right; font-weight: 700; }
+.db-lb-you .db-lb-rank, .db-lb-you .db-lb-name, .db-lb-you .db-lb-elo { color: var(--accent); }
+
+/* ── Leaderboard pagination ── */
+.db-lb-pagination { display: flex; gap: 6px; padding: 16px 22px; justify-content: center; }
+.db-lb-page-btn { background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--gray2); font-size: 11px; padding: 5px 11px; border-radius: 3px; cursor: pointer; transition: background 0.15s; }
+.db-lb-page-btn:hover { background: rgba(255,255,255,0.08); }
+.db-lb-page-btn.active { background: var(--accent); color: var(--white); border-color: var(--accent); }
