@@ -1,0 +1,159 @@
+/* ═══════════════════ NAVBAR — Full Width Dark Bar ═══════════════════ */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 999;
+  height: 66px;
+  display: flex;
+  align-items: center;
+  background: rgba(6,6,6,0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  /* Reset pill shape */
+  border-radius: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  transform: none;
+  box-shadow: none;
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 56px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── Logo ── */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--white);
+  text-decoration: none;
+  padding: 0;
+  margin-right: 0;
+}
+.logo-dot { display: none; }
+.logo-text { color: var(--white); }
+
+/* ── Nav Links ── */
+.nav-links {
+  display: flex;
+  gap: 36px;
+  align-items: center;
+  margin-left: 52px;
+  flex: 1;
+}
+
+.nav-links a {
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--gray2);
+  text-decoration: none;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
+.nav-links a:hover { color: var(--white); background: none; }
+.nav-links a.active { color: var(--white); background: none; }
+
+/* ── Version toggle ── */
+.nav-version-toggle {
+  display: flex;
+  gap: 2px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 100px;
+  padding: 3px;
+  margin: 0 12px;
+}
+.nav-version-btn {
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  border: none;
+  background: transparent;
+  color: var(--gray2);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.15s;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.nav-version-btn.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ── CTA (Start Training) ── */
+.nav-links a[href="/training"].active,
+.nav-cta {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--white);
+  color: var(--bg);
+  padding: 9px 22px;
+  border-radius: 100px;
+  transition: background 0.2s;
+  margin-left: auto;
+}
+
+/* ── Landing page variant (more transparent) ── */
+/* Landing.jsx adds .page-landing to document.body on mount and removes on unmount */
+.page-landing .nav { background: rgba(6,6,6,0.55); }
+
+/* ── Hamburger ── */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--white);
+  padding: 6px;
+  cursor: pointer;
+  margin-left: 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.hamburger:hover { background: rgba(255,255,255,0.06); }
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+  .nav { border-radius: 0; }
+  .nav-inner { padding: 0 20px; }
+  .hamburger { display: block; }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 66px; left: 0; right: 0;
+    background: rgba(6,6,6,0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+    flex-direction: column;
+    padding: 16px 20px;
+    gap: 4px;
+    margin-left: 0;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a {
+    padding: 10px 0;
+    border-radius: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-links a:last-child { border-bottom: none; }
+}
