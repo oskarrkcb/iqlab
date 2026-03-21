@@ -15,7 +15,7 @@
 }
 .iq-intro-inner { position: relative; z-index: 2; max-width: 600px; }
 .iq-intro-eye { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
-.iq-intro-title { font-size: clamp(44px,6vw,72px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; margin-bottom: 20px; }
+.iq-intro-title { font-size: clamp(38px,5vw,64px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; margin-bottom: 28px; }
 .iq-intro-title .dim { display: block; color: var(--gray3); }
 .iq-intro-desc { font-size: 15px; color: var(--gray2); line-height: 1.75; font-weight: 300; margin-bottom: 16px; }
 .iq-intro-meta { display: flex; gap: 28px; justify-content: center; margin-bottom: 44px; flex-wrap: wrap; }

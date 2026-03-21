@@ -92,9 +92,16 @@ export default function IQTest() {
         <div className="iq-intro">
           <div className="iq-intro-glow" />
           <div className="iq-intro-inner">
-            <h2>{t.iqTest.title}</h2>
-            <p>{iqQuestions.length} {t.iqTest.desc}</p>
-            <button className="btn btn-primary btn-lg" onClick={startTest}>{t.iqTest.startTest}</button>
+            <div className="iq-intro-eye">IQ Assessment</div>
+            <h2 className="iq-intro-title">{t.iqTest.title}<span className="dim">How sharp are you?</span></h2>
+            <div className="iq-intro-meta">
+              <div><div className="iq-intro-stat-v">15</div><div className="iq-intro-stat-l">Questions</div></div>
+              <div><div className="iq-intro-stat-v">~5</div><div className="iq-intro-stat-l">Minutes</div></div>
+              <div><div className="iq-intro-stat-v">3</div><div className="iq-intro-stat-l">Categories</div></div>
+            </div>
+            <div className="iq-intro-btns">
+              <button className="btn-fill" onClick={startTest}>{t.iqTest.startTest}</button>
+            </div>
           </div>
         </div>
         <Footer />
@@ -115,9 +122,19 @@ export default function IQTest() {
               <div className="iq-result-desc">{result.desc}</div>
             </div>
             <div className="iq-result-bars">
-              <div className="iq-result-bar-row"><div className="iq-result-bar-val">{result.logicPct}%</div><div className="iq-result-bar-lbl">{t.iqTest.logic}</div></div>
-              <div className="iq-result-bar-row"><div className="iq-result-bar-val">{result.mathPct}%</div><div className="iq-result-bar-lbl">{t.iqTest.math}</div></div>
-              <div className="iq-result-bar-row"><div className="iq-result-bar-val">{result.patPct}%</div><div className="iq-result-bar-lbl">{t.iqTest.pattern}</div></div>
+              {[
+                { lbl: t.iqTest.logic,   val: result.logicPct, cls: 'blue'   },
+                { lbl: t.iqTest.math,    val: result.mathPct,  cls: 'green'  },
+                { lbl: t.iqTest.pattern, val: result.patPct,   cls: 'purple' },
+              ].map(({ lbl, val, cls }) => (
+                <div key={lbl} className="iq-result-bar-row">
+                  <div className="iq-result-bar-lbl">{lbl}</div>
+                  <div className="iq-result-bar-track">
+                    <div className={`iq-result-bar-fill ${cls}`} style={{ width: `${val}%` }} />
+                  </div>
+                  <div className="iq-result-bar-val">{val}%</div>
+                </div>
+              ))}
             </div>
             <div className="iq-range-panel">
               <div className="iq-range-panel-lbl">IQ Reference Range</div>
