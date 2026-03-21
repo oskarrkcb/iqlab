@@ -1,0 +1,49 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   IQLab Design System — v5 Dark Edition
+   Palette: Black + Dark Greys + Blue Accent
+   Typography: Inter (display/body) + JetBrains Mono (stats/code)
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  /* Backgrounds */
+  --bg:    #060606;
+  --bg2:   #0e0e0e;
+  --bg3:   #141414;
+  --bg4:   #1c1c1c;
+  --bg5:   #222222;
+
+  /* Borders */
+  --border: rgba(255,255,255,0.07);
+
+  /* Text */
+  --white:  #ffffff;
+  --gray1:  #cccccc;
+  --gray2:  #888888;
+  --gray3:  #3a3a3a;
+  --gray4:  #555555;
+  --gray5:  #2a2a2a;
+
+  /* Accent — Blue */
+  --accent:  #3b82f6;
+  --accent2: #2563eb;
+  --accent3: #1d4ed8;
+  --glow:    rgba(59,130,246,0.12);
+  --glow2:   rgba(59,130,246,0.20);
+
+  /* Semantic */
+  --green:    #22c55e;
+  --green-g:  rgba(34,197,94,0.12);
+  --red:      #ef4444;
+  --red-g:    rgba(239,68,68,0.12);
+  --orange:   #f97316;
+  --orange-g: rgba(249,115,22,0.12);
+  --blue:     #3b82f6;
+  --blue-g:   rgba(59,130,246,0.12);
+  --purple:   #a78bfa;
+
+  /* Layout */
+  --r:  4px;
+  --r2: 4px;
+  --r3: 4px;
+  --font: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
