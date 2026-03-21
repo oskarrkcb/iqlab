@@ -1,0 +1,110 @@
+/* IQLab — IQ Test Page v5 — Dark theme. Three phases: intro / test / result. */
+
+/* ─── INTRO ─────────────────────────────────────────────── */
+.iq-intro {
+  min-height: calc(100vh - 66px);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  text-align: center; padding: 40px 32px;
+  position: relative;
+}
+.iq-intro-glow {
+  position: absolute; width: 600px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.06), transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;
+}
+.iq-intro-inner { position: relative; z-index: 2; max-width: 600px; }
+.iq-intro-eye { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
+.iq-intro-title { font-size: clamp(44px,6vw,72px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; margin-bottom: 20px; }
+.iq-intro-title .dim { display: block; color: var(--gray3); }
+.iq-intro-desc { font-size: 15px; color: var(--gray2); line-height: 1.75; font-weight: 300; margin-bottom: 16px; }
+.iq-intro-meta { display: flex; gap: 28px; justify-content: center; margin-bottom: 44px; flex-wrap: wrap; }
+.iq-intro-stat-v { font-family: var(--mono); font-size: 28px; font-weight: 900; color: var(--white); }
+.iq-intro-stat-l { font-size: 10px; color: var(--gray3); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+.iq-intro-btns { display: flex; gap: 12px; justify-content: center; }
+
+/* ─── TEST PHASE ─────────────────────────────────────────── */
+.iq-test-wrap {
+  min-height: calc(100vh - 66px);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 40px 32px 60px;
+}
+.iq-test-inner { width: 100%; max-width: 680px; }
+.iq-progress { margin-bottom: 40px; }
+.iq-progress-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.iq-progress-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); }
+.iq-progress-num { font-family: var(--mono); font-size: 11px; color: var(--gray3); }
+.iq-progress-track { height: 2px; background: rgba(255,255,255,0.06); border-radius: 1px; }
+.iq-progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 0.4s ease; }
+.iq-q-card { background: var(--bg3); border: 1px solid var(--border); padding: 44px; margin-bottom: 20px; }
+.iq-q-cat { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray3); margin-bottom: 20px; }
+.iq-q-text { font-size: 20px; font-weight: 700; line-height: 1.4; letter-spacing: -0.01em; }
+.iq-q-seq { font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--accent); letter-spacing: 0.08em; margin-top: 16px; }
+.iq-answers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.iq-ans-btn {
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 16px 20px; cursor: pointer; text-align: left;
+  display: flex; align-items: center; gap: 14px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.iq-ans-btn:hover:not(:disabled) { background: var(--bg4); border-color: rgba(255,255,255,0.15); }
+.iq-ans-btn.correct { background: rgba(34,197,94,0.1); border-color: rgba(34,197,94,0.4); }
+.iq-ans-btn.wrong { background: rgba(239,68,68,0.08); border-color: rgba(239,68,68,0.3); }
+.iq-ans-btn.selected { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.4); }
+.iq-ans-letter { font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--gray3); width: 20px; flex-shrink: 0; }
+.iq-ans-text { font-size: 14px; font-weight: 600; color: var(--white); }
+.iq-explanation { background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.15); padding: 16px 20px; margin-top: 8px; }
+.iq-expl-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 6px; }
+.iq-expl-text { font-size: 13px; color: var(--gray2); line-height: 1.65; font-weight: 300; }
+
+/* ─── RESULT ─────────────────────────────────────────────── */
+.iq-result-wrap {
+  min-height: calc(100vh - 66px);
+  display: flex; flex-direction: column; align-items: center;
+  padding: 60px 32px 80px; position: relative;
+}
+.iq-result-glow {
+  position: absolute; width: 700px; height: 500px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.06), transparent 70%);
+  top: 40%; left: 50%; transform: translate(-50%,-50%); pointer-events: none;
+}
+.iq-result-inner { width: 100%; max-width: 720px; position: relative; z-index: 2; }
+.iq-result-header { text-align: center; margin-bottom: 48px; }
+.iq-result-eye { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.iq-result-num { font-family: var(--mono); font-size: clamp(72px,12vw,120px); font-weight: 900; letter-spacing: -0.06em; color: var(--white); line-height: 1; }
+.iq-result-num-lbl { font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray3); margin-top: 8px; }
+.iq-result-desc { font-size: 16px; color: var(--gray2); margin-top: 16px; font-weight: 300; max-width: 400px; margin-left: auto; margin-right: auto; }
+.iq-result-kpis { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 1px; }
+.iq-result-kpi { background: var(--bg3); padding: 20px; text-align: center; }
+.iq-result-kpi-v { font-family: var(--mono); font-size: 28px; font-weight: 900; letter-spacing: -0.04em; }
+.iq-result-kpi-v.accent { color: var(--accent); }
+.iq-result-kpi-v.green { color: var(--green); }
+.iq-result-kpi-l { font-size: 9px; color: var(--gray3); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+.iq-result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.iq-result-card { background: var(--bg3); padding: 28px; }
+.iq-result-card-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray3); margin-bottom: 12px; }
+.iq-result-card-title { font-size: 15px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+.iq-result-bars { display: flex; flex-direction: column; gap: 13px; }
+.iq-result-bar-row { display: flex; align-items: center; gap: 10px; }
+.iq-result-bar-lbl { font-size: 11px; color: var(--gray3); width: 90px; flex-shrink: 0; }
+.iq-result-bar-track { flex: 1; height: 2px; background: rgba(255,255,255,0.05); border-radius: 1px; }
+.iq-result-bar-fill { height: 100%; border-radius: 1px; transition: width 1s cubic-bezier(0.16,1,0.3,1); }
+.iq-result-bar-fill.blue { background: var(--accent); }
+.iq-result-bar-fill.green { background: var(--green); }
+.iq-result-bar-fill.purple { background: var(--purple); }
+.iq-result-bar-val { font-family: var(--mono); font-size: 10px; color: var(--gray4); width: 28px; text-align: right; }
+.iq-result-actions { display: flex; gap: 12px; justify-content: center; margin-top: 28px; flex-wrap: wrap; }
+
+/* ─── IQ RANGE REFERENCE PANEL ─────────────────────────── */
+.iq-range-panel { margin-top: 1px; background: var(--bg3); border: 1px solid var(--border); padding: 28px; border-top: none; }
+.iq-range-panel-lbl { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray3); margin-bottom: 16px; }
+.iq-range-rows { display: flex; flex-direction: column; gap: 0; }
+.iq-range-row {
+  display: flex; align-items: center; gap: 14px;
+  padding: 10px 14px; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 12px; color: var(--gray2); transition: background 0.15s;
+}
+.iq-range-row:last-child { border-bottom: none; }
+.iq-range-row.current { background: rgba(59,130,246,0.07); color: var(--white); border-left: 2px solid var(--accent); }
+.iq-range-score { font-family: var(--mono); font-size: 11px; color: var(--gray3); width: 60px; flex-shrink: 0; }
+.iq-range-label { flex: 1; }
