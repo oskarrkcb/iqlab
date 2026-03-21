@@ -1,0 +1,141 @@
+/* ═══════════════════════════════════════════════════════════════
+   IQLab — Training Page v5
+   Dark theme. Two-column layout: sidebar + game grid.
+   ═══════════════════════════════════════════════════════════════ */
+
+.training-page { padding-top: 66px; min-height: 100vh; }
+.tr-inner { max-width: 100%; }
+
+/* Two-column layout */
+.tr-layout { display: grid; grid-template-columns: 244px 1fr; min-height: calc(100vh - 66px); }
+
+/* Header */
+.tr-header { padding: 36px 40px 0; max-width: calc(100% - 244px); margin-left: 244px; }
+.tr-header h2 { font-size: clamp(22px,2.2vw,32px); font-weight: 800; letter-spacing: -0.03em; }
+.tr-header-sub { font-size: 12px; color: var(--gray2); font-weight: 300; margin-top: 2px; }
+
+/* ── SIDEBAR ── */
+.tr-sidebar {
+  background: var(--bg2); border-right: 1px solid var(--border);
+  padding: 32px 22px; position: sticky; top: 66px;
+  height: calc(100vh - 66px); overflow-y: auto;
+}
+.tr-sidebar-label { font-size: 9px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--gray3); margin-bottom: 10px; }
+.tr-sidebar-divider { height: 1px; background: var(--border); margin: 22px 0; }
+.tr-sidebar-section { margin-bottom: 24px; }
+
+/* Quick play buttons */
+.tr-sidebar-mode-btn {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--white); font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s; text-align: left; margin-bottom: 6px;
+}
+.tr-sidebar-mode-btn:hover:not(:disabled) { border-color: rgba(255,255,255,0.15); background: var(--bg4); }
+.tr-sidebar-mode-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.tr-sidebar-modes { display: flex; flex-direction: column; gap: 0; }
+.tr-sidebar-mode-icon {
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.12); border-radius: 4px; flex-shrink: 0;
+}
+.tr-soon-tag { margin-left: auto; font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray3); border: 1px solid var(--gray3); padding: 2px 6px; border-radius: 2px; }
+
+/* Session row (Sets + Time) */
+.tr-sidebar-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.tr-sidebar-field-label { font-size: 12px; color: var(--gray2); }
+.tr-sidebar-select {
+  font-family: var(--mono); font-size: 11px; color: var(--white);
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 5px 8px; cursor: pointer; outline: none;
+  -webkit-appearance: none; border-radius: 2px;
+}
+.tr-sidebar-select--full {
+  width: 100%; font-family: var(--font); font-size: 12px; color: var(--white);
+  background: var(--bg3); border: 1px solid var(--border);
+  padding: 8px 10px; cursor: pointer; outline: none;
+  -webkit-appearance: none; border-radius: 2px; margin-top: 4px;
+}
+
+/* Timed / Zen toggle */
+.tr-sidebar-toggle-row { display: flex; gap: 6px; margin-top: 8px; }
+.tr-sidebar-toggle {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-size: 11px; font-weight: 600; padding: 8px 10px;
+  background: var(--bg3); border: 1px solid var(--border); cursor: pointer;
+  color: var(--gray2); font-family: var(--font); transition: all 0.15s; border-radius: 2px;
+}
+.tr-sidebar-toggle.active { background: rgba(59,130,246,0.12); border-color: rgba(59,130,246,0.35); color: var(--accent); }
+
+/* Difficulty pills */
+.tr-sidebar-section .diff-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.tr-sidebar-section .diff-pills button {
+  padding: 4px 10px; border-radius: 999px; font-size: 12px;
+  background: var(--bg3); color: var(--gray2);
+  border: 1px solid var(--border);
+  cursor: pointer; font-family: var(--font);
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.tr-sidebar-section .diff-pills button.active {
+  background: var(--accent); color: #fff; border-color: var(--accent);
+}
+
+/* ── MAIN AREA ── */
+.tr-main { padding: 36px 40px 60px; }
+
+/* Category tabs */
+.tr-cat-tabs { display: flex; gap: 6px; margin: 24px 0 0; flex-wrap: wrap; }
+.tr-cat-tab {
+  font-size: 11px; font-weight: 600; padding: 6px 14px; border-radius: 100px;
+  border: 1px solid var(--border); background: transparent; color: var(--gray2);
+  cursor: pointer; font-family: var(--font); transition: all 0.15s;
+}
+.tr-cat-tab.active { background: var(--white); color: var(--bg); border-color: var(--white); }
+.tr-cat-tab:hover:not(.active) { border-color: rgba(255,255,255,0.2); color: var(--white); }
+
+/* Section labels */
+.tr-section-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gray3); margin: 28px 0 14px; }
+.tr-empty { font-size: 13px; color: var(--gray2); padding: 40px 0; }
+
+/* Game grid */
+.tr-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+.tr-card { background: var(--bg3); padding: 20px 18px 32px; cursor: pointer; transition: background 0.15s; position: relative; }
+.tr-card:hover { background: var(--bg4); }
+
+/* Card top row */
+.tr-card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 12px; }
+.tr-card-icon {
+  width: 32px; height: 32px; border-radius: 5px; flex-shrink: 0;
+  background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.12);
+  display: flex; align-items: center; justify-content: center;
+}
+.tr-card-icon svg { display: block; }
+
+/* High-score chip */
+.train-hs-chip {
+  display: flex; align-items: center; gap: 4px;
+  font-family: var(--mono); font-size: 10px; color: var(--orange);
+  background: rgba(249,115,22,0.08); border: 1px solid rgba(249,115,22,0.2);
+  padding: 3px 7px; border-radius: 2px; white-space: nowrap;
+}
+
+/* Card text */
+.tr-card-cat { font-size: 9px; font-weight: 700; letter-spacing: 0.15em; color: var(--accent); text-transform: uppercase; margin-bottom: 5px; }
+.tr-card-title { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 5px; }
+.tr-card-desc { font-size: 11px; color: var(--gray2); line-height: 1.55; font-weight: 300; }
+
+/* ── GAME IMMERSIVE (active game) ── */
+.game-immersive { display: flex; flex-direction: column; min-height: calc(100vh - 66px); }
+.session-bar {
+  padding: 12px 40px; display: flex; align-items: center; gap: 12px;
+  background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.session-bar-info { display: flex; gap: 10px; align-items: center; margin-left: auto; }
+.session-sets-pill, .session-timer-pill {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 700; font-family: var(--mono);
+  padding: 5px 12px; border-radius: 100px;
+  background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.2); color: var(--accent);
+}
+.session-timer-pill.warn { background: rgba(249,115,22,0.1); border-color: rgba(249,115,22,0.2); color: var(--orange); }
+.session-timer-pill.danger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: var(--red); }
+.game-frame-large { flex: 1; display: flex; flex-direction: column; padding: 32px 40px; }
