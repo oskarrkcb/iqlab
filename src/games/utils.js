@@ -650,38 +650,121 @@ export const seqGens = [
     }
     return seqGens[37]();
   },
-  // 43. +a, ×b, ÷b, +c, ×d, ÷d — two pairs of ×/÷ with different adds
+  // 43. ×2, ÷3, ×4, ÷5, ×6 — alternating multiply/divide by increasing n
+  () => {
+    // ops: ×2, ÷3, ×4, ÷5, ×6 → divisors at positions 1,3 are 3,5 → start = LCM(3,5)×k
+    const k = R(1, 4);
+    const s = 15 * k;
+    if (s > 8000) return seqGens[9]();
+    const q = [s];
+    for (let i = 0; i < 5; i++) {
+      const factor = i + 2;
+      q.push(i % 2 === 0 ? q[i] * factor : q[i] / factor);
+    }
+    if (q.some(v => !Number.isInteger(v) || v <= 0 || v > 8000)) return seqGens[9]();
+    return {
+      seq: q.slice(0, 6), rule: '×2, ÷3, ×4, ÷5, ×6...',
+      ex: () => ({
+        steps: q.slice(1, 6).map((val, i) => {
+          const factor = i + 2;
+          const op = i % 2 === 0 ? `×${factor}` : `÷${factor}`;
+          return `${q[i]} ${op} = <span class="hl">${val}</span>`;
+        }),
+        f: 'Multiply/divide by increasing n: ×2, ÷3, ×4, ÷5...'
+      })
+    };
+  },
+  // 44. ÷2, ÷3, ÷4, ÷5, ÷6 — divide by increasing n (start from 720)
+  () => {
+    const scale = pick([1, 2]);
+    const s = 720 * scale;
+    if (s > 8000) return seqGens[10]();
+    const q = [s];
+    for (let d = 2; d <= 6; d++) q.push(q[q.length - 1] / d);
+    return {
+      seq: q.slice(0, 6), rule: '÷2, ÷3, ÷4, ÷5, ÷6',
+      ex: () => ({
+        steps: q.slice(1, 6).map((val, i) => `${q[i]} ÷ ${i + 2} = <span class="hl">${val}</span>`),
+        f: 'Divide by 2, then 3, then 4, then 5...'
+      })
+    };
+  },
+  // 45. +1, ×2, +2, ×3, +3 — alternating add/multiply with increasing operands
+  () => {
+    const s = R(1, 4);
+    const q = [s];
+    for (let i = 1; i < 6; i++) {
+      const n = Math.ceil(i / 2);
+      q.push(i % 2 === 1 ? q[i - 1] + n : q[i - 1] * (n + 1));
+    }
+    if (q.some(v => v > 8000)) return seqGens[20]();
+    return {
+      seq: q, rule: '+1, ×2, +2, ×3, +3... (increasing)',
+      ex: () => ({
+        steps: q.slice(1).map((val, i) => {
+          const n = Math.ceil((i + 1) / 2);
+          const op = i % 2 === 0 ? `+${n}` : `×${n + 1}`;
+          return `${q[i]} ${op} = <span class="hl">${val}</span>`;
+        }),
+        f: '+1, ×2, +2, ×3, +3, ×4... (operands increase each step)'
+      })
+    };
+  },
+  // 46. +a, ×m, ÷n cycle where the add increases by 1 each full cycle
   () => {
     for (let tries = 0; tries < 200; tries++) {
-      const a = R(2, 5), b = pick([2, 3]), c = R(2, 5), d = pick([2, 3]);
-      if (a === c && b === d) continue;
-      const s = b * d * R(1, 3);
+      const m = pick([3, 4, 6]), n = pick([2, 3]), a0 = R(2, 5);
+      if (m % n !== 0) continue; // ensure ×m then ÷n is clean only when needed
+      const s = n * R(2, 6);
       const q = [s];
       let ok = true;
-      const ops = [a, b, -b, c, d, -d]; // offsets conceptually, just build it
-      // Pattern: +a, ×b, ÷b, +c, ×d, ÷d
-      const pattern = [
-        v => v + a, v => v * b, v => v / b,
-        v => v + c, v => v * d, v => v / d,
-      ];
-      for (let i = 0; i < 6; i++) {
-        const v = pattern[i % pattern.length](q[q.length - 1]);
+      for (let i = 0; i < 5; i++) {
+        const cycle = Math.floor(i / 3);
+        const step = i % 3;
+        const add = a0 + cycle;
+        const v = step === 0 ? q[i] + add : step === 1 ? q[i] * m : q[i] / n;
         if (!Number.isInteger(v) || v <= 0 || v > 8000) { ok = false; break; }
         q.push(v);
       }
-      if (ok && q.length === 7) {
-        const seq = q.slice(0, 6);
-        const opLabels = [`+${a}`, `×${b}`, `÷${b}`, `+${c}`, `×${d}`, `÷${d}`];
+      if (ok && q.length === 6) {
         return {
-          seq, rule: `+${a},×${b},÷${b},+${c},×${d},÷${d} cycle`,
+          seq: q, rule: `+${a0},×${m},÷${n} → +${a0 + 1},×${m},÷${n}...`,
           ex: () => ({
-            steps: seq.slice(1).map((val, i) => `${seq[i]} ${opLabels[i % 6]} = <span class="hl">${val}</span>`),
-            f: `Pattern: +${a}, ×${b}, ÷${b}, +${c}, ×${d}, ÷${d}`
+            steps: q.slice(1).map((val, i) => {
+              const cycle = Math.floor(i / 3);
+              const step = i % 3;
+              const add = a0 + cycle;
+              const ops = [`+${add}`, `×${m}`, `÷${n}`];
+              return `${q[i]} ${ops[step]} = <span class="hl">${val}</span>`;
+            }),
+            f: `+${a0},×${m},÷${n}, +${a0 + 1},×${m},÷${n} (add grows each cycle)`
           })
         };
       }
     }
     return seqGens[41]();
+  },
+  // 47. +a₁, ×b₁, +a₂, ×b₂, +a₃ — both adds and multiplies change each pair
+  () => {
+    for (let tries = 0; tries < 200; tries++) {
+      const a1 = R(2, 5), b1 = R(2, 3), a2 = R(2, 5), b2 = R(2, 3);
+      if (a1 === a2 && b1 === b2) continue;
+      const s = R(1, 5);
+      const q = [s, s + a1, (s + a1) * b1, (s + a1) * b1 + a2, ((s + a1) * b1 + a2) * b2];
+      q.push(q[4] + a1 + 1); // next add grows
+      if (q.some(v => !Number.isInteger(v) || v <= 0 || v > 8000)) continue;
+      return {
+        seq: q, rule: `+${a1},×${b1},+${a2},×${b2} alternating`,
+        ex: () => ({
+          steps: q.slice(1).map((val, i) => {
+            const ops = [`+${a1}`, `×${b1}`, `+${a2}`, `×${b2}`, `+${a1 + 1}`];
+            return `${q[i]} ${ops[i]} = <span class="hl">${val}</span>`;
+          }),
+          f: `+${a1}, ×${b1}, +${a2}, ×${b2}, +${a1 + 1}...`
+        })
+      };
+    }
+    return seqGens[27]();
   },
 ];
 
@@ -766,7 +849,11 @@ const seqGensMeta = [
   { fn: seqGens[39], type: 'mixed' },        // 39. Cumulative product
   { fn: seqGens[40], type: 'alternating' },  // 40. +a, ×b, ÷c three-step cycle
   { fn: seqGens[41], type: 'alternating' },  // 41. ×a, +b, ÷c, −d four-step cycle
-  { fn: seqGens[42], type: 'alternating' },  // 42. Two ×/÷ pairs with different adds
+  { fn: seqGens[42], type: 'alternating' },  // 42. ×2,÷3,×4,÷5,×6 increasing factors
+  { fn: seqGens[43], type: 'mixed' },        // 43. ÷2,÷3,÷4,÷5,÷6 from 720
+  { fn: seqGens[44], type: 'alternating' },  // 44. +1,×2,+2,×3,+3 increasing operands
+  { fn: seqGens[45], type: 'alternating' },  // 45. +a,×m,÷n with growing add per cycle
+  { fn: seqGens[46], type: 'alternating' },  // 46. +a₁,×b₁,+a₂,×b₂ varying pairs
 ];
 
 /**
