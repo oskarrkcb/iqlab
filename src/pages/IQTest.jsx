@@ -107,7 +107,7 @@ export default function IQTest() {
   const startTest = useCallback(() => {
     startTimeRef.current = Date.now();
     setBarWidths([0, 0, 0]);
-    setQuestions(shuf([...iqQuestions]).slice(0, 15));
+    setQuestions(shuf([...iqQuestions]).slice(0, 20));
     setQi(0); setCorrect(0); setSelected(-1); setLocked(false); setShowExpl(false);
     setCats({ logic: 0, math: 0, pat: 0, logicT: 0, mathT: 0, patT: 0 });
     setPhase('test');
@@ -172,8 +172,8 @@ export default function IQTest() {
             <div className="iq-intro-eye">IQ Assessment</div>
             <h2 className="iq-intro-title">{t.iqTest.title}<span className="dim">How sharp are you?</span></h2>
             <div className="iq-intro-meta">
-              <div><div className="iq-intro-stat-v">15</div><div className="iq-intro-stat-l">Questions</div></div>
-              <div><div className="iq-intro-stat-v">~6</div><div className="iq-intro-stat-l">Minutes</div></div>
+              <div><div className="iq-intro-stat-v">20</div><div className="iq-intro-stat-l">Questions</div></div>
+              <div><div className="iq-intro-stat-v">~8</div><div className="iq-intro-stat-l">Minutes</div></div>
               <div><div className="iq-intro-stat-v">3</div><div className="iq-intro-stat-l">Categories</div></div>
             </div>
             <div className="iq-intro-btns">
