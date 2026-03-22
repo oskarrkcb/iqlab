@@ -6,6 +6,64 @@ import Footer from '../components/Footer';
 import { useLang } from '../i18n/LanguageContext';
 import './IQTest.css';
 
+// ── SVG Matrix Cell renderer ──────────────────────────────────────────────
+
+function cellShape(shape, cx, cy, r) {
+  switch (shape) {
+    case 'circle':   return <circle cx={cx} cy={cy} r={r} />;
+    case 'square':   return <rect x={cx - r} y={cy - r} width={r * 2} height={r * 2} />;
+    case 'triangle': return <polygon points={`${cx},${cy - r} ${cx + r * 0.866},${cy + r * 0.5} ${cx - r * 0.866},${cy + r * 0.5}`} />;
+    case 'diamond':  return <polygon points={`${cx},${cy - r} ${cx + r},${cy} ${cx},${cy + r} ${cx - r},${cy}`} />;
+    default:         return <circle cx={cx} cy={cy} r={r} />;
+  }
+}
+
+const CELL_CFG = {
+  1: { positions: [{ x: 22, y: 22 }], r: 10 },
+  2: { positions: [{ x: 14, y: 22 }, { x: 30, y: 22 }], r: 7 },
+  3: { positions: [{ x: 10, y: 22 }, { x: 22, y: 22 }, { x: 34, y: 22 }], r: 6 },
+};
+
+function MatrixCell({ cell, uid, px = 52 }) {
+  if (!cell) {
+    return (
+      <svg width={px} height={px} viewBox="0 0 44 44">
+        <text x="22" y="29" textAnchor="middle" fontSize="22"
+          fill="rgba(255,255,255,0.18)" fontWeight="700">?</text>
+      </svg>
+    );
+  }
+  const { shape = 'circle', fill = 2, n = 1 } = cell;
+  const cfg = CELL_CFG[n] || CELL_CFG[1];
+  const white = 'rgba(255,255,255,0.88)';
+  const sw = 1.8;
+  const clipId = `mc-${uid}`;
+
+  return (
+    <svg width={px} height={px} viewBox="0 0 44 44">
+      {fill === 1 && (
+        <defs>
+          <clipPath id={clipId}>
+            <rect x="0" y="0" width="22" height="44" />
+          </clipPath>
+        </defs>
+      )}
+      {cfg.positions.map((pos, i) => (
+        <g key={i}>
+          {fill === 2 && <g fill={white}>{cellShape(shape, pos.x, pos.y, cfg.r)}</g>}
+          {fill === 0 && <g fill="none" stroke={white} strokeWidth={sw}>{cellShape(shape, pos.x, pos.y, cfg.r)}</g>}
+          {fill === 1 && <>
+            <g fill={white} clipPath={`url(#${clipId})`}>{cellShape(shape, pos.x, pos.y, cfg.r)}</g>
+            <g fill="none" stroke={white} strokeWidth={sw}>{cellShape(shape, pos.x, pos.y, cfg.r)}</g>
+          </>}
+        </g>
+      ))}
+    </svg>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────
+
 export default function IQTest() {
   const { t } = useLang();
   const [phase, setPhase] = useState('intro');
@@ -22,7 +80,6 @@ export default function IQTest() {
   const iqNumRef = useRef(null);
   const [barWidths, setBarWidths] = useState([0, 0, 0]);
 
-  // Animate bar fills from 0 → actual value when result screen mounts
   useEffect(() => {
     if (phase !== 'result' || !result) return;
     const tid = setTimeout(() => {
@@ -87,8 +144,8 @@ export default function IQTest() {
     const pct = finalCorrect / questions.length;
     const iq = Math.round(70 + pct * 65 + R(-3, 3));
     const logicPct = cats.logicT ? Math.round(cats.logic / cats.logicT * 100) : 0;
-    const mathPct = cats.mathT ? Math.round(cats.math / cats.mathT * 100) : 0;
-    const patPct = cats.patT ? Math.round(cats.pat / cats.patT * 100) : 0;
+    const mathPct  = cats.mathT  ? Math.round(cats.math  / cats.mathT  * 100) : 0;
+    const patPct   = cats.patT   ? Math.round(cats.pat   / cats.patT   * 100) : 0;
 
     let desc = '';
     if (iq >= 130) desc = t.iqTest.exceptional;
@@ -105,6 +162,7 @@ export default function IQTest() {
     setPhase('result');
   };
 
+  // ── INTRO ──────────────────────────────────────────────────────────────
   if (phase === 'intro') {
     return (
       <div className="page-enter">
@@ -115,7 +173,7 @@ export default function IQTest() {
             <h2 className="iq-intro-title">{t.iqTest.title}<span className="dim">How sharp are you?</span></h2>
             <div className="iq-intro-meta">
               <div><div className="iq-intro-stat-v">15</div><div className="iq-intro-stat-l">Questions</div></div>
-              <div><div className="iq-intro-stat-v">~5</div><div className="iq-intro-stat-l">Minutes</div></div>
+              <div><div className="iq-intro-stat-v">~6</div><div className="iq-intro-stat-l">Minutes</div></div>
               <div><div className="iq-intro-stat-v">3</div><div className="iq-intro-stat-l">Categories</div></div>
             </div>
             <div className="iq-intro-btns">
@@ -128,6 +186,7 @@ export default function IQTest() {
     );
   }
 
+  // ── RESULT ─────────────────────────────────────────────────────────────
   if (phase === 'result' && result) {
     return (
       <div className="page-enter">
@@ -159,21 +218,21 @@ export default function IQTest() {
               <div className="iq-range-panel-lbl">IQ Reference Range</div>
               <div className="iq-range-rows">
                 {[
-                  { range: '130+', label: 'Very Superior' },
+                  { range: '130+',    label: 'Very Superior' },
                   { range: '120–129', label: 'Superior' },
                   { range: '110–119', label: 'High Average' },
-                  { range: '90–109', label: 'Average' },
-                  { range: '80–89', label: 'Low Average' },
-                  { range: '<80', label: 'Below Average' },
+                  { range: '90–109',  label: 'Average' },
+                  { range: '80–89',   label: 'Low Average' },
+                  { range: '<80',     label: 'Below Average' },
                 ].map(tier => {
                   const n = result.iq;
                   const isCurrent =
-                    (tier.range === '130+' && n >= 130) ||
+                    (tier.range === '130+'    && n >= 130) ||
                     (tier.range === '120–129' && n >= 120 && n < 130) ||
                     (tier.range === '110–119' && n >= 110 && n < 120) ||
-                    (tier.range === '90–109' && n >= 90 && n < 110) ||
-                    (tier.range === '80–89' && n >= 80 && n < 90) ||
-                    (tier.range === '<80' && n < 80);
+                    (tier.range === '90–109'  && n >= 90  && n < 110) ||
+                    (tier.range === '80–89'   && n >= 80  && n < 90)  ||
+                    (tier.range === '<80'     && n < 80);
                   return (
                     <div key={tier.range} className={`iq-range-row${isCurrent ? ' current' : ''}`}>
                       <span className="iq-range-score">{tier.range}</span>
@@ -203,11 +262,15 @@ export default function IQTest() {
     );
   }
 
+  // ── QUESTION ───────────────────────────────────────────────────────────
   const q = questions[qi];
+  const isMatrix = q?.type === 'matrix';
+
   return (
     <div className="page-enter">
       <div className="iq-test-wrap">
         <div className="iq-test-inner">
+
           <div className="iq-progress">
             <div className="iq-progress-top">
               <span className="iq-progress-label">{t.iqTest.question} {qi + 1}</span>
@@ -217,29 +280,63 @@ export default function IQTest() {
               <div className="iq-progress-fill" style={{ width: `${((qi + 1) / questions.length) * 100}%` }} />
             </div>
           </div>
+
           <div className="iq-q-card">
-            <div className="iq-q-cat">{q.cat}</div>
+            <div className="iq-q-cat">{isMatrix ? 'pattern recognition' : q.cat}</div>
             <div className="iq-q-text">{q.q}</div>
+            {isMatrix && (
+              <div className="iq-matrix-grid">
+                {q.grid.map((row, ri) =>
+                  row.map((cell, ci) => (
+                    <div
+                      key={`${ri}-${ci}`}
+                      className={`iq-matrix-cell${cell === null ? ' iq-matrix-cell--q' : ''}`}
+                    >
+                      <MatrixCell cell={cell} uid={`q${qi}-r${ri}c${ci}`} px={54} />
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
-          <div className="iq-answers">
-            {q.opts.map((o, i) => (
-              <button
-                key={i}
-                className={`iq-ans-btn${selected === i ? (i === q.correct ? ' correct' : ' wrong') : ''}${locked && i === q.correct && selected !== i ? ' correct' : ''}`}
-                onClick={() => answer(i)}
-                disabled={locked}
-              >
-                <span className="iq-ans-letter">{String.fromCharCode(65 + i)}</span>
-                <span className="iq-ans-text">{o}</span>
-              </button>
-            ))}
-          </div>
+
+          {isMatrix ? (
+            <div className="iq-matrix-opts">
+              {q.opts.map((opt, i) => (
+                <button
+                  key={i}
+                  className={`iq-matrix-opt-btn${selected === i ? (i === q.correct ? ' correct' : ' wrong') : ''}${locked && i === q.correct && selected !== i ? ' correct' : ''}`}
+                  onClick={() => answer(i)}
+                  disabled={locked}
+                >
+                  <span className="iq-ans-letter">{String.fromCharCode(65 + i)}</span>
+                  <MatrixCell cell={opt} uid={`opt${qi}-${i}`} px={54} />
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div className="iq-answers">
+              {q.opts.map((o, i) => (
+                <button
+                  key={i}
+                  className={`iq-ans-btn${selected === i ? (i === q.correct ? ' correct' : ' wrong') : ''}${locked && i === q.correct && selected !== i ? ' correct' : ''}`}
+                  onClick={() => answer(i)}
+                  disabled={locked}
+                >
+                  <span className="iq-ans-letter">{String.fromCharCode(65 + i)}</span>
+                  <span className="iq-ans-text">{o}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {showExpl && (
             <div className="iq-explanation">
               <div className="iq-expl-label">Explanation</div>
               <div className="iq-expl-text">{q.ex}</div>
             </div>
           )}
+
         </div>
       </div>
     </div>

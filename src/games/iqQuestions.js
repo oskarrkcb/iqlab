@@ -285,4 +285,116 @@ export const iqQuestions = [
     correct: 2, cat: 'math',
     ex: 'Distance = 2 × 60 = 120 miles. At 80 mph: 120 ÷ 80 = 1.5 hours = 1 hour 30 minutes.',
   },
+
+  // ── VISUAL MATRIX QUESTIONS ──────────────────────────────────────────────
+  // cell descriptor: { shape: 'circle'|'square'|'triangle'|'diamond', fill: 0|1|2, n: 1|2|3 }
+  // fill: 0 = outline, 1 = half-filled (left side), 2 = solid
+
+  {
+    type: 'matrix',
+    q: 'Which image completes the pattern?',
+    grid: [
+      [{ shape:'circle',   fill:0, n:1 }, { shape:'circle',   fill:1, n:1 }, { shape:'circle',   fill:2, n:1 }],
+      [{ shape:'square',   fill:0, n:1 }, { shape:'square',   fill:1, n:1 }, { shape:'square',   fill:2, n:1 }],
+      [{ shape:'triangle', fill:0, n:1 }, { shape:'triangle', fill:1, n:1 }, null],
+    ],
+    opts: [
+      { shape:'triangle', fill:2, n:1 },
+      { shape:'circle',   fill:2, n:1 },
+      { shape:'triangle', fill:0, n:1 },
+      { shape:'diamond',  fill:2, n:1 },
+    ],
+    correct: 0, cat: 'pat',
+    ex: 'Each row uses the same shape. Each column shows fill progressing: outline → half → solid. Row 3 is triangles, column 3 is solid. Answer: solid triangle.',
+  },
+
+  {
+    type: 'matrix',
+    q: 'Which image completes the pattern?',
+    grid: [
+      [{ shape:'circle',   fill:2, n:1 }, { shape:'circle',   fill:2, n:2 }, { shape:'circle',   fill:2, n:3 }],
+      [{ shape:'square',   fill:2, n:1 }, { shape:'square',   fill:2, n:2 }, { shape:'square',   fill:2, n:3 }],
+      [{ shape:'triangle', fill:2, n:1 }, { shape:'triangle', fill:2, n:2 }, null],
+    ],
+    opts: [
+      { shape:'triangle', fill:2, n:1 },
+      { shape:'circle',   fill:2, n:3 },
+      { shape:'triangle', fill:2, n:3 },
+      { shape:'triangle', fill:0, n:3 },
+    ],
+    correct: 2, cat: 'pat',
+    ex: 'Each column has 1, 2 or 3 shapes. Each row uses the same shape, all solid. Row 3 = triangles, column 3 = 3 shapes. Answer: 3 solid triangles.',
+  },
+
+  {
+    type: 'matrix',
+    q: 'Which image completes the pattern?',
+    grid: [
+      [{ shape:'circle',   fill:2, n:1 }, { shape:'square',   fill:2, n:1 }, { shape:'triangle', fill:2, n:1 }],
+      [{ shape:'circle',   fill:0, n:1 }, { shape:'square',   fill:0, n:1 }, { shape:'triangle', fill:0, n:1 }],
+      [{ shape:'circle',   fill:1, n:1 }, { shape:'square',   fill:1, n:1 }, null],
+    ],
+    opts: [
+      { shape:'triangle', fill:2, n:1 },
+      { shape:'circle',   fill:1, n:1 },
+      { shape:'diamond',  fill:1, n:1 },
+      { shape:'triangle', fill:1, n:1 },
+    ],
+    correct: 3, cat: 'pat',
+    ex: 'Each column cycles through the same shape (circle → square → triangle). Each row uses the same fill (solid → outline → half). Row 3 = half-fill, column 3 = triangle. Answer: half-filled triangle.',
+  },
+
+  {
+    type: 'matrix',
+    q: 'Which image completes the pattern?',
+    grid: [
+      [{ shape:'circle', fill:2, n:1 }, { shape:'circle', fill:0, n:1 }, { shape:'circle', fill:2, n:1 }],
+      [{ shape:'circle', fill:0, n:1 }, { shape:'circle', fill:2, n:1 }, { shape:'circle', fill:0, n:1 }],
+      [{ shape:'circle', fill:2, n:1 }, { shape:'circle', fill:0, n:1 }, null],
+    ],
+    opts: [
+      { shape:'circle', fill:0, n:1 },
+      { shape:'circle', fill:2, n:1 },
+      { shape:'square', fill:2, n:1 },
+      { shape:'circle', fill:1, n:1 },
+    ],
+    correct: 1, cat: 'pat',
+    ex: 'The grid alternates between solid and outline like a checkerboard. Position (2,2) follows the diagonal pattern — it must be solid. Answer: solid circle.',
+  },
+
+  {
+    type: 'matrix',
+    q: 'Which image completes the pattern?',
+    grid: [
+      [{ shape:'circle',  fill:2, n:1 }, { shape:'circle',  fill:2, n:2 }, { shape:'circle',  fill:2, n:3 }],
+      [{ shape:'diamond', fill:2, n:1 }, { shape:'diamond', fill:2, n:2 }, { shape:'diamond', fill:2, n:3 }],
+      [{ shape:'square',  fill:2, n:1 }, { shape:'square',  fill:2, n:2 }, null],
+    ],
+    opts: [
+      { shape:'square', fill:2, n:1 },
+      { shape:'circle', fill:2, n:3 },
+      { shape:'square', fill:0, n:3 },
+      { shape:'square', fill:2, n:3 },
+    ],
+    correct: 3, cat: 'pat',
+    ex: 'Each row uses the same shape; count increases left-to-right (1, 2, 3); all shapes are solid. Row 3 = squares, column 3 = 3 shapes. Answer: 3 solid squares.',
+  },
+
+  {
+    type: 'matrix',
+    q: 'Which image completes the pattern?',
+    grid: [
+      [{ shape:'circle',   fill:2, n:1 }, { shape:'square',   fill:2, n:1 }, { shape:'triangle', fill:2, n:1 }],
+      [{ shape:'circle',   fill:2, n:2 }, { shape:'square',   fill:2, n:2 }, { shape:'triangle', fill:2, n:2 }],
+      [{ shape:'circle',   fill:2, n:3 }, { shape:'square',   fill:2, n:3 }, null],
+    ],
+    opts: [
+      { shape:'triangle', fill:2, n:1 },
+      { shape:'triangle', fill:0, n:3 },
+      { shape:'circle',   fill:2, n:3 },
+      { shape:'triangle', fill:2, n:3 },
+    ],
+    correct: 3, cat: 'pat',
+    ex: 'Shape is determined by column (circle, square, triangle). Count increases by row (1, 2, 3). All shapes are solid. Answer: 3 solid triangles.',
+  },
 ];
