@@ -73,6 +73,15 @@ function fmtTime(s) {
   return `${m}:${String(sec).padStart(2, '0')}`;
 }
 
+/** Format seconds to short label, e.g. 60 → "1m", 90 → "1m30s", 30 → "30s" */
+function fmtLimit(s) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  if (m > 0 && sec > 0) return `${m}m${sec}s`;
+  if (m > 0) return `${m}m`;
+  return `${sec}s`;
+}
+
 /** Small inline high-score chip shown on game cards */
 function ScoreChip({ gameId }) {
   const hs = getHighScore(gameId);
@@ -236,6 +245,9 @@ export default function Training() {
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H17"/></svg>
                     Marathon
                   </div>
+                  {timerMode === 'timed' && (
+                    <div className="session-limit-pill">{fmtLimit(timeLimit)}</div>
+                  )}
                 </div>
               </div>
               <div className="game-frame-large">
@@ -471,6 +483,11 @@ export default function Training() {
                     <div className="session-sets-pill">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
                       Set {currentSet}/{reps}
+                    </div>
+                  )}
+                  {timerMode === 'timed' && (
+                    <div className="session-limit-pill">
+                      {fmtLimit(timeLimit)}
                     </div>
                   )}
                   {timerMode === 'timed' && sessionTimeLeft !== null && (

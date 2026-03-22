@@ -138,4 +138,9 @@
 }
 .session-timer-pill.warn { background: rgba(249,115,22,0.1); border-color: rgba(249,115,22,0.2); color: var(--orange); }
 .session-timer-pill.danger { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: var(--red); }
+.session-limit-pill {
+  font-size: 11px; font-weight: 600; font-family: var(--mono);
+  padding: 5px 12px; border-radius: 100px;
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--gray2);
+}
 .game-frame-large { flex: 1; display: flex; flex-direction: column; padding: 32px 40px; }
