@@ -504,7 +504,7 @@ export default function Dashboard() {
                                               `rgba(239,68,68,${intensity * 0.22})`,
                     }}
                   >
-                    <span className="db-heatmap-hour">{h.hour}</span>
+                    {h.hour % 6 === 0 && <span className="db-heatmap-hour">{h.hour}</span>}
                     <span className="db-heatmap-val">{perf}%</span>
                   </div>
                 );

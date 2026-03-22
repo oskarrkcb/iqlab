@@ -29,6 +29,13 @@
   gap: 0;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
 /* ── Logo ── */
 .logo {
   display: flex;
@@ -53,7 +60,6 @@
   gap: 36px;
   align-items: center;
   margin-left: 52px;
-  flex: 1;
 }
 
 .nav-links a {

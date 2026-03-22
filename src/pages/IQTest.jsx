@@ -18,7 +18,19 @@ export default function IQTest() {
   const [showExpl, setShowExpl] = useState(false);
   const [result, setResult] = useState(null);
 
+  const startTimeRef = useRef(null);
   const iqNumRef = useRef(null);
+  const [barWidths, setBarWidths] = useState([0, 0, 0]);
+
+  // Animate bar fills from 0 → actual value when result screen mounts
+  useEffect(() => {
+    if (phase !== 'result' || !result) return;
+    const tid = setTimeout(() => {
+      setBarWidths([result.logicPct, result.mathPct, result.patPct]);
+    }, 200);
+    return () => clearTimeout(tid);
+  }, [phase, result]);
+
   useEffect(() => {
     if (phase !== 'result' || !result) return;
     const el = iqNumRef.current;
@@ -36,6 +48,8 @@ export default function IQTest() {
   }, [phase, result]);
 
   const startTest = useCallback(() => {
+    startTimeRef.current = Date.now();
+    setBarWidths([0, 0, 0]);
     setQuestions(shuf([...iqQuestions]).slice(0, 15));
     setQi(0); setCorrect(0); setSelected(-1); setLocked(false); setShowExpl(false);
     setCats({ logic: 0, math: 0, pat: 0, logicT: 0, mathT: 0, patT: 0 });
@@ -82,7 +96,12 @@ export default function IQTest() {
     else if (iq >= 100) desc = t.iqTest.goodAvg;
     else desc = t.iqTest.roomForImprovement;
 
-    setResult({ iq, desc, logicPct, mathPct, patPct, correct: finalCorrect, total: questions.length });
+    const elapsed = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0;
+    const elapsedMin = Math.floor(elapsed / 60);
+    const elapsedSec = elapsed % 60;
+    const elapsedLabel = elapsedMin > 0 ? `${elapsedMin}m ${elapsedSec}s` : `${elapsedSec}s`;
+
+    setResult({ iq, desc, logicPct, mathPct, patPct, correct: finalCorrect, total: questions.length, elapsedLabel });
     setPhase('result');
   };
 
@@ -123,14 +142,14 @@ export default function IQTest() {
             </div>
             <div className="iq-result-bars">
               {[
-                { lbl: t.iqTest.logic,   val: result.logicPct, cls: 'blue'   },
-                { lbl: t.iqTest.math,    val: result.mathPct,  cls: 'green'  },
-                { lbl: t.iqTest.pattern, val: result.patPct,   cls: 'purple' },
-              ].map(({ lbl, val, cls }) => (
+                { lbl: t.iqTest.logic,   val: result.logicPct, cls: 'blue',   w: barWidths[0] },
+                { lbl: t.iqTest.math,    val: result.mathPct,  cls: 'green',  w: barWidths[1] },
+                { lbl: t.iqTest.pattern, val: result.patPct,   cls: 'purple', w: barWidths[2] },
+              ].map(({ lbl, val, cls, w }) => (
                 <div key={lbl} className="iq-result-bar-row">
                   <div className="iq-result-bar-lbl">{lbl}</div>
                   <div className="iq-result-bar-track">
-                    <div className={`iq-result-bar-fill ${cls}`} style={{ width: `${val}%` }} />
+                    <div className={`iq-result-bar-fill ${cls}`} style={{ width: `${w}%` }} />
                   </div>
                   <div className="iq-result-bar-val">{val}%</div>
                 </div>
@@ -164,9 +183,14 @@ export default function IQTest() {
                 })}
               </div>
             </div>
-            <p style={{ color: 'var(--gray3)', fontSize: 12, marginBottom: 24 }}>
+            <p style={{ color: 'var(--gray3)', fontSize: 12, marginBottom: 8 }}>
               {result.correct} {t.iqTest.of} {result.total} {t.iqTest.questionsCorrect}
             </p>
+            {result.elapsedLabel && (
+              <p style={{ color: 'var(--gray4)', fontSize: 11, fontFamily: 'var(--mono)', marginBottom: 24 }}>
+                {result.elapsedLabel}
+              </p>
+            )}
             <div className="iq-result-actions">
               <Link to="/dashboard" className="btn btn-primary btn-lg">{t.iqTest.dashboard}</Link>
               <button className="btn btn-secondary btn-lg" onClick={startTest}>{t.iqTest.testAgain}</button>

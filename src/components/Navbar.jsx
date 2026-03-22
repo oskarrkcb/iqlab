@@ -24,41 +24,6 @@ export default function Navbar() {
           <span className="logo-text">IQLab</span>
           <span className="logo-dot" />
         </Link>
-        <button onClick={toggleLang} style={{
-          background: 'rgba(255,255,255,0.06)',
-          border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: '999px',
-          padding: '4px 10px',
-          color: 'var(--white)',
-          fontSize: '11px',
-          fontWeight: 600,
-          letterSpacing: '0.05em',
-          cursor: 'pointer',
-          fontFamily: 'var(--mono)',
-        }}>
-          {lang.toUpperCase()}
-        </button>
-        {user && (
-          <button onClick={signOut} style={{
-            background: 'transparent',
-            border: '1px solid rgba(255,255,255,0.12)',
-            borderRadius: '999px',
-            padding: '4px 12px',
-            color: 'var(--gray2)',
-            fontSize: '12px',
-            cursor: 'pointer',
-            fontFamily: 'var(--font)',
-          }}>
-            Sign Out
-          </button>
-        )}
-        <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
         <div className={`nav-links${menuOpen ? ' open' : ''}`}>
           <Link to="/" className={isActive('/') ? 'active' : ''}>{t.nav.home}</Link>
           <Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>{t.nav.dashboard}</Link>
@@ -66,6 +31,43 @@ export default function Navbar() {
           <Link to="/iq-test" className={isActive('/iq-test') ? 'active' : ''}>{t.nav.iqTest}</Link>
           <Link to="/login" className={isActive('/login') ? 'active' : ''}>{t.nav.login}</Link>
         </div>
+        <div className="nav-actions">
+          <button onClick={toggleLang} style={{
+            background: 'rgba(255,255,255,0.06)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '999px',
+            padding: '4px 10px',
+            color: 'var(--white)',
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.05em',
+            cursor: 'pointer',
+            fontFamily: 'var(--mono)',
+          }}>
+            {lang.toUpperCase()}
+          </button>
+          {user && (
+            <button onClick={signOut} style={{
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.12)',
+              borderRadius: '999px',
+              padding: '4px 12px',
+              color: 'var(--gray2)',
+              fontSize: '12px',
+              cursor: 'pointer',
+              fontFamily: 'var(--font)',
+            }}>
+              Sign Out
+            </button>
+          )}
+        </div>
+        <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
       </div>
     </nav>
   );
