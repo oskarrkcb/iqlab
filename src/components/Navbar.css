@@ -105,8 +105,7 @@
   color: #fff;
 }
 
-/* ── CTA (Start Training) ── */
-.nav-links a[href="/training"].active,
+/* ── CTA (legacy, kept for .nav-cta class if used elsewhere) ── */
 .nav-cta {
   font-size: 11px;
   font-weight: 700;

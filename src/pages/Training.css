@@ -33,6 +33,7 @@
 }
 .tr-sidebar-mode-btn:hover:not(:disabled) { border-color: rgba(255,255,255,0.15); background: var(--bg4); }
 .tr-sidebar-mode-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.tr-sidebar-mode-btn--soon { opacity: 0.5; }
 .tr-sidebar-modes { display: flex; flex-direction: column; gap: 0; }
 .tr-sidebar-mode-icon {
   width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;

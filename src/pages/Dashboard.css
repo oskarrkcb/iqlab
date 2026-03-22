@@ -75,6 +75,7 @@ label.db-checkin-lbl { font-size: 12px; color: var(--gray2); }
   background: rgba(255,255,255,0.07); border-radius: 1px; outline: none; cursor: pointer;
 }
 .db-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); cursor: pointer; }
+.db-slider--stress::-webkit-slider-thumb { background: var(--orange); }
 .db-checkin-summary { font-size: 11px; color: var(--gray4); line-height: 1.6; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
 
 /* ── Performance chart (Row 3) ── */
