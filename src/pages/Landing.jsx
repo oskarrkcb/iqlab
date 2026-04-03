@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLang } from '../i18n/LanguageContext';
 import './Landing.css';
@@ -7,30 +7,10 @@ export default function Landing() {
   const { t } = useLang();
   const lnd = t.landing;
   const observerRef = useRef(null);
-  const heroImgRef = useRef(null);
-
   // Add .page-landing to body so Navbar.css can apply the 55% opacity variant
   useEffect(() => {
     document.body.classList.add('page-landing');
     return () => document.body.classList.remove('page-landing');
-  }, []);
-
-  // Hero parallax — subtle vertical shift on scroll
-  useEffect(() => {
-    let ticking = false;
-    function onScroll() {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(() => {
-        const y = window.scrollY;
-        if (heroImgRef.current && y < window.innerHeight) {
-          heroImgRef.current.style.transform = `translateY(calc(-50% + ${y * 0.25}px))`;
-        }
-        ticking = false;
-      });
-    }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   useEffect(() => {
@@ -101,7 +81,7 @@ export default function Landing() {
       {/* HERO */}
       <section className="lnd-hero">
         <div className="lnd-hero-bg" />
-        <div className="lnd-hero-img" ref={heroImgRef} />
+        <div className="lnd-hero-img" />
         <div className="lnd-hero-content">
           <div className="lnd-eyebrow lnd-hero-fade" style={{animationDelay:'0.2s'}}>
             <div className="lnd-eyebrow-line" />
