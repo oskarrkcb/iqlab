@@ -10,6 +10,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [confirmEmail, setConfirmEmail] = useState(false);
 
   const { signIn, signUp } = useAuth();
   const { t } = useLang();
@@ -19,14 +20,23 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setSubmitting(true);
-    const { error } = isSignUp
-      ? await signUp(email, password)
-      : await signIn(email, password);
-    setSubmitting(false);
-    if (error) {
-      setError(error.message);
+
+    if (isSignUp) {
+      const { error } = await signUp(email, password);
+      setSubmitting(false);
+      if (error) {
+        setError(error.message);
+      } else {
+        setConfirmEmail(true);
+      }
     } else {
-      navigate(isSignUp ? '/onboarding' : '/dashboard');
+      const { error } = await signIn(email, password);
+      setSubmitting(false);
+      if (error) {
+        setError(error.message);
+      } else {
+        navigate('/dashboard');
+      }
     }
   };
 
@@ -38,6 +48,26 @@ export default function Login() {
         </Link>
 
         <div className="auth-card glass">
+          {confirmEmail ? (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              </div>
+              <h2 style={{ marginBottom: 8 }}>Check your email</h2>
+              <p style={{ color: 'var(--gray2)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+                We sent a confirmation link to<br/>
+                <strong style={{ color: 'var(--white)' }}>{email}</strong><br/>
+                Click the link to activate your account.
+              </p>
+              <button
+                className="btn btn-primary btn-w"
+                onClick={() => { setConfirmEmail(false); setIsSignUp(false); }}
+              >
+                Back to Sign In
+              </button>
+            </div>
+          ) : (
+          <>
           <h2>{isSignUp ? t.login.createAccount : t.login.welcomeBack}</h2>
           <p className="auth-subtitle">
             {isSignUp ? t.login.signUpDesc : t.login.signInDesc}
@@ -98,6 +128,8 @@ export default function Login() {
               {isSignUp ? t.login.signIn : t.login.signUp}
             </button>
           </p>
+          </>
+          )}
         </div>
       </div>
     </div>
