@@ -49,9 +49,13 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function load() {
-      const [stats, iq] = await Promise.all([getAllStats(), getLatestIQ()]);
-      setAllStats(stats);
-      setLatestIQ(iq);
+      try {
+        const [stats, iq] = await Promise.all([getAllStats(), getLatestIQ()]);
+        setAllStats(stats);
+        setLatestIQ(iq);
+      } catch (e) {
+        console.error('Dashboard load error:', e);
+      }
       setLoading(false);
     }
     load();
@@ -146,7 +150,7 @@ export default function Dashboard() {
     Object.values(allStats.games).forEach(g => g.history.forEach(h => entries.push({ ts: h.ts, score: h.score })));
     if (entries.length < 3) return empty;
     const now = Date.now(), weekMs = 7 * 24 * 60 * 60 * 1000;
-    let lastVal = fallback[0];
+    let lastVal = empty[0];
     return Array.from({ length: 12 }, (_, i) => {
       const start = now - (11 - i) * weekMs, end = start + weekMs;
       const week  = entries.filter(e => e.ts >= start && e.ts < end);
