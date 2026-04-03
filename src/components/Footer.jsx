@@ -15,6 +15,7 @@ export default function Footer() {
           <Link to="/training">{t.nav.training}</Link>
           <Link to="/iq-test">{t.nav.iqTest}</Link>
           <Link to="/dashboard">{t.nav.dashboard}</Link>
+          <Link to="/privacy">Privacy</Link>
         </nav>
       </div>
     </footer>

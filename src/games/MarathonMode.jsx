@@ -40,9 +40,9 @@ export default function MarathonMode({ onBack, difficulty = 'medium', timerMode 
   const totalGames = MARATHON_GAMES.length;
 
   /** Called when GameEnd "Next Game →" is clicked (via SessionContext.onNextSet) */
-  const handleNextGame = useCallback(() => {
-    // Score is already saved to localStorage by GameEnd's useEffect — read it back
-    const hist = getHistory(currentGame.id, 1);
+  const handleNextGame = useCallback(async () => {
+    // Score is already saved to Supabase by GameEnd's useEffect — read it back
+    const hist = await getHistory(currentGame.id, 1);
     const lastScore = hist.length ? hist[hist.length - 1].score : 0;
     const entry = { id: currentGame.id, label: currentGame.label, discipline: currentGame.discipline, score: lastScore };
 
