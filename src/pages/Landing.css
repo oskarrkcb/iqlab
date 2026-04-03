@@ -34,6 +34,16 @@
   padding: 0 32px;
 }
 
+/* Hero staggered entrance */
+.lnd-hero-fade {
+  opacity: 0;
+  transform: translateY(28px);
+  animation: heroReveal 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes heroReveal {
+  to { opacity: 1; transform: none; }
+}
+
 .lnd-eyebrow {
   display: inline-flex; align-items: center; gap: 10px;
   font-size: 10px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase;

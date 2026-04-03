@@ -27,9 +27,25 @@ img { max-width: 100%; }
 @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
 @keyframes scrollLine { 0%,100%{opacity:0.3} 50%{opacity:1} }
 
-/* ═══════════════════ FADE-UP ON SCROLL ═══════════════════ */
-.fade-up { opacity:0; transform:translateY(32px); transition:opacity 0.7s ease,transform 0.7s ease; }
-.fade-up.visible { opacity:1; transform:none; }
+/* ═══════════════════ SCROLL REVEAL ANIMATIONS ═══════════════════ */
+.fade-up, .fade-left, .fade-right {
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+.fade-up   { transform: translateY(40px); }
+.fade-left { transform: translateX(-50px); }
+.fade-right{ transform: translateX(50px); }
+
+.fade-up.visible,
+.fade-left.visible,
+.fade-right.visible { opacity: 1; transform: none; }
+
+/* Stagger delay via CSS custom property */
+.fade-up[data-d], .fade-left[data-d], .fade-right[data-d] {
+  transition-delay: calc(var(--d, 0) * 1ms);
+}
 
 /* ═══════════════════ BUTTONS ═══════════════════ */
 .btn-fill {
