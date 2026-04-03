@@ -121,7 +121,7 @@
 
 /* ── Landing page variant (more transparent) ── */
 /* Landing.jsx adds .page-landing to document.body on mount and removes on unmount */
-.page-landing .nav { background: rgba(6,6,6,0.88); }
+.page-landing .nav { background: rgba(6,6,6,0.97); }
 
 /* ── Hamburger ── */
 .hamburger {
