@@ -21,7 +21,11 @@ import AlgoThinking from '../games/AlgoThinking';
 import VsBot from '../games/VsBot';
 import MarathonMode from '../games/MarathonMode';
 import { getHighScore } from '../stats';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import './Training.css';
+
+const FREE_GAMES = ['sp', 'seq'];
 
 const GAME_COMPONENTS = {
   seq: NumberSeries,
@@ -84,7 +88,10 @@ function fmtLimit(s) {
 
 /** Small inline high-score chip shown on game cards */
 function ScoreChip({ gameId }) {
-  const hs = getHighScore(gameId);
+  const [hs, setHs] = useState(0);
+  useEffect(() => {
+    getHighScore(gameId).then(setHs);
+  }, [gameId]);
   if (!hs) return null;
   return (
     <span className="train-hs-chip">
@@ -106,6 +113,8 @@ const CATEGORY_MAP = {
 
 export default function Training() {
   const { t } = useLang();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [timerMode, setTimerMode] = useState('timed');
   const [difficulty, setDifficulty] = useState('medium');
   const [seriesType, setSeriesType] = useState('mixed');
@@ -192,6 +201,10 @@ export default function Training() {
   useEffect(() => () => clearInterval(sessionTimerRef.current), []);
 
   const startGame = (id) => {
+    if (!user && !FREE_GAMES.includes(id)) {
+      navigate('/login');
+      return;
+    }
     setActiveGame(id);
     setCurrentSet(1);
     setGameKey(k => k + 1);
@@ -283,11 +296,12 @@ export default function Training() {
                 <div className="tr-sidebar-section">
                   <div className="tr-sidebar-label">Quick Play</div>
                   <div className="tr-sidebar-modes">
-                    <button className="tr-sidebar-mode-btn" onClick={startMarathon}>
+                    <button className={`tr-sidebar-mode-btn${!user ? ' tr-sidebar-mode-btn--locked' : ''}`} onClick={() => user ? startMarathon() : navigate('/login')}>
                       <span className="tr-sidebar-mode-icon"><GameIcon type="marathon" /></span>
                       <span>Marathon</span>
+                      {!user && <svg className="tr-sidebar-lock" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>}
                     </button>
-                    <button className="tr-sidebar-mode-btn" onClick={() => startGame('vs-bot')}>
+                    <button className={`tr-sidebar-mode-btn${!user ? ' tr-sidebar-mode-btn--locked' : ''}`} onClick={() => user ? startGame('vs-bot') : navigate('/login')}>
                       <span className="tr-sidebar-mode-icon">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="3"/><path d="M12 8v3"/><circle cx="8" cy="16" r="1"/><circle cx="16" cy="16" r="1"/></svg>
                       </span>
@@ -427,17 +441,28 @@ export default function Training() {
                   <>
                     <div className="tr-section-label">{t.training.available}</div>
                     <div className="tr-grid">
-                      {filteredBasicGames.map(game => (
-                        <div key={game.id} className="tr-card" onClick={() => startGame(game.id)}>
-                          <div className="tr-card-top">
-                            <div className="tr-card-icon"><GameIcon type={game.icon} /></div>
-                            <ScoreChip gameId={game.id} />
+                      {filteredBasicGames.map(game => {
+                        const isFree = FREE_GAMES.includes(game.id);
+                        const locked = !user && !isFree;
+                        return (
+                          <div key={game.id} className={`tr-card${locked ? ' tr-card--locked' : ''}`} onClick={() => startGame(game.id)}>
+                            <div className="tr-card-top">
+                              <div className="tr-card-icon"><GameIcon type={game.icon} /></div>
+                              {!locked && <ScoreChip gameId={game.id} />}
+                              {isFree && !user && <span className="tr-free-tag">Free</span>}
+                            </div>
+                            <div className="tr-card-cat">{game.category}</div>
+                            <div className="tr-card-title">{game.name}</div>
+                            <div className="tr-card-desc">{game.desc}</div>
+                            {locked && (
+                              <div className="tr-lock-overlay">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span>Sign up to play</span>
+                              </div>
+                            )}
                           </div>
-                          <div className="tr-card-cat">{game.category}</div>
-                          <div className="tr-card-title">{game.name}</div>
-                          <div className="tr-card-desc">{game.desc}</div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </>
                 )}
@@ -447,17 +472,26 @@ export default function Training() {
                   <>
                     <div className="tr-section-label" style={{ marginTop: filteredBasicGames.length > 0 ? 28 : 0 }}>{t.training.advanced}</div>
                     <div className="tr-grid">
-                      {filteredAdvancedGames.map(game => (
-                        <div key={game.id} className="tr-card" onClick={() => startGame(game.id)}>
-                          <div className="tr-card-top">
-                            <div className="tr-card-icon"><GameIcon type={game.icon} /></div>
-                            <ScoreChip gameId={game.id} />
+                      {filteredAdvancedGames.map(game => {
+                        const locked = !user;
+                        return (
+                          <div key={game.id} className={`tr-card${locked ? ' tr-card--locked' : ''}`} onClick={() => startGame(game.id)}>
+                            <div className="tr-card-top">
+                              <div className="tr-card-icon"><GameIcon type={game.icon} /></div>
+                              {!locked && <ScoreChip gameId={game.id} />}
+                            </div>
+                            <div className="tr-card-cat">{game.category}</div>
+                            <div className="tr-card-title">{game.name}</div>
+                            <div className="tr-card-desc">{game.desc}</div>
+                            {locked && (
+                              <div className="tr-lock-overlay">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                <span>Sign up to play</span>
+                              </div>
+                            )}
                           </div>
-                          <div className="tr-card-cat">{game.category}</div>
-                          <div className="tr-card-title">{game.name}</div>
-                          <div className="tr-card-desc">{game.desc}</div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </>
                 )}

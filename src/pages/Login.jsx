@@ -34,7 +34,6 @@ export default function Login() {
     <div className="page-enter auth-page">
       <div className="auth-container">
         <Link to="/" className="auth-logo">
-          <div className="logo-icon">I</div>
           IQLab
         </Link>
 

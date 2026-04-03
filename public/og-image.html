@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 630px;
+    background: #0a0a0c;
+    font-family: 'Inter', system-ui, sans-serif;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .glow {
+    position: absolute;
+    width: 600px; height: 600px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,246,0.12), transparent 70%);
+    top: 50%; left: 60%; transform: translate(-50%,-50%);
+  }
+  .content {
+    position: relative; z-index: 2;
+    text-align: center; color: #fff;
+  }
+  .logo {
+    display: inline-flex; align-items: center; gap: 12px;
+    margin-bottom: 32px;
+  }
+  .logo-icon {
+    width: 52px; height: 52px; border-radius: 12px;
+    background: #3b82f6; display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 900; color: #fff;
+  }
+  .logo-text {
+    font-size: 42px; font-weight: 800; letter-spacing: -0.03em;
+  }
+  h1 {
+    font-size: 56px; font-weight: 800; letter-spacing: -0.03em;
+    line-height: 1.1; margin-bottom: 20px;
+  }
+  h1 span { color: rgba(255,255,255,0.25); display: block; }
+  p {
+    font-size: 20px; color: rgba(255,255,255,0.45);
+    font-weight: 300; letter-spacing: 0.04em;
+  }
+  .stats {
+    display: flex; gap: 48px; justify-content: center;
+    margin-top: 40px;
+  }
+  .stat-num {
+    font-size: 32px; font-weight: 900; font-family: 'JetBrains Mono', monospace;
+    color: #3b82f6;
+  }
+  .stat-lbl {
+    font-size: 11px; color: rgba(255,255,255,0.3);
+    text-transform: uppercase; letter-spacing: 0.15em; margin-top: 4px;
+  }
+  .border-line {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+  }
+</style>
+</head>
+<body>
+  <div class="glow"></div>
+  <div class="content">
+    <div class="logo">
+      <div class="logo-icon">I</div>
+      <div class="logo-text">IQLab</div>
+    </div>
+    <h1>Train Your Brain.<span>Measure Your Mind.</span></h1>
+    <p>Science-based cognitive training</p>
+    <div class="stats">
+      <div><div class="stat-num">17</div><div class="stat-lbl">Exercises</div></div>
+      <div><div class="stat-num">6</div><div class="stat-lbl">Domains</div></div>
+      <div><div class="stat-num">IQ</div><div class="stat-lbl">Test</div></div>
+    </div>
+  </div>
+  <div class="border-line"></div>
+</body>
+</html>

@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Training from './pages/Training';
 import IQTest from './pages/IQTest';
 import NotFound from './pages/NotFound';
+import Privacy from './pages/Privacy';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
@@ -29,8 +30,9 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/training" element={<ProtectedRoute><Training /></ProtectedRoute>} />
+            <Route path="/training" element={<Training />} />
             <Route path="/iq-test" element={<ProtectedRoute><IQTest /></ProtectedRoute>} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

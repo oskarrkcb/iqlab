@@ -143,7 +143,9 @@ export default function IQTest() {
 
   const showResult = (finalCorrect) => {
     const pct = finalCorrect / questions.length;
-    const iq = Math.round(70 + pct * 65 + R(-3, 3));
+    const elapsed = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0;
+    const timeBonus = Math.max(0, (1 - elapsed / 600) * 5);
+    const iq = Math.round(60 + pct * 85 + timeBonus);
     const logicPct = cats.logicT ? Math.round(cats.logic / cats.logicT * 100) : 0;
     const mathPct  = cats.mathT  ? Math.round(cats.math  / cats.mathT  * 100) : 0;
     const patPct   = cats.patT   ? Math.round(cats.pat   / cats.patT   * 100) : 0;
@@ -154,7 +156,6 @@ export default function IQTest() {
     else if (iq >= 100) desc = t.iqTest.goodAvg;
     else desc = t.iqTest.roomForImprovement;
 
-    const elapsed = startTimeRef.current ? Math.round((Date.now() - startTimeRef.current) / 1000) : 0;
     const elapsedMin = Math.floor(elapsed / 60);
     const elapsedSec = elapsed % 60;
     const elapsedLabel = elapsedMin > 0 ? `${elapsedMin}m ${elapsedSec}s` : `${elapsedSec}s`;

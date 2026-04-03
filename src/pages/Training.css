@@ -124,6 +124,32 @@
 .tr-card-title { font-size: 13px; font-weight: 700; color: var(--white); margin-bottom: 5px; }
 .tr-card-desc { font-size: 11px; color: var(--gray2); line-height: 1.55; font-weight: 300; }
 
+/* ── Locked card ── */
+.tr-card--locked { cursor: pointer; }
+.tr-card--locked .tr-card-icon { opacity: 0.35; }
+.tr-card--locked .tr-card-cat,
+.tr-card--locked .tr-card-title,
+.tr-card--locked .tr-card-desc { opacity: 0.3; }
+.tr-lock-overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  color: var(--gray3); font-size: 11px; font-weight: 600; letter-spacing: 0.04em;
+  background: rgba(10, 10, 14, 0.55);
+  opacity: 0; transition: opacity 0.2s;
+}
+.tr-card--locked:hover .tr-lock-overlay { opacity: 1; }
+
+/* Free tag */
+.tr-free-tag {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--green); border: 1px solid rgba(34,197,94,0.25);
+  padding: 2px 7px; border-radius: 2px; line-height: 1.4;
+}
+
+/* Sidebar lock */
+.tr-sidebar-mode-btn--locked { opacity: 0.45; }
+.tr-sidebar-lock { margin-left: auto; color: var(--gray3); }
+
 /* ── GAME IMMERSIVE (active game) ── */
 .game-immersive { display: flex; flex-direction: column; min-height: calc(100vh - 66px); }
 .session-bar {
