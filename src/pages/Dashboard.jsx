@@ -61,21 +61,10 @@ export default function Dashboard() {
     load();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="page-enter db-page">
-        <div className="db-inner" style={{ padding: '80px 0', textAlign: 'center', color: 'var(--gray3)' }}>
-          Loading your data...
-        </div>
-      </div>
-    );
-  }
-
   const globalStats = allStats?.global ?? { totalGames: 0, totalPoints: 0 };
   const realTotalEx  = globalStats.totalGames;
   const realTotalPts = globalStats.totalPoints;
 
-  // Per-exercise high scores (derived from allStats already loaded)
   const exerciseIds = Object.keys(GAME_LABELS);
   const exerciseScores = useMemo(() => {
     return exerciseIds.map(id => ({
@@ -87,7 +76,6 @@ export default function Dashboard() {
 
   const maxExScore = Math.max(...exerciseScores.map(e => e.highScore), 1);
 
-  // Real accuracy
   const realAccuracy = useMemo(() => {
     if (!allStats?.games) return 0;
     let correct = 0, total = 0;
@@ -97,7 +85,6 @@ export default function Dashboard() {
     return total > 0 ? Math.round((correct / total) * 100) : 0;
   }, [allStats]);
 
-  // Real streak
   const realStreak = useMemo(() => {
     if (!allStats?.games) return 0;
     const timestamps = [];
@@ -113,7 +100,6 @@ export default function Dashboard() {
     return streak;
   }, [allStats]);
 
-  // Real cognitive potential
   const realPotential = useMemo(() => {
     if (!allStats?.games) return { logic: 0, math: 0, mem: 0 };
     const mathIds  = ['est', 'op', 'g24', 'sp'];
@@ -136,13 +122,11 @@ export default function Dashboard() {
     };
   }, [allStats]);
 
-  // Real Elo
   const realElo = useMemo(() => {
     if (realTotalPts <= 0) return 0;
     return Math.min(2200, Math.max(800, 1000 + Math.round(realTotalPts / 12)));
   }, [realTotalPts]);
 
-  // Weekly progress (last 12 weeks)
   const realProgressData = useMemo(() => {
     const empty = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
     if (!allStats?.games) return empty;
@@ -161,7 +145,6 @@ export default function Dashboard() {
     });
   }, [allStats]);
 
-  // Heatmap by hour
   const realHeatmap = useMemo(() => {
     const empty = Array.from({ length: 24 }, (_, i) => ({ hour: i, performance: 0 }));
     if (!allStats?.games) return empty;
@@ -177,7 +160,6 @@ export default function Dashboard() {
     }));
   }, [allStats]);
 
-  // IQ from real data
   const userIQ = latestIQ?.iq_score ?? null;
 
   // Radar helpers
@@ -232,6 +214,16 @@ export default function Dashboard() {
     if (score >= 3) return 'Fair — stick to shorter sessions today';
     return 'Low — rest may help more than training';
   }, [sleep, stress]);
+
+  if (loading) {
+    return (
+      <div className="page-enter db-page">
+        <div className="db-inner" style={{ padding: '80px 0', textAlign: 'center', color: 'var(--gray3)' }}>
+          Loading your data...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-enter db-page">
