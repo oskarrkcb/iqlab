@@ -1,51 +1,9 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
-import { getAllStats, getHistory, getHighScore } from '../stats';
+import { getAllStats, getHighScore, getLatestIQ } from '../stats';
 import { useLang } from '../i18n/LanguageContext';
 import './Dashboard.css';
-
-const USER = {
-  iq: 112,
-  totalEx: 47,
-  totalPts: 1240,
-  streak: 3,
-  accuracy: 73,
-  potential: { logic: 72, math: 65, mem: 81 },
-  elo: 1247,
-};
-
-const LEADERBOARD = [
-  { rank: 1,  name: 'NeuroAlpha',   elo: 2341, country: 'US' },
-  { rank: 2,  name: 'CortexKing',   elo: 2298, country: 'DE' },
-  { rank: 3,  name: 'SynapticFlow', elo: 2187, country: 'JP' },
-  { rank: 4,  name: 'MindForge',    elo: 2134, country: 'UK' },
-  { rank: 5,  name: 'BrainVolt',    elo: 2089, country: 'KR' },
-  { rank: 6,  name: 'CogniMax',     elo: 2045, country: 'SE' },
-  { rank: 7,  name: 'PeakMind',     elo: 1998, country: 'CA' },
-  { rank: 8,  name: 'LogicLion',    elo: 1956, country: 'AU' },
-  { rank: 9,  name: 'AxonStorm',    elo: 1912, country: 'FR' },
-  { rank: 10, name: 'Dendrite99',   elo: 1870, country: 'IN' },
-  { rank: 11, name: 'NeuronX',      elo: 1845, country: 'BR' },
-  { rank: 12, name: 'CogWave',      elo: 1823, country: 'NL' },
-  { rank: 13, name: 'ThinkFast_',   elo: 1801, country: 'IT' },
-  { rank: 14, name: 'SynapseGod',   elo: 1778, country: 'ES' },
-  { rank: 15, name: 'MindBender',   elo: 1756, country: 'PL' },
-  { rank: 16, name: 'BrainStorm7',  elo: 1734, country: 'MX' },
-  { rank: 17, name: 'PuzzleKing',   elo: 1712, country: 'RU' },
-  { rank: 18, name: 'IQHunter',     elo: 1690, country: 'CN' },
-  { rank: 19, name: 'NeuroBlitz',   elo: 1668, country: 'ZA' },
-  { rank: 20, name: 'CortexPrime',  elo: 1645, country: 'AR' },
-];
-
-const HEATMAP_HOURS = Array.from({ length: 24 }, (_, i) => ({
-  hour: i,
-  performance: i >= 9 && i <= 11 ? 92 + Math.random() * 8 :
-               i >= 14 && i <= 16 ? 78 + Math.random() * 10 :
-               i >= 6  && i <= 8  ? 70 + Math.random() * 15 :
-               i >= 20 && i <= 23 ? 55 + Math.random() * 15 :
-               40 + Math.random() * 20,
-}));
 
 const GAME_LABELS = {
   seq: 'Series',    ooo: 'Odd One',  mat: 'Matrix',   est: 'Estimate',
@@ -85,39 +43,59 @@ export default function Dashboard() {
   const { t } = useLang();
   const [sleep, setSleep]   = useState(7);
   const [stress, setStress] = useState(3);
-  const [lbPage, setLbPage] = useState(0);
+  const [allStats, setAllStats] = useState(null);
+  const [latestIQ, setLatestIQ] = useState(null);
+  const [loading, setLoading]   = useState(true);
 
-  // ── Pull real stats from localStorage ──
-  const allStats    = useMemo(() => getAllStats(), []);
-  const globalStats = allStats.global ?? { totalGames: 0, totalPoints: 0 };
-  const realTotalEx  = globalStats.totalGames   || USER.totalEx;
-  const realTotalPts = globalStats.totalPoints  || USER.totalPts;
+  useEffect(() => {
+    async function load() {
+      const [stats, iq] = await Promise.all([getAllStats(), getLatestIQ()]);
+      setAllStats(stats);
+      setLatestIQ(iq);
+      setLoading(false);
+    }
+    load();
+  }, []);
 
-  // Per-exercise high scores
+  if (loading) {
+    return (
+      <div className="page-enter db-page">
+        <div className="db-inner" style={{ padding: '80px 0', textAlign: 'center', color: 'var(--gray3)' }}>
+          Loading your data...
+        </div>
+      </div>
+    );
+  }
+
+  const globalStats = allStats?.global ?? { totalGames: 0, totalPoints: 0 };
+  const realTotalEx  = globalStats.totalGames;
+  const realTotalPts = globalStats.totalPoints;
+
+  // Per-exercise high scores (derived from allStats already loaded)
   const exerciseIds = Object.keys(GAME_LABELS);
   const exerciseScores = useMemo(() => {
     return exerciseIds.map(id => ({
       id, label: GAME_LABELS[id],
-      highScore: getHighScore(id),
-      history:   getHistory(id, 10),
+      highScore: allStats?.games?.[id]?.highScore ?? 0,
+      history:   allStats?.games?.[id]?.history ?? [],
     }));
-  }, []); // eslint-disable-line
+  }, [allStats]);
 
   const maxExScore = Math.max(...exerciseScores.map(e => e.highScore), 1);
 
   // Real accuracy
   const realAccuracy = useMemo(() => {
-    if (!allStats.games) return USER.accuracy;
+    if (!allStats?.games) return 0;
     let correct = 0, total = 0;
     Object.values(allStats.games).forEach(g =>
       g.history.forEach(h => { if (h.total > 0) { correct += h.correct; total += h.total; } })
     );
-    return total > 0 ? Math.round((correct / total) * 100) : USER.accuracy;
+    return total > 0 ? Math.round((correct / total) * 100) : 0;
   }, [allStats]);
 
   // Real streak
   const realStreak = useMemo(() => {
-    if (!allStats.games) return USER.streak;
+    if (!allStats?.games) return 0;
     const timestamps = [];
     Object.values(allStats.games).forEach(g => g.history.forEach(h => timestamps.push(h.ts)));
     if (timestamps.length === 0) return 0;
@@ -133,35 +111,40 @@ export default function Dashboard() {
 
   // Real cognitive potential
   const realPotential = useMemo(() => {
-    if (!allStats.games) return USER.potential;
+    if (!allStats?.games) return { logic: 0, math: 0, mem: 0 };
     const mathIds  = ['est', 'op', 'g24', 'sp'];
     const logicIds = ['seq', 'ooo', 'syllogisms', 'algo', 'mat'];
     const memIds   = ['mem', 'dual-nback', 'chimp'];
     const categoryScore = (ids) => {
       const played = ids.filter(id => (allStats.games[id]?.history?.length ?? 0) > 0);
-      if (played.length === 0) return null;
-      return Math.min(100, USER.potential[ids === mathIds ? 'math' : ids === logicIds ? 'logic' : 'mem'] + played.length * 4);
+      if (played.length === 0) return 0;
+      const totalCorrect = ids.reduce((s, id) => {
+        const hist = allStats.games[id]?.history ?? [];
+        return s + hist.reduce((a, h) => a + (h.total > 0 ? h.correct / h.total : 0), 0);
+      }, 0);
+      const totalRounds = ids.reduce((s, id) => s + (allStats.games[id]?.history?.filter(h => h.total > 0).length ?? 0), 0);
+      return totalRounds > 0 ? Math.min(100, Math.round((totalCorrect / totalRounds) * 100)) : 0;
     };
     return {
-      math:  categoryScore(mathIds)  ?? USER.potential.math,
-      logic: categoryScore(logicIds) ?? USER.potential.logic,
-      mem:   categoryScore(memIds)   ?? USER.potential.mem,
+      math:  categoryScore(mathIds),
+      logic: categoryScore(logicIds),
+      mem:   categoryScore(memIds),
     };
   }, [allStats]);
 
   // Real Elo
   const realElo = useMemo(() => {
-    if (realTotalPts <= 0) return USER.elo;
+    if (realTotalPts <= 0) return 0;
     return Math.min(2200, Math.max(800, 1000 + Math.round(realTotalPts / 12)));
   }, [realTotalPts]);
 
   // Weekly progress (last 12 weeks)
   const realProgressData = useMemo(() => {
-    const fallback = [42, 48, 45, 52, 58, 55, 63, 60, 67, 72, 69, 74];
-    if (!allStats.games) return fallback;
+    const empty = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    if (!allStats?.games) return empty;
     const entries = [];
     Object.values(allStats.games).forEach(g => g.history.forEach(h => entries.push({ ts: h.ts, score: h.score })));
-    if (entries.length < 3) return fallback;
+    if (entries.length < 3) return empty;
     const now = Date.now(), weekMs = 7 * 24 * 60 * 60 * 1000;
     let lastVal = fallback[0];
     return Array.from({ length: 12 }, (_, i) => {
@@ -176,26 +159,22 @@ export default function Dashboard() {
 
   // Heatmap by hour
   const realHeatmap = useMemo(() => {
-    if (!allStats.games) return HEATMAP_HOURS;
+    const empty = Array.from({ length: 24 }, (_, i) => ({ hour: i, performance: 0 }));
+    if (!allStats?.games) return empty;
     const counts = new Array(24).fill(0), totals = new Array(24).fill(0);
     Object.values(allStats.games).forEach(g =>
       g.history.forEach(h => { const hr = new Date(h.ts).getHours(); counts[hr]++; totals[hr] += h.score; })
     );
-    const hasRealData = counts.some(c => c > 0);
     return Array.from({ length: 24 }, (_, i) => ({
       hour: i,
       performance: counts[i] > 0
         ? Math.min(100, Math.round((totals[i] / counts[i]) / 3))
-        : hasRealData ? 20 : HEATMAP_HOURS[i].performance,
+        : 0,
     }));
   }, [allStats]);
 
-  // Leaderboard with user inserted at correct rank
-  const enrichedLeaderboard = useMemo(() => {
-    const you      = { name: 'You', elo: realElo, country: '—', isYou: true };
-    const combined = [...LEADERBOARD, you].sort((a, b) => b.elo - a.elo).map((p, i) => ({ ...p, rank: i + 1 }));
-    return combined;
-  }, [realElo]);
+  // IQ from real data
+  const userIQ = latestIQ?.iq_score ?? null;
 
   // Radar helpers
   const radarPoints = (values, max = 100, radius = 80) => {
@@ -215,11 +194,6 @@ export default function Dashboard() {
 
   const avgPotential = Math.round((realPotential.logic + realPotential.math + realPotential.mem) / 3);
 
-  // Leaderboard pagination
-  const LB_PER_PAGE = 10;
-  const lbSlice  = enrichedLeaderboard.slice(lbPage * LB_PER_PAGE, (lbPage + 1) * LB_PER_PAGE);
-  const lbPages  = Math.ceil(enrichedLeaderboard.length / LB_PER_PAGE);
-
   // Today's date for the header subtitle
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -232,7 +206,7 @@ export default function Dashboard() {
     const now = Date.now();
     const dayMs = 86400000;
     const timestamps = [];
-    if (allStats.games) {
+    if (allStats?.games) {
       Object.values(allStats.games).forEach(g => g.history.forEach(h => timestamps.push(h.ts)));
     }
     for (let i = 34; i >= 0; i--) {
@@ -304,11 +278,20 @@ export default function Dashboard() {
               Cognitive Estimate
             </div>
             <div className="db-iq-gauge-row">
-              <IQ_GAUGE iq={USER.iq} />
-              <div className="db-iq-label-block">
-                <div className="db-iq-label-text">Estimated IQ</div>
-                <div className="db-iq-big">{USER.iq}</div>
-              </div>
+              {userIQ ? (
+                <>
+                  <IQ_GAUGE iq={userIQ} />
+                  <div className="db-iq-label-block">
+                    <div className="db-iq-label-text">Estimated IQ</div>
+                    <div className="db-iq-big">{userIQ}</div>
+                  </div>
+                </>
+              ) : (
+                <div className="db-iq-label-block" style={{ textAlign: 'center', width: '100%', padding: '20px 0' }}>
+                  <div className="db-iq-label-text" style={{ marginBottom: '12px' }}>No IQ test taken yet</div>
+                  <Link to="/iq-test" className="btn-fill" style={{ fontSize: '13px' }}>Take the IQ Test</Link>
+                </div>
+              )}
             </div>
             <div className="db-potential-bars">
               {[
@@ -574,40 +557,16 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ══ ROW 5 — Leaderboard (full width) ══ */}
+        {/* ══ ROW 5 — Leaderboard (coming soon) ══ */}
         <div className="db-row5">
           <div className="db-card">
             <div className="db-card-title">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
               World Rankings
             </div>
-            <div className="db-lb-header">
-              <span>#</span>
-              <span>Player</span>
-              <span style={{ textAlign: 'right' }}>Elo</span>
-            </div>
-            {lbSlice.map((p) => (
-              <div key={p.rank} className={`db-lb-row${p.isYou ? ' db-lb-you' : ''}`}>
-                <span className="db-lb-rank">{p.rank}</span>
-                <span className="db-lb-name">
-                  {p.name}
-                  {p.country !== '—' && <span className="db-lb-country">{p.country}</span>}
-                  {p.isYou && <span className="db-lb-you-tag">You</span>}
-                </span>
-                <span className="db-lb-elo">{p.elo.toLocaleString()}</span>
-              </div>
-            ))}
-            {lbPages > 1 && (
-              <div className="db-lb-pagination">
-                {Array.from({ length: lbPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    className={`db-lb-page-btn${lbPage === i ? ' active' : ''}`}
-                    onClick={() => setLbPage(i)}
-                  >{i + 1}</button>
-                ))}
-              </div>
-            )}
+            <p style={{ color: 'var(--gray3)', fontSize: '14px', padding: '24px 0', textAlign: 'center' }}>
+              Leaderboard coming soon — keep training to climb the ranks.
+            </p>
           </div>
         </div>
 

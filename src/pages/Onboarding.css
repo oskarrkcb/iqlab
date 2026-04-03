@@ -1,0 +1,48 @@
+/* ═══════════════════ ONBOARDING ═══════════════════ */
+.onboarding-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 40px 24px;
+  background: radial-gradient(ellipse at 50% 20%, rgba(244,63,94,0.06) 0%, transparent 60%);
+}
+.onboarding-container { width: 100%; max-width: 540px; }
+
+.onboarding-header { text-align: center; margin-bottom: 40px; }
+.onboarding-logo {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+  font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 24px;
+}
+.onboarding-progress { display: flex; gap: 6px; justify-content: center; margin-bottom: 12px; }
+.ob-dot {
+  width: 40px; height: 4px; border-radius: 4px; background: var(--bg5); transition: background 0.3s;
+}
+.ob-dot.done { background: var(--accent); }
+.ob-dot.current { background: var(--accent); animation: pulse 1.5s infinite; }
+.onboarding-step { font-size: 12px; color: var(--gray3); text-transform: uppercase; letter-spacing: 1px; }
+
+.onboarding-question {
+  font-size: 24px; font-weight: 800; text-align: center;
+  margin-bottom: 28px; letter-spacing: -0.5px;
+}
+
+.onboarding-options { display: flex; flex-direction: column; gap: 12px; }
+
+.ob-option {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--bg3); border: 2px solid var(--gray5); border-radius: var(--r2);
+  padding: 20px 24px; cursor: pointer; transition: all 0.25s;
+  text-align: left; width: 100%; color: var(--white); font-family: var(--font);
+}
+.ob-option:hover { border-color: rgba(244,63,94,0.3); transform: translateY(-2px); }
+.ob-option.selected { border-color: var(--accent); background: rgba(244,63,94,0.06); }
+
+.ob-option-icon { font-size: 28px; flex-shrink: 0; }
+.ob-option-text { flex: 1; }
+.ob-option-text strong { display: block; font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.ob-option-text span { font-size: 12px; color: var(--gray2); }
+
+.ob-option-check {
+  opacity: 0; color: var(--accent); transition: opacity 0.2s; flex-shrink: 0;
+}
+.ob-option.selected .ob-option-check { opacity: 1; }
+
+.ob-back { margin-top: 20px; }

@@ -6,12 +6,15 @@ import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Training from './pages/Training';
 import IQTest from './pages/IQTest';
+import NotFound from './pages/NotFound';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/AuthContext';
 
 function ProtectedRoute({ children }) {
-  // Auth check temporarily disabled for local testing
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
   return children;
 }
 
@@ -28,6 +31,7 @@ export default function App() {
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/training" element={<ProtectedRoute><Training /></ProtectedRoute>} />
             <Route path="/iq-test" element={<ProtectedRoute><IQTest /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
       </AuthProvider>

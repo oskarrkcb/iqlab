@@ -21,7 +21,7 @@
   right: 0;
   top: 50%; transform: translateY(-50%);
   width: 52%; height: 92%;
-  background: url('/pic5.jpg') center/cover no-repeat;
+  background: url('/mario-hero.jpg') center/cover no-repeat;
   mask-image: radial-gradient(ellipse 55% 65% at 60% 50%, black 28%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse 55% 65% at 60% 50%, black 28%, transparent 70%);
   filter: brightness(0.75) saturate(1.15);

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { iqQuestions } from '../games/iqQuestions';
 import { shuf, R } from '../games/utils';
+import { recordIQResult } from '../stats';
 import Footer from '../components/Footer';
 import { useLang } from '../i18n/LanguageContext';
 import './IQTest.css';
@@ -160,6 +161,16 @@ export default function IQTest() {
 
     setResult({ iq, desc, logicPct, mathPct, patPct, correct: finalCorrect, total: questions.length, elapsedLabel });
     setPhase('result');
+
+    recordIQResult({
+      iqScore: iq,
+      correct: finalCorrect,
+      total: questions.length,
+      logicPct,
+      mathPct,
+      patternPct: patPct,
+      timeSecs: elapsed,
+    });
   };
 
   // ── INTRO ──────────────────────────────────────────────────────────────
