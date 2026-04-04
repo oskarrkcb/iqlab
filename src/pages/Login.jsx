@@ -18,9 +18,14 @@ export default function Login() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const { signIn, signUp, signInWithGoogle, resetPassword, updatePassword } = useAuth();
+  const { user, signIn, signUp, signInWithGoogle, resetPassword, updatePassword } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
+
+  // Auto-redirect to dashboard if already logged in (e.g. after Google OAuth)
+  useEffect(() => {
+    if (user && !isReset) navigate('/dashboard', { replace: true });
+  }, [user, isReset, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

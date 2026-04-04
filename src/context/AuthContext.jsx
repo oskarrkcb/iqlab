@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
   const signUp = (email, password) => supabase.auth.signUp({ email, password });
   const signInWithGoogle = () => supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: `${window.location.origin}/dashboard` },
+    options: { redirectTo: `${window.location.origin}/login` },
   });
   const resetPassword = (email) => supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${window.location.origin}/login?reset=1`,
