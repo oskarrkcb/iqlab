@@ -111,6 +111,23 @@ export async function getAllStats() {
   return { games, global: { totalGames, totalPoints } };
 }
 
+/** Get leaderboard — top players by total points */
+export async function getLeaderboard(limit = 20) {
+  const { data, error } = await supabase.rpc('get_leaderboard', { lim: limit });
+  if (error) { console.error('getLeaderboard error:', error); return []; }
+  return data ?? [];
+}
+
+/** Get current user's rank */
+export async function getUserRank() {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const lb = await getLeaderboard(1000);
+  const idx = lb.findIndex(r => r.user_id === user.id);
+  return idx >= 0 ? { rank: idx + 1, ...lb[idx] } : null;
+}
+
 /** Get latest IQ result */
 export async function getLatestIQ() {
   const { data: { user } } = await supabase.auth.getUser();

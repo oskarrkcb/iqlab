@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
-import { getAllStats, getHighScore, getLatestIQ } from '../stats';
+import { getAllStats, getHighScore, getLatestIQ, getLeaderboard, getUserRank } from '../stats';
+import { useAuth } from '../context/AuthContext';
 import { useLang } from '../i18n/LanguageContext';
 import './Dashboard.css';
 
@@ -43,16 +44,23 @@ export default function Dashboard() {
   const { t } = useLang();
   const [sleep, setSleep]   = useState(7);
   const [stress, setStress] = useState(3);
+  const { user } = useAuth();
   const [allStats, setAllStats] = useState(null);
   const [latestIQ, setLatestIQ] = useState(null);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [myRank, setMyRank] = useState(null);
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
     async function load() {
       try {
-        const [stats, iq] = await Promise.all([getAllStats(), getLatestIQ()]);
+        const [stats, iq, lb, rank] = await Promise.all([
+          getAllStats(), getLatestIQ(), getLeaderboard(20), getUserRank(),
+        ]);
         setAllStats(stats);
         setLatestIQ(iq);
+        setLeaderboard(lb);
+        setMyRank(rank);
       } catch (e) {
         console.error('Dashboard load error:', e);
       }
@@ -553,16 +561,48 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ══ ROW 5 — Leaderboard (coming soon) ══ */}
+        {/* ══ ROW 5 — Leaderboard ══ */}
         <div className="db-row5">
           <div className="db-card">
             <div className="db-card-title">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 7 7 7 7"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C17 4 17 7 17 7"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
               World Rankings
             </div>
-            <p style={{ color: 'var(--gray3)', fontSize: '14px', padding: '24px 0', textAlign: 'center' }}>
-              Leaderboard coming soon — keep training to climb the ranks.
-            </p>
+
+            {leaderboard.length === 0 ? (
+              <p style={{ color: 'var(--gray3)', fontSize: '14px', padding: '24px 0', textAlign: 'center' }}>
+                No rankings yet — play some games to appear here.
+              </p>
+            ) : (
+              <>
+                <div className="db-lb-header">
+                  <span>#</span><span>Player</span><span>Points</span>
+                </div>
+                {leaderboard.map((entry, i) => {
+                  const isMe = user?.id === entry.user_id;
+                  return (
+                    <div key={entry.user_id} className={`db-lb-row ${isMe ? 'db-lb-you' : ''}`}>
+                      <span className="db-lb-rank">{i + 1}</span>
+                      <span className="db-lb-name">
+                        {entry.display_name || 'Anonymous'}
+                        {isMe && <span className="db-lb-you-tag">You</span>}
+                      </span>
+                      <span className="db-lb-elo">{entry.total_points.toLocaleString()}</span>
+                    </div>
+                  );
+                })}
+                {myRank && myRank.rank > 20 && (
+                  <div className="db-lb-row db-lb-you" style={{ borderTop: '1px solid var(--border)' }}>
+                    <span className="db-lb-rank">{myRank.rank}</span>
+                    <span className="db-lb-name">
+                      {myRank.display_name || 'Anonymous'}
+                      <span className="db-lb-you-tag">You</span>
+                    </span>
+                    <span className="db-lb-elo">{myRank.total_points.toLocaleString()}</span>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
 
