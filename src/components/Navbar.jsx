@@ -28,7 +28,6 @@ export default function Navbar() {
           <Link to="/" className={isActive('/') ? 'active' : ''}>{t.nav.home}</Link>
           <Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>{t.nav.dashboard}</Link>
           <Link to="/training" className={isActive('/training') ? 'active' : ''}>{t.nav.training}</Link>
-          <Link to="/iq-test" className={isActive('/iq-test') ? 'active' : ''}>{t.nav.iqTest}</Link>
           <Link to="/login" className={isActive('/login') ? 'active' : ''}>{t.nav.login}</Link>
         </div>
         <div className="nav-actions">

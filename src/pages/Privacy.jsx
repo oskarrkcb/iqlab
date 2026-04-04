@@ -29,7 +29,7 @@ export default function Privacy() {
             <ul style={ulStyle}>
               <li><strong style={strongStyle}>Account data:</strong> Email address and a hashed password when you create an account. We never store your password in plain text.</li>
               <li><strong style={strongStyle}>Game data:</strong> Your game scores, accuracy, difficulty level, and time spent per session — stored so you can track your progress on the Dashboard.</li>
-              <li><strong style={strongStyle}>IQ test results:</strong> Your score, category breakdowns, and time taken — stored to display your results.</li>
+              <li><strong style={strongStyle}>Neuro Score:</strong> Your cognitive performance score, calculated from your training results across all domains.</li>
             </ul>
           </section>
 

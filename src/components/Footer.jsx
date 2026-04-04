@@ -13,7 +13,6 @@ export default function Footer() {
         <nav className="footer-nav">
           <Link to="/">{t.nav.home}</Link>
           <Link to="/training">{t.nav.training}</Link>
-          <Link to="/iq-test">{t.nav.iqTest}</Link>
           <Link to="/dashboard">{t.nav.dashboard}</Link>
           <Link to="/privacy">Privacy</Link>
         </nav>

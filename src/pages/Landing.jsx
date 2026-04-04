@@ -94,7 +94,7 @@ export default function Landing() {
           </h1>
           <div className="lnd-actions lnd-hero-fade" style={{animationDelay:'0.7s'}}>
             <Link to="/training" className="btn-fill">{lnd.ctaTrain} <span>→</span></Link>
-            <Link to="/iq-test" className="btn-glass">{lnd.ctaIQ} ↗</Link>
+            <Link to="/dashboard" className="btn-glass">{lnd.ctaDashboard} ↗</Link>
           </div>
         </div>
         <div className="lnd-scroll-hint lnd-hero-fade" style={{animationDelay:'1.2s'}}>
@@ -162,7 +162,7 @@ export default function Landing() {
                 <div className="lnd-mb-row"><span className="lnd-mb-lbl">{lnd.mbFocus}</span><div className="lnd-mb-track"><div className="lnd-mb-fill" data-w="71"/></div><span className="lnd-mb-val">71%</span></div>
               </div>
             </div>
-            <div className="lnd-b fade-up" data-d="200"><div className="lnd-b-num">02 — {lnd.bento2Tag}</div><div className="lnd-b-title">{lnd.bento2Title}</div><div className="lnd-b-desc">{lnd.bento2Desc}</div><Link to="/iq-test" className="lnd-b-tag">{lnd.ctaIQ} →</Link></div>
+            <div className="lnd-b fade-up" data-d="200"><div className="lnd-b-num">02 — {lnd.bento2Tag}</div><div className="lnd-b-title">{lnd.bento2Title}</div><div className="lnd-b-desc">{lnd.bento2Desc}</div><Link to="/dashboard" className="lnd-b-tag">{lnd.ctaDashboard} →</Link></div>
             <div className="lnd-b fade-up" data-d="300"><div className="lnd-b-num">03 — {lnd.bento3Tag}</div><div className="lnd-b-title">{lnd.bento3Title}</div><div className="lnd-b-desc">{lnd.bento3Desc}</div><Link to="/training" className="lnd-b-tag">{lnd.bento3Cta} →</Link></div>
             <div className="lnd-b fade-up" data-d="400"><div className="lnd-b-num">04 — vs Bot</div><div className="lnd-b-title">{lnd.bento4Title}</div><div className="lnd-b-desc">{lnd.bento4Desc}</div><span className="lnd-b-tag">Coming: 1v1 →</span></div>
             <div className="lnd-b w2 fade-up" data-d="500"><div className="lnd-b-num">05 — {lnd.bento5Tag}</div><div className="lnd-b-title">{lnd.bento5Title}</div><div className="lnd-b-desc">{lnd.bento5Desc}</div><span className="lnd-b-tag" style={{color:'var(--white)',borderColor:'rgba(255,255,255,0.14)'}}>100% Free</span></div>
@@ -213,21 +213,21 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* IQ TEST */}
+      {/* NEURO SCORE */}
       <div className="lnd-iq-wrap">
         <div className="lnd-iq-img fade-left" data-d="0">
-          <img src="/resource-iq.jpg" alt="Brain IQ" />
+          <img src="/resource-iq.jpg" alt="Brain Training" />
         </div>
         <div className="lnd-iq-content">
           <div className="lnd-eye fade-right" data-d="100">{lnd.iqTag}</div>
           <h2 className="lnd-h2 fade-right" data-d="200">{lnd.iqHeadline1}<br/><span className="muted">{lnd.iqHeadline2}</span></h2>
           <p className="lnd-sub fade-right" data-d="300">{lnd.iqDesc}</p>
           <div className="lnd-iq-kpis fade-right" data-d="400">
-            <div className="lnd-iq-kpi"><div className="lnd-iq-kpi-v blue" data-count="127">0</div><div className="lnd-iq-kpi-l">IQ Score</div></div>
+            <div className="lnd-iq-kpi"><div className="lnd-iq-kpi-v blue" data-count="87">0</div><div className="lnd-iq-kpi-l">Neuro Score</div></div>
             <div className="lnd-iq-kpi"><div className="lnd-iq-kpi-v" data-count="84" data-suffix="%">0%</div><div className="lnd-iq-kpi-l">Logic</div></div>
             <div className="lnd-iq-kpi"><div className="lnd-iq-kpi-v" data-count="76" data-suffix="%">0%</div><div className="lnd-iq-kpi-l">Patterns</div></div>
           </div>
-          <Link to="/iq-test" className="btn-fill fade-right" data-d="500" style={{alignSelf:'flex-start',marginTop:'8px'}}>{lnd.ctaIQ} →</Link>
+          <Link to="/training" className="btn-fill fade-right" data-d="500" style={{alignSelf:'flex-start',marginTop:'8px'}}>{lnd.ctaTrain} →</Link>
         </div>
       </div>
 
@@ -239,7 +239,7 @@ export default function Landing() {
           <div className="lnd-cta-h fade-up" data-d="150">{lnd.ctaHeadline1}<span className="dim">{lnd.ctaHeadline2}</span></div>
           <div className="lnd-cta-acts fade-up" data-d="300">
             <Link to="/training" className="btn-fill">{lnd.ctaTrain} →</Link>
-            <Link to="/iq-test" className="btn-glass">{lnd.ctaIQ}</Link>
+            <Link to="/dashboard" className="btn-glass">{lnd.ctaDashboard}</Link>
           </div>
         </div>
       </section>

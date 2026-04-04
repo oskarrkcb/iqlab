@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
-import { getAllStats, getHighScore, getLatestIQ, getLeaderboard, getUserRank } from '../stats';
+import { getAllStats, getHighScore, getLeaderboard, getUserRank } from '../stats';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../i18n/LanguageContext';
 import './Dashboard.css';
@@ -14,12 +14,9 @@ const GAME_LABELS = {
   chimp: 'Chimp',   algo: 'Algo',    'vs-bot': 'vs Bot',
 };
 
-// ── IQ Gauge SVG ──
-const IQ_GAUGE = ({ iq }) => {
-  const pct = Math.min(1, iq / 160);
-  // 270° arc: start 135°, end 45° (clockwise). cx=100, cy=95, r=72
-  // Start point (135°): cos=-0.707, sin=0.707 → (49.1, 145.9)
-  // End point (45°):    cos=0.707,  sin=0.707 → (150.9, 145.9)
+// ── Neuro Score Gauge SVG ──
+const NEURO_GAUGE = ({ score }) => {
+  const pct = Math.min(1, score / 100);
   const cx = 100, cy = 95, r = 72;
   const fillAngleDeg = 135 + 270 * pct;
   const fillAngle = fillAngleDeg * Math.PI / 180;
@@ -33,9 +30,9 @@ const IQ_GAUGE = ({ iq }) => {
       <path d={`M 49.1,145.9 A 72,72 0 ${largeArc} 1 ${fx.toFixed(1)},${fy.toFixed(1)}`}
         fill="none" stroke="var(--accent)" strokeWidth="11" strokeLinecap="round"/>
       <text x={cx} y={cy + 8} textAnchor="middle" fill="var(--white)"
-        fontSize="34" fontWeight="900" fontFamily="var(--mono)">{iq}</text>
+        fontSize="34" fontWeight="900" fontFamily="var(--mono)">{score}</text>
       <text x={cx} y={cy + 26} textAnchor="middle" fill="var(--gray3)"
-        fontSize="9" letterSpacing="2.5" fontFamily="var(--font)">IQ SCORE</text>
+        fontSize="9" letterSpacing="2.5" fontFamily="var(--font)">NEURO SCORE</text>
     </svg>
   );
 };
@@ -46,7 +43,6 @@ export default function Dashboard() {
   const [stress, setStress] = useState(3);
   const { user } = useAuth();
   const [allStats, setAllStats] = useState(null);
-  const [latestIQ, setLatestIQ] = useState(null);
   const [leaderboard, setLeaderboard] = useState([]);
   const [myRank, setMyRank] = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -54,11 +50,10 @@ export default function Dashboard() {
   useEffect(() => {
     async function load() {
       try {
-        const [stats, iq, lb, rank] = await Promise.all([
-          getAllStats(), getLatestIQ(), getLeaderboard(20), getUserRank(),
+        const [stats, lb, rank] = await Promise.all([
+          getAllStats(), getLeaderboard(20), getUserRank(),
         ]);
         setAllStats(stats);
-        setLatestIQ(iq);
         setLeaderboard(lb);
         setMyRank(rank);
       } catch (e) {
@@ -167,8 +162,6 @@ export default function Dashboard() {
         : 0,
     }));
   }, [allStats]);
-
-  const userIQ = latestIQ?.iq_score ?? null;
 
   // Radar helpers
   const radarPoints = (values, max = 100, radius = 80) => {
@@ -279,21 +272,21 @@ export default function Dashboard() {
           <div className="db-card db-row2-iq">
             <div className="db-card-title">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-              Cognitive Estimate
+              Neuro Score
             </div>
             <div className="db-iq-gauge-row">
-              {userIQ ? (
+              {realTotalEx > 0 ? (
                 <>
-                  <IQ_GAUGE iq={userIQ} />
+                  <NEURO_GAUGE score={avgPotential} />
                   <div className="db-iq-label-block">
-                    <div className="db-iq-label-text">Estimated IQ</div>
-                    <div className="db-iq-big">{userIQ}</div>
+                    <div className="db-iq-label-text">Neuro Score</div>
+                    <div className="db-iq-big">{avgPotential}</div>
                   </div>
                 </>
               ) : (
                 <div className="db-iq-label-block" style={{ textAlign: 'center', width: '100%', padding: '20px 0' }}>
-                  <div className="db-iq-label-text" style={{ marginBottom: '12px' }}>No IQ test taken yet</div>
-                  <Link to="/iq-test" className="btn-fill" style={{ fontSize: '13px' }}>Take the IQ Test</Link>
+                  <div className="db-iq-label-text" style={{ marginBottom: '12px' }}>Play some games to unlock your Neuro Score</div>
+                  <Link to="/training" className="btn-fill" style={{ fontSize: '13px' }}>Start Training</Link>
                 </div>
               )}
             </div>

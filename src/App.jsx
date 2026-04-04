@@ -5,7 +5,7 @@ import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
 import Training from './pages/Training';
-import IQTest from './pages/IQTest';
+
 import NotFound from './pages/NotFound';
 import Privacy from './pages/Privacy';
 import { LanguageProvider } from './i18n/LanguageContext';
@@ -31,7 +31,6 @@ export default function App() {
             <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/training" element={<Training />} />
-            <Route path="/iq-test" element={<ProtectedRoute><IQTest /></ProtectedRoute>} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
