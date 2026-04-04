@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameStats, GameTimer, Feedback, GameEnd, HighScoreBanner } from './GameShell';
+import { useKeySelect } from './useKeySelect';
 import { R, shuf } from './utils';
 const GAME_ID = 'rotation';
 
@@ -162,7 +163,7 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
 
   useEffect(() => { nextRound(); return stopTimer; }, []); // eslint-disable-line
 
-  const answer = (i) => {
+  const answer = useCallback((i) => {
     if (answered) return;
     setAnswered(true); stopTimer();
     const ok = i === correctIdx;
@@ -174,7 +175,9 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
       setFb({ type: 'err', msg: `Wrong! Option ${correctIdx + 1} was correct.` });
     }
     setTimeout(nextRound, 1500);
-  };
+  }, [answered, correctIdx, stopTimer, nextRound]);
+
+  useKeySelect(answer, 4, answered);
 
   if (ended) return (
     <GameEnd

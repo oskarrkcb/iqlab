@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameStats, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
+import { useKeySelect } from './useKeySelect';
 import { R, shuf } from './utils';
 const GAME_ID = 'ravens';
 
@@ -137,7 +138,7 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
 
   useEffect(() => { nextRound(); }, []); // eslint-disable-line
 
-  const pickOpt = (i) => {
+  const pickOpt = useCallback((i) => {
     if (answered) return;
     setAnswered(true); setSelected(i);
     const ok = i === puzzle.ci;
@@ -151,7 +152,9 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
       setExpl({ steps: [puzzle.rule] });
       setWaiting(true);
     }
-  };
+  }, [answered, puzzle, nextRound]);
+
+  useKeySelect(pickOpt, puzzle?.opts?.length ?? 4, answered);
 
   if (ended) return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); }} onBack={onBack} />;
 

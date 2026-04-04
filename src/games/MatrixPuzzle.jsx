@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameStats, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
+import { useKeySelect } from './useKeySelect';
 import { R, pick, shuf, matGens } from './utils';
 const GAME_ID = 'mat';
 
@@ -37,7 +38,7 @@ export default function MatrixPuzzle({ onBack, difficulty = 'medium' }) {
 
   useEffect(() => { nextRound(); }, []); // eslint-disable-line
 
-  const pickOpt = (i) => {
+  const pickOpt = useCallback((i) => {
     if (answered) return;
     setAnswered(true); setSelected(i);
     const ok = i === correctIdx;
@@ -51,7 +52,9 @@ export default function MatrixPuzzle({ onBack, difficulty = 'medium' }) {
       setExpl({ steps: [rule, `Missing: <span class="hl">${answer}</span>`] });
       setWaiting(true);
     }
-  };
+  }, [answered, correctIdx, answer, rule, nextRound]);
+
+  useKeySelect(pickOpt, options.length || 4, answered);
 
   if (ended) {
     return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); }} onBack={onBack} />;

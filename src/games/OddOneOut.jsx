@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameStats, GameTimer, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
+import { useKeySelect } from './useKeySelect';
 import { pick, oooGens } from './utils';
 const GAME_ID = 'ooo';
 const TIME_LIMIT = { easy: null, medium: null, hard: 15, 'really-hard': 10 };
@@ -50,7 +51,7 @@ export default function OddOneOut({ onBack, difficulty = 'medium' }) {
 
   useEffect(() => { nextRound(); return stopTimer; }, []); // eslint-disable-line
 
-  const pickNum = (i) => {
+  const pickNum = useCallback((i) => {
     if (answered) return;
     stopTimer();
     setAnswered(true); setSelected(i);
@@ -65,7 +66,9 @@ export default function OddOneOut({ onBack, difficulty = 'medium' }) {
       setExpl({ steps: [puzzle.rule] });
       setWaiting(true);
     }
-  };
+  }, [answered, puzzle, stopTimer, nextRound]);
+
+  useKeySelect(pickNum, puzzle?.nums?.length ?? 4, answered);
 
   if (ended) {
     return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); }} onBack={onBack} />;

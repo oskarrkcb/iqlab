@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GameStats, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
+import { useKeySelect } from './useKeySelect';
 import { R, pick, shuf } from './utils';
 const GAME_ID = 'algo';
 
@@ -144,7 +145,7 @@ export default function AlgoThinking({ onBack, difficulty = 'medium' }) {
 
   useEffect(() => { nextRound(); }, []); // eslint-disable-line
 
-  const answer = (i) => {
+  const answer = useCallback((i) => {
     if (answered) return;
     setAnswered(true); setSelected(i);
     const ok = i === puzzle.correct;
@@ -158,7 +159,9 @@ export default function AlgoThinking({ onBack, difficulty = 'medium' }) {
       setExpl({ steps: [puzzle.ex] });
       setWaiting(true);
     }
-  };
+  }, [answered, puzzle, nextRound]);
+
+  useKeySelect(answer, puzzle?.opts?.length ?? 4, answered);
 
   if (ended) return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); }} onBack={onBack} />;
 

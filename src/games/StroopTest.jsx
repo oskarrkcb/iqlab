@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameStats, GameTimer, Feedback, GameEnd, HighScoreBanner } from './GameShell';
+import { useKeySelect } from './useKeySelect';
 import { R, pick, shuf } from './utils';
 const GAME_ID = 'stroop';
 
@@ -72,7 +73,7 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
   useEffect(() => () => clearInterval(timerRef.current), []);
   useEffect(() => { scRef.current = sc; }, [sc]);
 
-  const answer = (i) => {
+  const answer = useCallback((i) => {
     if (answered) return;
     setAnswered(true);
     if (i === correctIdx) {
@@ -89,7 +90,9 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
       setFb({ type: 'err', msg: `${options[correctIdx].name} · −3s` });
     }
     setTimeout(genQ, 600);
-  };
+  }, [answered, correctIdx, options, genQ]);
+
+  useKeySelect(answer, options.length || 4, answered);
 
   if (mode === 'intro') {
     return (

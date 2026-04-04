@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { iqQuestions } from '../games/iqQuestions';
 import { shuf, R } from '../games/utils';
+import { useKeySelect } from '../games/useKeySelect';
 import { recordIQResult } from '../stats';
 import Footer from '../components/Footer';
 import { useLang } from '../i18n/LanguageContext';
@@ -114,7 +115,7 @@ export default function IQTest() {
     setPhase('test');
   }, []);
 
-  const answer = (idx) => {
+  const answer = useCallback((idx) => {
     if (locked) return;
     setLocked(true); setSelected(idx);
     const q = questions[qi];
@@ -139,7 +140,9 @@ export default function IQTest() {
         else { setQi(qi + 1); setSelected(-1); setLocked(false); setShowExpl(false); }
       }, 3000);
     }
-  };
+  }, [locked, questions, qi, correct]);
+
+  useKeySelect(answer, questions[qi]?.options?.length ?? 4, locked);
 
   const showResult = (finalCorrect) => {
     const pct = finalCorrect / questions.length;

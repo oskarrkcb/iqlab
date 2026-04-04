@@ -1,18 +1,24 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../i18n/LanguageContext';
 import './Login.css';
 
 export default function Login() {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [searchParams] = useSearchParams();
+  const isReset = searchParams.get('reset') === '1';
+
+  const [view, setView] = useState(isReset ? 'newPassword' : 'signIn');
+  // views: signIn, signUp, forgot, resetSent, confirmEmail, newPassword, passwordDone
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const [confirmPw, setConfirmPw] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
-  const [confirmEmail, setConfirmEmail] = useState(false);
 
-  const { signIn, signUp, signInWithGoogle } = useAuth();
+  const { signIn, signUp, signInWithGoogle, resetPassword, updatePassword } = useAuth();
   const { t } = useLang();
   const navigate = useNavigate();
 
@@ -21,23 +27,39 @@ export default function Login() {
     setError('');
     setSubmitting(true);
 
-    if (isSignUp) {
+    if (view === 'signUp') {
       const { error } = await signUp(email, password);
       setSubmitting(false);
-      if (error) {
-        setError(error.message);
-      } else {
-        setConfirmEmail(true);
-      }
+      if (error) { setError(error.message); }
+      else { setView('confirmEmail'); }
     } else {
       const { error } = await signIn(email, password);
       setSubmitting(false);
-      if (error) {
-        setError(error.message);
-      } else {
-        navigate('/dashboard');
-      }
+      if (error) { setError(error.message); }
+      else { navigate('/dashboard'); }
     }
+  };
+
+  const handleForgot = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSubmitting(true);
+    const { error } = await resetPassword(email);
+    setSubmitting(false);
+    if (error) { setError(error.message); }
+    else { setView('resetSent'); }
+  };
+
+  const handleNewPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (newPw !== confirmPw) { setError('Passwords do not match'); return; }
+    if (newPw.length < 6) { setError('Password must be at least 6 characters'); return; }
+    setSubmitting(true);
+    const { error } = await updatePassword(newPw);
+    setSubmitting(false);
+    if (error) { setError(error.message); }
+    else { setView('passwordDone'); }
   };
 
   return (
@@ -48,7 +70,9 @@ export default function Login() {
         </Link>
 
         <div className="auth-card glass">
-          {confirmEmail ? (
+
+          {/* ── Email confirmation after sign up ── */}
+          {view === 'confirmEmail' && (
             <div style={{ textAlign: 'center', padding: '20px 0' }}>
               <div style={{ fontSize: 48, marginBottom: 16 }}>
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
@@ -59,18 +83,94 @@ export default function Login() {
                 <strong style={{ color: 'var(--white)' }}>{email}</strong><br/>
                 Click the link to activate your account.
               </p>
-              <button
-                className="btn btn-primary btn-w"
-                onClick={() => { setConfirmEmail(false); setIsSignUp(false); }}
-              >
-                Back to Sign In
+              <button className="btn btn-primary btn-w" onClick={() => setView('signIn')}>
+                {t.login.backToSignIn}
               </button>
             </div>
-          ) : (
+          )}
+
+          {/* ── Reset link sent ── */}
+          {view === 'resetSent' && (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              </div>
+              <h2 style={{ marginBottom: 8 }}>{t.login.resetSent}</h2>
+              <p style={{ color: 'var(--gray2)', fontSize: 14, lineHeight: 1.7, marginBottom: 24 }}>
+                {t.login.resetSentDesc}<br/>
+                <strong style={{ color: 'var(--white)' }}>{email}</strong>
+              </p>
+              <button className="btn btn-primary btn-w" onClick={() => setView('signIn')}>
+                {t.login.backToSignIn}
+              </button>
+            </div>
+          )}
+
+          {/* ── Set new password (after clicking reset link) ── */}
+          {view === 'newPassword' && (
+            <>
+              <h2>{t.login.resetTitle}</h2>
+              <p className="auth-subtitle">{t.login.newPassword}</p>
+              <form onSubmit={handleNewPassword} className="auth-form">
+                <div className="form-group">
+                  <label htmlFor="newPw">{t.login.newPassword}</label>
+                  <input type="password" id="newPw" className="form-input" placeholder="••••••••"
+                    value={newPw} onChange={(e) => setNewPw(e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="confirmPw">{t.login.confirmNewPassword}</label>
+                  <input type="password" id="confirmPw" className="form-input" placeholder="••••••••"
+                    value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-w btn-lg" disabled={submitting}>
+                  {submitting ? '...' : t.login.updatePassword}
+                </button>
+                {error && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{error}</p>}
+              </form>
+            </>
+          )}
+
+          {/* ── Password updated success ── */}
+          {view === 'passwordDone' && (
+            <div style={{ textAlign: 'center', padding: '20px 0' }}>
+              <div style={{ fontSize: 48, marginBottom: 16 }}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--green, #22c55e)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              </div>
+              <h2 style={{ marginBottom: 8 }}>{t.login.passwordUpdated}</h2>
+              <button className="btn btn-primary btn-w" style={{ marginTop: 16 }} onClick={() => setView('signIn')}>
+                {t.login.signIn}
+              </button>
+            </div>
+          )}
+
+          {/* ── Forgot password form ── */}
+          {view === 'forgot' && (
+            <>
+              <h2>{t.login.resetTitle}</h2>
+              <p className="auth-subtitle">{t.login.resetDesc}</p>
+              <form onSubmit={handleForgot} className="auth-form">
+                <div className="form-group">
+                  <label htmlFor="resetEmail">{t.login.email}</label>
+                  <input type="email" id="resetEmail" className="form-input" placeholder="you@example.com"
+                    value={email} onChange={(e) => setEmail(e.target.value)} required />
+                </div>
+                <button type="submit" className="btn btn-primary btn-w btn-lg" disabled={submitting}>
+                  {submitting ? '...' : t.login.sendReset}
+                </button>
+                {error && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{error}</p>}
+              </form>
+              <p className="auth-toggle">
+                <button onClick={() => setView('signIn')}>{t.login.backToSignIn}</button>
+              </p>
+            </>
+          )}
+
+          {/* ── Sign In / Sign Up form ── */}
+          {(view === 'signIn' || view === 'signUp') && (
           <>
-          <h2>{isSignUp ? t.login.createAccount : t.login.welcomeBack}</h2>
+          <h2>{view === 'signUp' ? t.login.createAccount : t.login.welcomeBack}</h2>
           <p className="auth-subtitle">
-            {isSignUp ? t.login.signUpDesc : t.login.signInDesc}
+            {view === 'signUp' ? t.login.signUpDesc : t.login.signInDesc}
           </p>
 
           <button
@@ -114,7 +214,7 @@ export default function Login() {
                 required
               />
             </div>
-            {isSignUp && (
+            {view === 'signUp' && (
               <div className="form-group">
                 <label htmlFor="confirm">{t.login.confirmPassword}</label>
                 <input
@@ -132,16 +232,22 @@ export default function Login() {
               disabled={submitting}
             >
               {submitting
-                ? isSignUp ? 'Creating account...' : 'Signing in...'
-                : isSignUp ? t.login.signUp : t.login.signIn}
+                ? view === 'signUp' ? 'Creating account...' : 'Signing in...'
+                : view === 'signUp' ? t.login.signUp : t.login.signIn}
             </button>
             {error && <p style={{ color: 'var(--red)', fontSize: 13, marginTop: 8 }}>{error}</p>}
           </form>
 
+          {view === 'signIn' && (
+            <p className="auth-toggle" style={{ marginTop: 12 }}>
+              <button onClick={() => { setError(''); setView('forgot'); }}>{t.login.forgotPassword}</button>
+            </p>
+          )}
+
           <p className="auth-toggle">
-            {isSignUp ? t.login.hasAccount : t.login.noAccount}{' '}
-            <button onClick={() => setIsSignUp(!isSignUp)}>
-              {isSignUp ? t.login.signIn : t.login.signUp}
+            {view === 'signUp' ? t.login.hasAccount : t.login.noAccount}{' '}
+            <button onClick={() => { setError(''); setView(view === 'signUp' ? 'signIn' : 'signUp'); }}>
+              {view === 'signUp' ? t.login.signIn : t.login.signUp}
             </button>
           </p>
           </>

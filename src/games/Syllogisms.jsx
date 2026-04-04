@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameStats, GameTimer, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
+import { useKeySelect } from './useKeySelect';
 import { R, pick, shuf } from './utils';
 const GAME_ID = 'syllogisms';
 
@@ -132,7 +133,7 @@ export default function Syllogisms({ onBack, difficulty = 'medium' }) {
 
   useEffect(() => { nextRound(); return stopTimer; }, []); // eslint-disable-line
 
-  const answer = (i) => {
+  const answer = useCallback((i) => {
     if (answered) return;
     stopTimer();
     setAnswered(true); setSelected(i);
@@ -147,7 +148,9 @@ export default function Syllogisms({ onBack, difficulty = 'medium' }) {
       setExpl({ steps: [puzzle.ex] });
       setWaiting(true);
     }
-  };
+  }, [answered, puzzle, stopTimer, nextRound]);
+
+  useKeySelect(answer, puzzle?.opts?.length ?? 4, answered);
 
   if (ended) return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setPool([]); setEnded(false); }} onBack={onBack} />;
 
