@@ -26,9 +26,9 @@ export default function Navbar() {
         </Link>
         <div className={`nav-links${menuOpen ? ' open' : ''}`}>
           <Link to="/" className={isActive('/') ? 'active' : ''}>{t.nav.home}</Link>
-          <Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>{t.nav.dashboard}</Link>
+          {user && <Link to="/dashboard" className={isActive('/dashboard') ? 'active' : ''}>{t.nav.dashboard}</Link>}
           <Link to="/training" className={isActive('/training') ? 'active' : ''}>{t.nav.training}</Link>
-          <Link to="/login" className={isActive('/login') ? 'active' : ''}>{t.nav.login}</Link>
+          {!user && <Link to="/login" className={isActive('/login') ? 'active' : ''}>{t.nav.login}</Link>}
         </div>
         <div className="nav-actions">
           <button onClick={toggleLang} style={{
