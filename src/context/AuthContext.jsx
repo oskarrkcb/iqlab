@@ -8,19 +8,33 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Listen for auth changes FIRST — catches OAuth redirects (PKCE code exchange)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      setLoading(false);
-    }).catch(() => {
-      setUser(null);
       setLoading(false);
     });
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    // Handle PKCE code from OAuth redirect explicitly
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ data: { session }, error }) => {
+        if (!error && session) {
+          setUser(session.user);
+        }
+        setLoading(false);
+      }).catch(() => setLoading(false));
+    } else {
+      // No OAuth code — check for existing session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }).catch(() => {
+        setUser(null);
+        setLoading(false);
+      });
+    }
 
     return () => subscription.unsubscribe();
   }, []);
