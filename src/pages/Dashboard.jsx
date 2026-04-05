@@ -6,6 +6,42 @@ import { useAuth } from '../context/AuthContext';
 import { useLang } from '../i18n/LanguageContext';
 import './Dashboard.css';
 
+// ── Rank system ──
+const RANKS = [
+  { name: 'Bronze',      min: 0,     color: '#cd7f32', bg: 'rgba(205,127,50,0.12)' },
+  { name: 'Silver',      min: 500,   color: '#a8a8a8', bg: 'rgba(168,168,168,0.12)' },
+  { name: 'Gold',        min: 2000,  color: '#ffd700', bg: 'rgba(255,215,0,0.12)' },
+  { name: 'Platinum',    min: 5000,  color: '#48d1cc', bg: 'rgba(72,209,204,0.12)' },
+  { name: 'Diamond',     min: 15000, color: '#b9f2ff', bg: 'rgba(185,242,255,0.15)' },
+  { name: 'Grandmaster', min: 50000, color: '#ff6b6b', bg: 'rgba(255,107,107,0.15)' },
+];
+
+function getRank(points) {
+  for (let i = RANKS.length - 1; i >= 0; i--) {
+    if (points >= RANKS[i].min) return { ...RANKS[i], index: i };
+  }
+  return { ...RANKS[0], index: 0 };
+}
+
+function RankBadge({ points, size = 'normal' }) {
+  const rank = getRank(points);
+  const next = RANKS[rank.index + 1];
+  const isSmall = size === 'small';
+  return (
+    <span style={{
+      display: 'inline-flex', alignItems: 'center', gap: isSmall ? 4 : 6,
+      background: rank.bg, border: `1px solid ${rank.color}33`,
+      borderRadius: 999, padding: isSmall ? '1px 8px' : '3px 12px',
+      fontSize: isSmall ? 10 : 11, fontWeight: 700, color: rank.color,
+      letterSpacing: 0.5, whiteSpace: 'nowrap',
+    }}
+      title={next ? `Next: ${next.name} (${next.min.toLocaleString()} pts)` : 'Max rank!'}
+    >
+      {rank.name}
+    </span>
+  );
+}
+
 const GAME_LABELS = {
   seq: 'Series',    ooo: 'Odd One',  mat: 'Matrix',   est: 'Estimate',
   op: 'Operator',   g24: 'Game 24',  sp: 'Speed',     mem: 'Memory',
@@ -246,7 +282,7 @@ export default function Dashboard() {
           <div className="db-kpi">
             <div className="db-kpi-label">{t.dashboard.eloRating}</div>
             <div className="db-kpi-value accent">{realElo.toLocaleString()}</div>
-            <div className="db-kpi-sub">Silver tier</div>
+            <div className="db-kpi-sub"><RankBadge points={realTotalPts} size="small" /></div>
           </div>
           <div className="db-kpi">
             <div className="db-kpi-label">{t.dashboard.accuracy}</div>
@@ -579,6 +615,7 @@ export default function Dashboard() {
                       <span className="db-lb-name">
                         {entry.display_name || 'Anonymous'}
                         {isMe && <span className="db-lb-you-tag">You</span>}
+                        <RankBadge points={entry.total_points} size="small" />
                       </span>
                       <span className="db-lb-elo">{entry.total_points.toLocaleString()}</span>
                     </div>
@@ -590,6 +627,7 @@ export default function Dashboard() {
                     <span className="db-lb-name">
                       {myRank.display_name || 'Anonymous'}
                       <span className="db-lb-you-tag">You</span>
+                      <RankBadge points={myRank.total_points} size="small" />
                     </span>
                     <span className="db-lb-elo">{myRank.total_points.toLocaleString()}</span>
                   </div>
