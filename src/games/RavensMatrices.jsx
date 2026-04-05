@@ -1,15 +1,25 @@
-import { useState, useEffect, useCallback } from 'react';
-import { GameStats, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { GameStats, GameTimer, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
 import { useKeySelect } from './useKeySelect';
-import { R, shuf } from './utils';
+import { R, shuf, pick } from './utils';
 const GAME_ID = 'ravens';
 
-// Generate pattern-based 3x3 grids with symbols
 const SHAPES = ['●', '■', '▲', '◆', '★', '○', '□', '△', '◇', '☆'];
 const COLORS = ['var(--accent)', 'var(--green)', 'var(--blue)', 'var(--orange)', 'var(--red)'];
+const RAVENS_TIME = { hard: 25, 'really-hard': 18 };
+const RAVENS_OPTS = { easy: 4, medium: 4, hard: 5, 'really-hard': 5 };
+
+// Type ranges by difficulty
+const TYPE_RANGE = {
+  easy: [0, 1],
+  medium: [0, 3],
+  hard: [0, 6],
+  'really-hard': [4, 6],
+};
 
 function generatePuzzle(difficulty = 'medium') {
-  const type = R(0, 3);
+  const range = TYPE_RANGE[difficulty] || [0, 3];
+  const type = R(range[0], range[1]);
   let grid, answer, rule, choices;
 
   if (type === 0) {
@@ -49,7 +59,7 @@ function generatePuzzle(difficulty = 'medium') {
     }
     answer = { shape, size: 18, color, count: 9 };
     rule = 'Number of shapes increases by 1 in reading order (1→9)';
-  } else {
+  } else if (type === 3) {
     // Alternating pattern
     const s1 = SHAPES[R(0, 4)], s2 = SHAPES[R(5, 9)];
     const c1 = COLORS[0], c2 = COLORS[1];
@@ -62,11 +72,49 @@ function generatePuzzle(difficulty = 'medium') {
     }
     answer = { shape: s1, size: 24, color: c1 };
     rule = 'Alternating pattern: shapes alternate in a checkerboard';
+  } else if (type === 4) {
+    // Double rule: rows determine shape, columns determine color
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        grid.push({ shape: shapes[r], size: 24, color: colors[c] });
+      }
+    }
+    answer = { shape: shapes[2], size: 24, color: colors[2] };
+    rule = 'Each row has the same shape AND each column has the same color';
+  } else if (type === 5) {
+    // Progressive count: row 1 has 1 each, row 2 has 2 each, row 3 has 3 each
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const color = COLORS[R(0, COLORS.length - 1)];
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        grid.push({ shape: shapes[c], size: 18, color, count: r + 1 });
+      }
+    }
+    answer = { shape: shapes[2], size: 18, color, count: 3 };
+    rule = 'Each row adds one more of each shape (1→2→3)';
+  } else {
+    // XOR / set completion: each row uses all 3 shapes, each col uses all 3 colors
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    // Latin square arrangement
+    const offsets = [[0,1,2],[1,2,0],[2,0,1]];
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        grid.push({ shape: shapes[offsets[r][c]], size: 24, color: colors[c] });
+      }
+    }
+    answer = { shape: shapes[offsets[2][2]], size: 24, color: colors[2] };
+    rule = 'Each row and column contains all 3 shapes exactly once (Latin square)';
   }
 
-  // Generate wrong choices — harder = more similar to answer
+  const numWrong = (RAVENS_OPTS[difficulty] || 4) - 1;
   const wrongChoices = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < numWrong; i++) {
     if (difficulty === 'really-hard') {
       // Same shape + same color, only size/count differs
       wrongChoices.push({
@@ -118,6 +166,8 @@ function CellContent({ cell }) {
 }
 
 export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
+  const timeLimit = RAVENS_TIME[difficulty] ?? null;
+  const optionCount = RAVENS_OPTS[difficulty] || 4;
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0 });
   const [puzzle, setPuzzle] = useState(null);
   const [answered, setAnswered] = useState(false);
@@ -126,7 +176,11 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
   const [expl, setExpl] = useState(null);
   const [waiting, setWaiting] = useState(false);
   const [ended, setEnded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(timeLimit);
+  const timerRef = useRef(null);
   const MX = 10;
+
+  const stopTimer = useCallback(() => clearInterval(timerRef.current), []);
 
   const nextRound = useCallback(() => {
     const rn = state.rn + 1;
@@ -134,12 +188,33 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
     setState(s => ({ ...s, rn }));
     setAnswered(false); setSelected(-1); setFb(null); setExpl(null); setWaiting(false);
     setPuzzle(generatePuzzle(difficulty));
-  }, [state.rn]);
+    if (timeLimit) {
+      setTimeLeft(timeLimit);
+      clearInterval(timerRef.current);
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 0.1) { clearInterval(timerRef.current); return 0; }
+          return prev - 0.1;
+        });
+      }, 100);
+    }
+  }, [state.rn, difficulty, timeLimit]);
 
-  useEffect(() => { nextRound(); }, []); // eslint-disable-line
+  useEffect(() => {
+    if (timeLimit && timeLeft <= 0 && puzzle && !answered) {
+      setAnswered(true);
+      setState(s => ({ ...s, sr: 0 }));
+      setFb({ type: 'err', msg: "Time's up!" });
+      setExpl({ steps: [puzzle.rule] });
+      setWaiting(true);
+    }
+  }, [timeLeft, puzzle, answered, timeLimit]);
+
+  useEffect(() => { nextRound(); return stopTimer; }, []); // eslint-disable-line
 
   const pickOpt = useCallback((i) => {
     if (answered) return;
+    stopTimer();
     setAnswered(true); setSelected(i);
     const ok = i === puzzle.ci;
     if (ok) {
@@ -154,7 +229,7 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
     }
   }, [answered, puzzle, nextRound]);
 
-  useKeySelect(pickOpt, puzzle?.opts?.length ?? 4, answered);
+  useKeySelect(pickOpt, optionCount, answered);
 
   if (ended) return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); }} onBack={onBack} />;
 
@@ -166,6 +241,7 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
         { label: 'Round', value: `${state.rn}/${MX}`, color: 'var(--orange)' },
         { label: 'Streak', value: state.sr, color: 'var(--green)' },
       ]} />
+      {timeLimit && <GameTimer timeLeft={timeLeft} maxTime={timeLimit} />}
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>Find the missing piece that completes the pattern matrix.</p>
       {puzzle && (
         <>
@@ -182,7 +258,7 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
             ))}
           </div>
           <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 11, marginBottom: 10 }}>Choose the answer:</p>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, maxWidth: 320, margin: '0 auto' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(optionCount, 5)}, 1fr)`, gap: 8, maxWidth: optionCount > 4 ? 400 : 320, margin: '0 auto' }}>
             {puzzle.choices.map((cell, i) => (
               <div key={i} onClick={() => pickOpt(i)} style={{
                 aspectRatio: 1, background: 'var(--bg4)',

@@ -4,24 +4,44 @@ import { useKeySelect } from './useKeySelect';
 import { R, shuf } from './utils';
 const GAME_ID = 'rotation';
 
-// Generate L/T/Z-like shapes as arrays of [x,y] blocks
-function generateShape() {
-  // Only use asymmetric (chiral) shapes — avoids the edge-case where mirror = rotation
-  const templates = [
-    [[0,0],[1,0],[2,0],[2,1]],         // L
-    [[0,0],[1,0],[2,0],[0,1],[0,2]],   // big L
-    [[0,0],[1,0],[1,1],[2,1]],         // Z / skew
-    [[0,0],[1,0],[0,1],[0,2]],         // J
-    [[0,0],[0,1],[1,1],[1,2]],         // S / reverse-skew
-    [[0,0],[1,0],[2,0],[1,1],[1,2]],   // T-with-tail (asymmetric)
-    [[0,0],[1,0],[2,0],[2,1],[2,2]],   // L-corner
-    [[0,0],[0,1],[0,2],[1,2],[2,2]],   // J-corner
-    [[0,0],[1,0],[1,1],[1,2],[2,2]],   // Z-stair
-    [[0,0],[0,1],[1,1],[2,1],[2,2]],   // S-stair
-    [[0,0],[1,0],[2,0],[0,1],[1,2]],   // irregular
-    [[0,0],[1,0],[0,1],[0,2],[1,2]],   // U-like
-  ];
-  return templates[R(0, templates.length - 1)];
+// Shape templates grouped by complexity
+const TEMPLATES_4BLOCK = [
+  [[0,0],[1,0],[2,0],[2,1]],         // L
+  [[0,0],[1,0],[1,1],[2,1]],         // Z / skew
+  [[0,0],[1,0],[0,1],[0,2]],         // J
+  [[0,0],[0,1],[1,1],[1,2]],         // S / reverse-skew
+];
+const TEMPLATES_5BLOCK = [
+  [[0,0],[1,0],[2,0],[0,1],[0,2]],   // big L
+  [[0,0],[1,0],[2,0],[1,1],[1,2]],   // T-with-tail
+  [[0,0],[1,0],[2,0],[2,1],[2,2]],   // L-corner
+  [[0,0],[0,1],[0,2],[1,2],[2,2]],   // J-corner
+  [[0,0],[1,0],[1,1],[1,2],[2,2]],   // Z-stair
+  [[0,0],[0,1],[1,1],[2,1],[2,2]],   // S-stair
+  [[0,0],[1,0],[2,0],[0,1],[1,2]],   // irregular
+  [[0,0],[1,0],[0,1],[0,2],[1,2]],   // U-like
+];
+const TEMPLATES_6BLOCK = [
+  [[0,0],[1,0],[2,0],[0,1],[0,2],[1,2]],   // big-U
+  [[0,0],[1,0],[2,0],[2,1],[1,2],[2,2]],   // zigzag-L
+  [[0,0],[0,1],[1,1],[2,1],[2,2],[2,3]],   // step-down
+  [[0,0],[1,0],[1,1],[2,1],[2,2],[3,2]],   // long-stair
+  [[0,0],[0,1],[0,2],[1,0],[2,0],[2,1]],   // C-shape
+  [[0,0],[1,0],[1,1],[1,2],[2,2],[2,3]],   // crane
+];
+
+const DIFF_TEMPLATES = {
+  easy: TEMPLATES_4BLOCK,
+  medium: [...TEMPLATES_4BLOCK, ...TEMPLATES_5BLOCK],
+  hard: TEMPLATES_5BLOCK,
+  'really-hard': [...TEMPLATES_5BLOCK, ...TEMPLATES_6BLOCK],
+};
+const DIFF_OPTIONS = { easy: 4, medium: 4, hard: 5, 'really-hard': 6 };
+const DIFF_CELL = { easy: 40, medium: 36, hard: 32, 'really-hard': 28 };
+
+function generateShape(difficulty = 'medium') {
+  const pool = DIFF_TEMPLATES[difficulty] || DIFF_TEMPLATES.medium;
+  return pool[R(0, pool.length - 1)];
 }
 
 function rotateShape(shape, times) {
@@ -72,10 +92,12 @@ function ShapeGrid({ shape, size = 40, color = 'var(--accent)' }) {
   );
 }
 
-const TIME_LIMIT = { easy: 20, medium: 15, hard: 10, 'really-hard': 8 };
+const TIME_LIMIT = { easy: 20, medium: 15, hard: 12, 'really-hard': 10 };
 
 export default function MentalRotation({ onBack, difficulty = 'medium' }) {
   const timeLimit = TIME_LIMIT[difficulty] || 15;
+  const optionCount = DIFF_OPTIONS[difficulty] || 4;
+  const cellSize = DIFF_CELL[difficulty] || 36;
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0 });
   const [original, setOriginal] = useState([]);
   const [options, setOptions] = useState([]);
@@ -95,37 +117,33 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
     setState(s => ({ ...s, rn }));
     setAnswered(false); setFb(null);
 
-    // Find a chiral shape and generate 3 unique mirrored distractors.
-    // Initialize distractors as [] so the while-condition is always safe.
-    let shape = generateShape();
+    const needed = optionCount - 1; // number of distractors
+    let shape = generateShape(difficulty);
     let allRotations = [0, 1, 2, 3].map(r => rotateShape(shape, r));
     let distractors = [];
 
-    // Try up to 15 shapes; if the current one is symmetric or can't produce 3 distractors, retry
     for (let shapeAttempts = 0; shapeAttempts < 15; shapeAttempts++) {
       if (!isChiral(shape)) {
-        shape = generateShape();
+        shape = generateShape(difficulty);
         allRotations = [0, 1, 2, 3].map(r => rotateShape(shape, r));
         distractors = [];
         continue;
       }
       distractors = [];
       let safety = 0;
-      while (distractors.length < 3 && safety < 120) {
+      while (distractors.length < needed && safety < 200) {
         safety++;
         const mirrorBase = rotateShape(mirrorShape(shape), R(0, 3));
         const isValidRot = allRotations.some(r => shapesEqual(r, mirrorBase));
         const isDup = distractors.some(o => shapesEqual(o, mirrorBase));
         if (!isValidRot && !isDup) distractors.push(mirrorBase);
       }
-      if (distractors.length >= 3) break;
-      // Not enough distractors with this shape — try another
-      shape = generateShape();
+      if (distractors.length >= needed) break;
+      shape = generateShape(difficulty);
       allRotations = [0, 1, 2, 3].map(r => rotateShape(shape, r));
     }
 
-    // Hard fallback: pad with distinct mirror rotations (geometry guarantees no overlap for chiral shapes)
-    while (distractors.length < 3) {
+    while (distractors.length < needed) {
       const fallback = rotateShape(mirrorShape(shape), distractors.length);
       if (!distractors.some(o => shapesEqual(o, fallback))) distractors.push(fallback);
       else distractors.push(rotateShape(mirrorShape(shape), distractors.length + 1));
@@ -177,7 +195,7 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
     setTimeout(nextRound, 1500);
   }, [answered, correctIdx, stopTimer, nextRound]);
 
-  useKeySelect(answer, 4, answered);
+  useKeySelect(answer, optionCount, answered);
 
   if (ended) return (
     <GameEnd
@@ -203,9 +221,9 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
       </p>
       <div style={{ textAlign: 'center', marginBottom: 20 }}>
         <p style={{ fontSize: 11, color: 'var(--gray3)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: 1 }}>Original</p>
-        <ShapeGrid shape={original.length ? original : [[0,0]]} size={34} />
+        <ShapeGrid shape={original.length ? original : [[0,0]]} size={cellSize} />
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12, maxWidth: 520, margin: '0 auto' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(optionCount, 4)}, 1fr)`, gap: 12, maxWidth: optionCount > 4 ? 600 : 520, margin: '0 auto' }}>
         {options.map((opt, i) => (
           <div
             key={i}
@@ -224,7 +242,7 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
             }}
           >
             <div style={{ fontSize: 11, color: 'var(--gray4)', marginBottom: 6, letterSpacing: 0.5 }}>{i + 1}</div>
-            <ShapeGrid shape={opt.length ? opt : [[0,0]]} size={24} color={answered && i === correctIdx ? 'var(--green)' : 'var(--accent)'} />
+            <ShapeGrid shape={opt.length ? opt : [[0,0]]} size={Math.min(cellSize - 8, 24)} color={answered && i === correctIdx ? 'var(--green)' : 'var(--accent)'} />
           </div>
         ))}
       </div>

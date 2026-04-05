@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { GameStats, Feedback, GameEnd, HighScoreBanner } from './GameShell';
+import { GameStats, GameTimer, Feedback, GameEnd, HighScoreBanner } from './GameShell';
 import { shuf } from './utils';
 const GAME_ID = 'chimp';
 
 const START_LV = { easy: 3, medium: 4, hard: 6, 'really-hard': 8 };
+// Viewing time in seconds: scales with difficulty and shrinks as level grows
+const BASE_VIEW_TIME = { easy: 6, medium: 5, hard: 3.5, 'really-hard': 2.5 };
+const VIEW_SHRINK = 0.15; // seconds less per level increase
 
 export default function ChimpTest({ onBack, difficulty = 'medium' }) {
   const startLv = START_LV[difficulty] || 4;
@@ -17,9 +20,17 @@ export default function ChimpTest({ onBack, difficulty = 'medium' }) {
   const [wrongCell, setWrongCell] = useState(-1);
   const [fb, setFb] = useState(null);
   const [ended, setEnded] = useState(false);
+  const [viewTime, setViewTime] = useState(0);
+  const [viewLeft, setViewLeft] = useState(0);
+  const viewTimerRef = useRef(null);
   const GRID = 8;
   const TOTAL = GRID * GRID;
   const MAX_STRIKES = 3;
+
+  const getViewTime = useCallback((lvl) => {
+    const base = BASE_VIEW_TIME[difficulty] || 5;
+    return Math.max(1.5, base - (lvl - startLv) * VIEW_SHRINK);
+  }, [difficulty, startLv]);
 
   const generateRound = useCallback((lvl) => {
     const positions = shuf(Array.from({ length: TOTAL }, (_, i) => i)).slice(0, lvl);
@@ -30,13 +41,35 @@ export default function ChimpTest({ onBack, difficulty = 'medium' }) {
     setWrongCell(-1);
     setFb(null);
     setPhase('show');
-  }, [TOTAL]);
+    // Auto-hide timer
+    const vt = getViewTime(lvl);
+    setViewTime(vt);
+    setViewLeft(vt);
+    clearInterval(viewTimerRef.current);
+    viewTimerRef.current = setInterval(() => {
+      setViewLeft(prev => {
+        if (prev <= 0.1) {
+          clearInterval(viewTimerRef.current);
+          return 0;
+        }
+        return prev - 0.1;
+      });
+    }, 100);
+  }, [TOTAL, getViewTime]);
 
-  useEffect(() => { generateRound(level); }, [level, generateRound]); // eslint-disable-line
+  // Auto-hide when view timer runs out
+  useEffect(() => {
+    if (viewLeft <= 0 && phase === 'show' && cells.length > 0) {
+      setPhase('hide');
+    }
+  }, [viewLeft, phase, cells.length]);
+
+  useEffect(() => { generateRound(level); return () => clearInterval(viewTimerRef.current); }, [level, generateRound]); // eslint-disable-line
 
   const clickCell = (pos, num) => {
     if (phase === 'show') {
-      // First click hides all numbers
+      // Manual early click hides all numbers
+      clearInterval(viewTimerRef.current);
       setPhase('hide');
     }
 
@@ -46,7 +79,6 @@ export default function ChimpTest({ onBack, difficulty = 'medium' }) {
       setClicked(newClicked);
 
       if (num === level) {
-        // Level cleared
         const newLvl = level + 1;
         if (newLvl > best) setBest(newLvl);
         setFb({ type: 'ok', msg: `Level ${level} cleared!` });
@@ -54,7 +86,6 @@ export default function ChimpTest({ onBack, difficulty = 'medium' }) {
       }
       setNextClick(num + 1);
     } else {
-      // Wrong
       setWrongCell(pos);
       const newStrikes = strikes + 1;
       setStrikes(newStrikes);
@@ -90,8 +121,9 @@ export default function ChimpTest({ onBack, difficulty = 'medium' }) {
         { label: 'Best', value: best || level, color: 'var(--orange)' },
         { label: 'Strikes', value: `${strikes}/${MAX_STRIKES}`, color: 'var(--red)' },
       ]} />
+      {phase === 'show' && <GameTimer timeLeft={viewLeft} maxTime={viewTime} />}
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
-        {phase === 'show' ? 'Memorize the positions of the numbers, then click them in ascending order.' : `Click number ${nextClick}`}
+        {phase === 'show' ? 'Memorize the numbers! They will hide automatically.' : `Click number ${nextClick}`}
       </p>
       <div style={{
         display: 'grid', gridTemplateColumns: `repeat(${GRID}, 1fr)`, gap: 3,

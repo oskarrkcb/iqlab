@@ -4,80 +4,145 @@ import { useKeySelect } from './useKeySelect';
 import { R, pick, shuf } from './utils';
 const GAME_ID = 'syllogisms';
 
-const PUZZLES = [
+const STATIC_PUZZLES = [
   {
     premises: ['All dogs are animals.', 'All animals are living things.'],
-    q: 'Therefore:',
-    opts: ['All dogs are living things.', 'All living things are dogs.', 'Some animals are not dogs.', 'No conclusion possible.'],
-    correct: 0, ex: 'Transitive: Dogs ⊂ Animals ⊂ Living things → Dogs ⊂ Living things.',
+    q: 'Therefore:', opts: ['All dogs are living things.', 'All living things are dogs.', 'Some animals are not dogs.', 'No conclusion possible.'],
+    correct: 0, ex: 'Transitive: Dogs ⊂ Animals ⊂ Living things → Dogs ⊂ Living things.', diff: 'easy',
   },
   {
     premises: ['All roses are flowers.', 'Some flowers are red.'],
-    q: 'Therefore:',
-    opts: ['All roses are red.', 'Some roses might be red.', 'No roses are red.', 'All flowers are roses.'],
-    correct: 1, ex: 'Only "some flowers" are red, roses are flowers, so some roses MIGHT be red.',
+    q: 'Therefore:', opts: ['All roses are red.', 'Some roses might be red.', 'No roses are red.', 'All flowers are roses.'],
+    correct: 1, ex: 'Only "some flowers" are red, roses are flowers, so some roses MIGHT be red.', diff: 'medium',
   },
   {
     premises: ['No fish can fly.', 'All salmon are fish.'],
-    q: 'Therefore:',
-    opts: ['Some salmon can fly.', 'All fish are salmon.', 'No salmon can fly.', 'Some fish are not salmon.'],
-    correct: 2, ex: 'Salmon ⊂ Fish, and no fish can fly → no salmon can fly.',
+    q: 'Therefore:', opts: ['Some salmon can fly.', 'All fish are salmon.', 'No salmon can fly.', 'Some fish are not salmon.'],
+    correct: 2, ex: 'Salmon ⊂ Fish, no fish can fly → no salmon can fly.', diff: 'easy',
   },
   {
     premises: ['All programmers use logic.', 'Maria is a programmer.'],
-    q: 'Therefore:',
-    opts: ['Maria does not use logic.', 'Maria uses logic.', 'All who use logic are programmers.', 'No conclusion possible.'],
-    correct: 1, ex: 'Maria ∈ Programmers, all programmers use logic → Maria uses logic.',
+    q: 'Therefore:', opts: ['Maria does not use logic.', 'Maria uses logic.', 'All who use logic are programmers.', 'No conclusion possible.'],
+    correct: 1, ex: 'Maria ∈ Programmers, all programmers use logic → Maria uses logic.', diff: 'easy',
   },
   {
     premises: ['Some students are athletes.', 'All athletes are healthy.'],
-    q: 'Therefore:',
-    opts: ['All students are healthy.', 'Some students are healthy.', 'No students are athletes.', 'All healthy people are students.'],
-    correct: 1, ex: 'Some students are athletes, athletes are healthy → some students are healthy.',
+    q: 'Therefore:', opts: ['All students are healthy.', 'Some students are healthy.', 'No students are athletes.', 'All healthy people are students.'],
+    correct: 1, ex: 'Some students are athletes, athletes are healthy → some students are healthy.', diff: 'medium',
   },
   {
     premises: ['If it rains, the ground is wet.', 'The ground is wet.'],
-    q: 'Therefore:',
-    opts: ['It rained.', 'It might have rained.', 'It did not rain.', 'The ground is always wet.'],
-    correct: 1, ex: 'Affirming the consequent is a fallacy. Wet ground could have other causes.',
+    q: 'Therefore:', opts: ['It rained.', 'It might have rained.', 'It did not rain.', 'The ground is always wet.'],
+    correct: 1, ex: 'Affirming the consequent is a fallacy. Wet ground could have other causes.', diff: 'hard',
   },
   {
     premises: ['All metals conduct electricity.', 'Copper is a metal.'],
-    q: 'Therefore:',
-    opts: ['Copper does not conduct.', 'Copper conducts electricity.', 'All conductors are copper.', 'Some metals are not copper.'],
-    correct: 1, ex: 'Copper ∈ Metals, metals conduct → copper conducts.',
+    q: 'Therefore:', opts: ['Copper does not conduct.', 'Copper conducts electricity.', 'All conductors are copper.', 'Some metals are not copper.'],
+    correct: 1, ex: 'Copper ∈ Metals, metals conduct → copper conducts.', diff: 'easy',
   },
   {
     premises: ['No reptiles have fur.', 'Some pets have fur.'],
-    q: 'Therefore:',
-    opts: ['Some pets are reptiles.', 'No pets are reptiles.', 'Some pets are not reptiles.', 'All reptiles are pets.'],
-    correct: 2, ex: 'Pets with fur cannot be reptiles (no reptiles have fur) → some pets are not reptiles.',
+    q: 'Therefore:', opts: ['Some pets are reptiles.', 'No pets are reptiles.', 'Some pets are not reptiles.', 'All reptiles are pets.'],
+    correct: 2, ex: 'Pets with fur cannot be reptiles → some pets are not reptiles.', diff: 'hard',
   },
   {
     premises: ['If A > B and B > C, then A > C.', 'X > Y and Y > Z.'],
-    q: 'Therefore:',
-    opts: ['Z > X', 'X = Z', 'X > Z', 'Y > X'],
-    correct: 2, ex: 'By transitivity: X > Y > Z → X > Z.',
+    q: 'Therefore:', opts: ['Z > X', 'X = Z', 'X > Z', 'Y > X'],
+    correct: 2, ex: 'By transitivity: X > Y > Z → X > Z.', diff: 'medium',
   },
   {
     premises: ['All squares are rectangles.', 'All rectangles have 4 right angles.'],
-    q: 'Therefore:',
-    opts: ['All rectangles are squares.', 'Squares have 4 right angles.', 'Some rectangles have no right angles.', 'Squares are not rectangles.'],
-    correct: 1, ex: 'Squares ⊂ Rectangles ⊂ Shapes with 4 right angles.',
+    q: 'Therefore:', opts: ['All rectangles are squares.', 'Squares have 4 right angles.', 'Some rectangles have no right angles.', 'Squares are not rectangles.'],
+    correct: 1, ex: 'Squares ⊂ Rectangles ⊂ Shapes with 4 right angles.', diff: 'easy',
   },
   {
     premises: ['Either it is day or it is night.', 'It is not day.'],
-    q: 'Therefore:',
-    opts: ['It is neither.', 'It is night.', 'It could be either.', 'No conclusion.'],
-    correct: 1, ex: 'Disjunctive syllogism: A or B, not A → B.',
+    q: 'Therefore:', opts: ['It is neither.', 'It is night.', 'It could be either.', 'No conclusion.'],
+    correct: 1, ex: 'Disjunctive syllogism: A or B, not A → B.', diff: 'medium',
   },
   {
     premises: ['If you study hard, you pass the exam.', 'You did not pass the exam.'],
-    q: 'Therefore:',
-    opts: ['You studied hard.', 'You did not study hard.', 'The exam was too hard.', 'No conclusion.'],
-    correct: 1, ex: 'Modus tollens: If P→Q and ¬Q, then ¬P. You did not study hard.',
+    q: 'Therefore:', opts: ['You studied hard.', 'You did not study hard.', 'The exam was too hard.', 'No conclusion.'],
+    correct: 1, ex: 'Modus tollens: If P→Q and ¬Q, then ¬P.', diff: 'hard',
   },
 ];
+
+// ── Procedural syllogism generators ──
+const GROUPS = [
+  ['dogs', 'cats', 'birds', 'horses', 'eagles', 'dolphins', 'wolves', 'tigers'],
+  ['doctors', 'engineers', 'teachers', 'scientists', 'athletes', 'artists', 'musicians', 'pilots'],
+  ['metals', 'liquids', 'vehicles', 'crystals', 'gases', 'minerals', 'polymers', 'alloys'],
+  ['roses', 'tulips', 'oaks', 'ferns', 'cacti', 'pines', 'palms', 'orchids'],
+];
+const PROPS = ['strong', 'fast', 'intelligent', 'dangerous', 'flexible', 'heavy', 'valuable', 'rare', 'colorful', 'ancient'];
+const NAMES = ['Anna', 'Ben', 'Clara', 'David', 'Eva', 'Felix', 'Gina', 'Hugo', 'Iris', 'Jan'];
+
+function genSyllogism(difficulty) {
+  const group = pick(GROUPS);
+  const [A, B, C] = shuf(group).slice(0, 3);
+  const [p1, p2] = shuf(PROPS).slice(0, 2);
+  const name = pick(NAMES);
+  const type = difficulty === 'easy' ? R(0, 2) : difficulty === 'medium' ? R(0, 4) : difficulty === 'hard' ? R(3, 7) : R(5, 9);
+
+  switch (type) {
+    case 0: // All A are B. All B are C. → All A are C.
+      return { premises: [`All ${A} are ${p1}.`, `All ${p1} things are ${p2}.`], q: 'Therefore:',
+        opts: [`All ${A} are ${p2}.`, `All ${p2} things are ${A}.`, `Some ${A} are not ${p2}.`, 'No conclusion possible.'],
+        correct: 0, ex: `Transitive: ${A} ⊂ ${p1} ⊂ ${p2} → ${A} ⊂ ${p2}.` };
+    case 1: // All A are B. X is A. → X is B.
+      return { premises: [`All ${A} are ${p1}.`, `${name} is a ${A.slice(0, -1)}.`], q: 'Therefore:',
+        opts: [`${name} is ${p1}.`, `${name} is not ${p1}.`, `All ${p1} things are ${A}.`, 'No conclusion possible.'],
+        correct: 0, ex: `${name} ∈ ${A}, all ${A} are ${p1} → ${name} is ${p1}.` };
+    case 2: // No A are B. All C are A. → No C are B.
+      return { premises: [`No ${A} are ${p1}.`, `All ${B} are ${A}.`], q: 'Therefore:',
+        opts: [`Some ${B} are ${p1}.`, `All ${A} are ${B}.`, `No ${B} are ${p1}.`, `Some ${A} are ${p1}.`],
+        correct: 2, ex: `${B} ⊂ ${A}, no ${A} are ${p1} → no ${B} are ${p1}.` };
+    case 3: // Some A are B. All B are C. → Some A are C.
+      return { premises: [`Some ${A} are ${p1}.`, `All ${p1} things are ${p2}.`], q: 'Therefore:',
+        opts: [`All ${A} are ${p2}.`, `Some ${A} are ${p2}.`, `No ${A} are ${p2}.`, `All ${p2} things are ${A}.`],
+        correct: 1, ex: `Some ${A} are ${p1}, ${p1} → ${p2}, so some ${A} are ${p2}.` };
+    case 4: // Either A or B. Not A. → B. (disjunctive)
+      return { premises: [`Either ${name} is a ${A.slice(0, -1)} or a ${B.slice(0, -1)}.`, `${name} is not a ${A.slice(0, -1)}.`], q: 'Therefore:',
+        opts: [`${name} is neither.`, `${name} is a ${B.slice(0, -1)}.`, 'It could be either.', 'No conclusion.'],
+        correct: 1, ex: `Disjunctive syllogism: A or B, not A → B.` };
+    case 5: // If P then Q. Not Q. → Not P. (modus tollens)
+      return { premises: [`If ${name} is a ${A.slice(0, -1)}, then ${name} is ${p1}.`, `${name} is not ${p1}.`], q: 'Therefore:',
+        opts: [`${name} is a ${A.slice(0, -1)}.`, `${name} is not a ${A.slice(0, -1)}.`, `${name} might be a ${A.slice(0, -1)}.`, 'No conclusion.'],
+        correct: 1, ex: `Modus tollens: If P→Q and ¬Q, then ¬P.` };
+    case 6: // Affirming consequent fallacy: If P→Q, Q → P? No!
+      return { premises: [`If something is a ${A.slice(0, -1)}, it is ${p1}.`, `${name} is ${p1}.`], q: 'Therefore:',
+        opts: [`${name} is a ${A.slice(0, -1)}.`, `${name} might be a ${A.slice(0, -1)}.`, `${name} is not a ${A.slice(0, -1)}.`, 'No conclusion.'],
+        correct: 1, ex: `Affirming the consequent is a fallacy. Being ${p1} doesn't mean being a ${A.slice(0, -1)}.` };
+    case 7: // No A are B. Some C are B. → Some C are not A.
+      return { premises: [`No ${A} are ${p1}.`, `Some ${B} are ${p1}.`], q: 'Therefore:',
+        opts: [`Some ${B} are ${A}.`, `No ${B} are ${A}.`, `Some ${B} are not ${A}.`, `All ${A} are ${B}.`],
+        correct: 2, ex: `${B} that are ${p1} cannot be ${A} (no ${A} are ${p1}) → some ${B} are not ${A}.` };
+    case 8: { // 3-premise chain: A→B, B→C, C→D. Is A→D?
+      const [q1, q2, q3] = shuf(PROPS).slice(0, 3);
+      return { premises: [`All ${q1} things are ${q2}.`, `All ${q2} things are ${q3}.`, `${name} is ${q1}.`], q: 'Therefore:',
+        opts: [`${name} is ${q3}.`, `${name} is not ${q3}.`, `All ${q3} things are ${q1}.`, 'No conclusion.'],
+        correct: 0, ex: `Chain: ${q1} → ${q2} → ${q3}. ${name} is ${q1} → ${name} is ${q3}.` };
+    }
+    default: { // Denying antecedent fallacy: If P→Q, Not P → Not Q? No!
+      return { premises: [`If ${name} is a ${A.slice(0, -1)}, then ${name} is ${p1}.`, `${name} is not a ${A.slice(0, -1)}.`], q: 'Therefore:',
+        opts: [`${name} is not ${p1}.`, `${name} might still be ${p1}.`, `${name} is ${p1}.`, 'No conclusion.'],
+        correct: 1, ex: `Denying the antecedent is a fallacy. Not being a ${A.slice(0, -1)} doesn't mean not being ${p1}.` };
+    }
+  }
+}
+
+function getPuzzle(difficulty) {
+  // Mix: 40% generated, 60% from static pool (filtered by diff)
+  if (Math.random() < 0.4) {
+    const pool = STATIC_PUZZLES.filter(p => {
+      if (difficulty === 'easy') return p.diff === 'easy';
+      if (difficulty === 'medium') return p.diff === 'easy' || p.diff === 'medium';
+      return true;
+    });
+    if (pool.length > 0) return pick(pool);
+  }
+  return genSyllogism(difficulty);
+}
 
 const SYL_TIME = { hard: 30, 'really-hard': 20 };
 
@@ -113,14 +178,8 @@ export default function Syllogisms({ onBack, difficulty = 'medium' }) {
       }, 100);
     }
 
-    // Pick from pool without repeats
-    setPool(prev => {
-      let p = prev.length > 0 ? prev : shuf([...PUZZLES]);
-      const chosen = p[0];
-      setPuzzle(chosen);
-      return p.slice(1);
-    });
-  }, [state.rn]);
+    setPuzzle(getPuzzle(difficulty));
+  }, [state.rn, difficulty]);
 
   useEffect(() => {
     if (timeLimit && timeLeft <= 0 && puzzle && !answered) {
