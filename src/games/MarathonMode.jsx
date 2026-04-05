@@ -5,21 +5,41 @@ import NumberMemory from './NumberMemory';
 import OddOneOut from './OddOneOut';
 import MatrixPuzzle from './MatrixPuzzle';
 import Estimation from './Estimation';
+import DualNBack from './DualNBack';
+import RavensMatrices from './RavensMatrices';
+import SchulteTables from './SchulteTables';
+import StroopTest from './StroopTest';
+import MentalRotation from './MentalRotation';
+import Syllogisms from './Syllogisms';
+import ChimpTest from './ChimpTest';
+import AlgoThinking from './AlgoThinking';
+import OperatorPuzzle from './OperatorPuzzle';
+import Game24 from './Game24';
 import { recordGame, getHistory } from '../stats';
 import { SessionContext } from './GameShell';
 
 /**
- * MarathonMode — plays through 6 core games in sequence, one round each.
+ * MarathonMode — plays through all 16 training games in sequence.
  * Uses SessionContext so GameEnd shows "Next Game →" instead of "Play Again / Back".
  */
 
 const MARATHON_GAMES = [
-  { id: 'sp',  label: 'Speed Math',    Component: SpeedMath,    discipline: 'Math'   },
-  { id: 'seq', label: 'Number Series', Component: NumberSeries, discipline: 'Logic'  },
-  { id: 'mem', label: 'Number Memory', Component: NumberMemory, discipline: 'Memory' },
-  { id: 'ooo', label: 'Odd One Out',   Component: OddOneOut,    discipline: 'Logic'  },
-  { id: 'mat', label: 'Matrix Puzzle', Component: MatrixPuzzle, discipline: 'IQ'     },
-  { id: 'est', label: 'Estimation',    Component: Estimation,   discipline: 'Math'   },
+  { id: 'sp',        label: 'Speed Math',      Component: SpeedMath,      discipline: 'Math'   },
+  { id: 'seq',       label: 'Number Series',   Component: NumberSeries,   discipline: 'Logic'  },
+  { id: 'mem',       label: 'Number Memory',   Component: NumberMemory,   discipline: 'Memory' },
+  { id: 'ooo',       label: 'Odd One Out',     Component: OddOneOut,      discipline: 'Logic'  },
+  { id: 'mat',       label: 'Matrix Puzzle',   Component: MatrixPuzzle,   discipline: 'IQ'     },
+  { id: 'est',       label: 'Estimation',      Component: Estimation,     discipline: 'Math'   },
+  { id: 'stroop',    label: 'Stroop Test',     Component: StroopTest,     discipline: 'Focus'  },
+  { id: 'op',        label: 'Operator Puzzle', Component: OperatorPuzzle, discipline: 'Math'   },
+  { id: 'schulte',   label: 'Schulte Tables',  Component: SchulteTables,  discipline: 'Focus'  },
+  { id: 'ravens',    label: 'Ravens Matrices', Component: RavensMatrices, discipline: 'IQ'     },
+  { id: 'rotation',  label: 'Mental Rotation', Component: MentalRotation, discipline: 'IQ'     },
+  { id: 'chimp',     label: 'Chimp Test',      Component: ChimpTest,      discipline: 'Memory' },
+  { id: 'dual-nback',label: 'Dual N-Back',     Component: DualNBack,      discipline: 'Memory' },
+  { id: 'g24',       label: 'Game 24',         Component: Game24,         discipline: 'Math'   },
+  { id: 'syllogisms',label: 'Syllogisms',      Component: Syllogisms,     discipline: 'Logic'  },
+  { id: 'algo',      label: 'Algo Thinking',   Component: AlgoThinking,   discipline: 'Logic'  },
 ];
 
 const DISCIPLINE_COLOR = {
@@ -27,6 +47,7 @@ const DISCIPLINE_COLOR = {
   Logic:  '#22d3ee',
   Memory: 'var(--orange)',
   IQ:     '#a78bfa',
+  Focus:  '#f472b6',
 };
 
 export default function MarathonMode({ onBack, difficulty = 'medium', timerMode = 'timed', timeLimit = 60, helpLevel = 'none', seriesType = 'mixed' }) {
