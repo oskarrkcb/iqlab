@@ -254,3 +254,26 @@
 @media (max-width: 768px) {
   .g-estg { grid-template-columns: 1fr; }
 }
+
+.g-share-btn {
+  margin: 16px auto 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--bg5);
+  color: var(--white);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.g-share-btn:hover {
+  background: rgba(255,255,255,0.06);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.g-share-btn:active { transform: translateY(1px) scale(0.98); }

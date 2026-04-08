@@ -541,7 +541,7 @@ export default function Dashboard() {
               {t.dashboard.cognitiveProfile}
             </div>
             <div className="db-radar-wrap">
-              <svg viewBox="0 0 200 200" width="180" height="180">
+              <svg viewBox="-20 0 240 200" width="200" height="180">
                 {[20, 40, 60, 80].map((r) => (
                   <polygon key={r} points={radarPoints([r, r, r])}
                     fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />

@@ -98,6 +98,36 @@ export function Explanation({ steps, formula }) {
   );
 }
 
+function ShareButton({ score, label, gameId }) {
+  const [copied, setCopied] = useState(false);
+  if (score == null || score <= 0) return null;
+
+  const url = 'https://iqlab-two.vercel.app';
+  const text = `Ich habe ${score} Punkte${label ? ` (${label})` : ''} bei IQLab erreicht. Schaffst du mehr?`;
+  const full = `${text} ${url}`;
+
+  const onShare = async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'IQLab', text, url });
+        return;
+      }
+    } catch { /* user cancelled */ }
+    try {
+      await navigator.clipboard.writeText(full);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch { /* ignore */ }
+  };
+
+  return (
+    <button type="button" className="g-share-btn" onClick={onShare} aria-label="Share score">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      {copied ? 'Kopiert!' : 'Ergebnis teilen'}
+    </button>
+  );
+}
+
 /**
  * Enhanced GameEnd — shows evaluation screen, last-attempt comparison, sparkline, and
  * optional set progression when rendered inside a SessionContext.Provider.
@@ -224,6 +254,8 @@ export function GameEnd({ gameId, score, correct, total, label, onReplay, onBack
           </svg>
         </div>
       )}
+
+      <ShareButton score={score} label={label} gameId={gameId} />
 
       <div className="g-end-btns">
         {isInSession && !isLastSet ? (
