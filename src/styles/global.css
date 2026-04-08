@@ -100,3 +100,52 @@ img { max-width: 100%; }
   .footer-inner { padding:0 20px; flex-direction:column; gap:16px; align-items:flex-start; }
   .footer-nav { gap:16px; flex-wrap:wrap; }
 }
+
+/* ═══════════════════ A11Y — SKIP LINK ═══════════════════ */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 12px;
+  background: var(--accent);
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  z-index: 9999;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 12px;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ═══════════════════ MOBILE TOUCH TARGETS ═══════════════════ */
+@media (max-width: 768px) {
+  button,
+  .btn,
+  .btn-fill,
+  a.btn,
+  [role="button"] {
+    min-height: 44px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* prevent iOS zoom */
+    min-height: 44px;
+  }
+}
+
+/* ═══════════════════ REDUCED MOTION ═══════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .page-enter { animation: none !important; }
+}

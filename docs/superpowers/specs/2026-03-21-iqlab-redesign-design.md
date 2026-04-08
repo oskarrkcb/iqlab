@@ -20,10 +20,12 @@ Replace the current light-grey/rose system entirely.
 | `--white` | `#ffffff` | primary text |
 | `--gray2` | `#888888` | secondary text |
 | `--gray3` | `#3a3a3a` | tertiary text, labels |
-| `--gray4` | `#555555` | muted text |
+| `--gray4` | `#555555` | muted text (global token, used in Dashboard/Training/Landing) |
 | `--blue` | `#3b82f6` | accent (replaces rose) |
 | `--green` | `#22c55e` | positive indicators only |
-| `--orange` | `#f97316` | high-score chips |
+| `--orange` | `#f97316` | high-score chips (global token, Training + future) |
+| `--purple` | `#a78bfa` | IQ Test result pattern bar, Training special mode cards |
+| `--red` | `#ef4444` | IQ Test wrong-answer highlight |
 | `--mono` | `'JetBrains Mono', monospace` | keep as-is |
 | `--font` | `'Inter', system-ui, sans-serif` | replace 'Outfit' |
 
@@ -45,7 +47,8 @@ Replace the current light-grey/rose system entirely.
 
 ### Navbar (`src/components/Navbar.jsx` + `Navbar.css`)
 - `position: fixed; height: 66px`
-- `background: rgba(6,6,6,0.75); backdrop-filter: blur(20px)`
+- `background: rgba(6,6,6,0.55); backdrop-filter: blur(20px)` on Landing page (hero beneath is dark, nav can be more transparent)
+- `background: rgba(6,6,6,0.75); backdrop-filter: blur(20px)` on Dashboard, Training, IQ Test
 - `border-bottom: 1px solid var(--border)`
 - Logo: uppercase, `letter-spacing: 0.2em`, 13px, weight 800
 - Links: 13px, `var(--gray2)`, active = `var(--white)`
@@ -55,6 +58,7 @@ Replace the current light-grey/rose system entirely.
 - All elements with class `fade-up` start at `opacity:0; transform:translateY(32px)`
 - `IntersectionObserver` with `threshold: 0.12` adds `.visible` class → `opacity:1; transform:none`
 - Stagger via `transition-delay` on siblings
+- **Cleanup:** call `observer.disconnect()` in `useEffect` cleanup function on component unmount to prevent memory leaks in the SPA
 
 ### Buttons
 - `.btn-fill`: `border-radius:100px; background:var(--white); color:var(--black); padding:14px 30px`
@@ -150,8 +154,10 @@ Replace the current light-grey/rose system entirely.
 - Each game card: icon (SVG), high-score chip (orange star), category label, name, description, `↗` arrow
 
 **Game active state**
-- Sidebar disappears, game fills full width
+- Controlled by `activeGame` state within `Training.jsx` (existing pattern — do not change routing)
+- When `activeGame !== null`: sidebar is hidden (CSS `display:none` or conditional render), game fills full width — this is a CSS/state toggle inside `Training.jsx`, NOT a new route. Route structure in `App.jsx` is frozen.
 - Session bar at top: Back button, Set counter pill (if sets > 1), Timer pill (if timed)
+- On unmount or Back press: clear `activeGame`, stop session timer (`clearInterval`)
 
 ### 3.4 IQ Test (`src/pages/IQTest.jsx` + `IQTest.css`)
 
@@ -205,12 +211,27 @@ Three phases rendered conditionally:
 - No CSS framework — keep vanilla CSS
 - Animations: `IntersectionObserver` in JSX for scroll-triggered effects; CSS `@keyframes` for loops (marquee, pulse)
 
-### Image assets
-- `public/pic5.jpg` → hero background (Landing)
-- `public/pic6.jpg` → Why IQLab split (Landing)
-- `public/neuro-picture.jpg` → Every Domain split (Landing)
-- `public/pic2.jpg` → IQ Test section (Landing)
+### Image assets — rename before implementation
+The current filenames in `public/` contain spaces which will cause 404s when referenced in JSX/CSS. **Rename these files first:**
+
+| Current filename | Rename to |
+|---|---|
+| `public/picture 5.jpg` | `public/pic5.jpg` |
+| `public/picture 6.jpg` | `public/pic6.jpg` |
+| `public/neuro picture.jpg` | `public/neuro-picture.jpg` |
+| `public/picture 2.jpg` | `public/pic2.jpg` |
+
+Usage after rename:
+- `pic5.jpg` → hero background (Landing)
+- `pic6.jpg` → Why IQLab split (Landing)
+- `neuro-picture.jpg` → Every Domain split (Landing)
+- `pic2.jpg` → IQ Test section (Landing)
 - All images: `object-fit: cover`, no grey borders, CSS mask for edge fades on hero
+
+---
+
+### Files that must NOT be touched
+`src/App.jsx`, `src/games/` (all files), `src/context/`, `src/lib/`, `src/i18n/`, `src/stats.js`, `src/pages/DashboardV2.jsx`, `src/pages/DashboardV2.css`, `src/pages/LandingV2.jsx`, `src/pages/LandingV2.css`, `src/pages/TrainingV2.jsx`, `src/pages/TrainingV2.css`, `src/pages/Onboarding.jsx`, `src/pages/Login.jsx`
 
 ---
 

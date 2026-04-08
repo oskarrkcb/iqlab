@@ -13,6 +13,7 @@ const Training = lazy(() => import('./pages/Training'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
+const Profile = lazy(() => import('./pages/Profile'));
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -26,7 +27,9 @@ export default function App() {
     <LanguageProvider>
       <AuthProvider>
         <BrowserRouter>
+          <a href="#main-content" className="skip-link">Zum Inhalt springen</a>
           <Navbar />
+          <main id="main-content">
           <Suspense fallback={null}>
             <Routes>
               <Route path="/" element={<Landing />} />
@@ -36,9 +39,11 @@ export default function App() {
               <Route path="/training" element={<Training />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>
+          </main>
         </BrowserRouter>
       </AuthProvider>
     </LanguageProvider>
