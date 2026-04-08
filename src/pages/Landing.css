@@ -5,7 +5,8 @@
 
 /* ─── HERO ─────────────────────────────────────────────────── */
 .lnd-hero {
-  height: 100vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -220,4 +221,37 @@
 .lnd-cta-eye { font-size: 10px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 24px; }
 .lnd-cta-h { font-size: clamp(44px, 6vw, 84px); font-weight: 900; letter-spacing: -0.04em; line-height: 0.95; color: var(--white); margin-bottom: 48px; }
 .lnd-cta-h .dim { color: var(--gray3); display: block; }
-.lnd-cta-acts { display: flex; gap: 12px; justify-content: center; }
+.lnd-cta-acts { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ─── MOBILE ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .lnd-hero { padding: 80px 20px 60px; text-align: center; }
+  .lnd-hero-img { width: 100%; height: 60%; opacity: 0.35; }
+  .lnd-hero-content { padding: 0 4px; }
+
+  .lnd-split,
+  .lnd-split-compact { grid-template-columns: 1fr !important; min-height: auto !important; }
+  .lnd-split-img { min-height: 240px; }
+  .lnd-split-content { padding: 40px 24px !important; border-left: none !important; border-right: none !important; border-top: 1px solid var(--border); }
+
+  /* Any 3/4-col grids → 1 column on mobile */
+  .lnd-grid-4,
+  [class*="grid-4"],
+  .lnd-iq-kpis { grid-template-columns: repeat(2, 1fr) !important; }
+
+  .lnd-cta { padding: 80px 20px; }
+  .lnd-cta-h { font-size: clamp(32px, 8vw, 48px) !important; }
+}
+
+@media (max-width: 480px) {
+  .lnd-iq-kpis { grid-template-columns: 1fr 1fr !important; }
+}
+
+/* Catch-all: any grid in landing with > 2 cols collapses on small screens */
+@media (max-width: 768px) {
+  .lnd-hero-content h1 { font-size: clamp(36px, 10vw, 56px) !important; }
+  .lnd-stats-inner { grid-template-columns: repeat(2, 1fr) !important; padding: 0 20px !important; }
+  .lnd-stat-block { padding: 24px 8px; }
+  .lnd-stat-block:nth-child(2) { border-right: none; }
+  .lnd-stat-block:nth-child(n+3) { border-top: 1px solid var(--border); }
+}

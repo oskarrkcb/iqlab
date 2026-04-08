@@ -1,6 +1,6 @@
 /* ═══════════════════ AUTH PAGE ═══════════════════ */
 .auth-page {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
   padding: 40px 24px;
   background: radial-gradient(ellipse at 50% 30%, rgba(244,63,94,0.06) 0%, transparent 60%);
 }

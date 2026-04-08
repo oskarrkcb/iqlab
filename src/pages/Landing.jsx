@@ -126,7 +126,7 @@ export default function Landing() {
       <div>
         <div className="lnd-split">
           <div className="lnd-split-img fade-left" data-d="0">
-            <img src="/nasa-brain.jpg" alt="Neural" />
+            <img src="/nasa-brain.jpg" alt="Neural" loading="lazy" decoding="async" />
             <div className="lnd-img-fade" />
           </div>
           <div className="lnd-split-content">
@@ -208,7 +208,7 @@ export default function Landing() {
             <p className="lnd-sub fade-left" data-d="200">{lnd.modulesDesc}</p>
           </div>
           <div className="lnd-split-img fade-right" data-d="0">
-            <img src="/gemini-domain.png" alt="Neural connections" style={{objectPosition:'center top'}} />
+            <img src="/gemini-domain.png" alt="Neural connections" loading="lazy" decoding="async" style={{objectPosition:'center top'}} />
           </div>
         </div>
       </div>
@@ -216,7 +216,7 @@ export default function Landing() {
       {/* NEURO SCORE */}
       <div className="lnd-iq-wrap">
         <div className="lnd-iq-img fade-left" data-d="0">
-          <img src="/resource-iq.jpg" alt="Brain Training" />
+          <img src="/resource-iq.jpg" alt="Brain Training" loading="lazy" decoding="async" />
         </div>
         <div className="lnd-iq-content">
           <div className="lnd-eye fade-right" data-d="100">{lnd.iqTag}</div>

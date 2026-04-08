@@ -171,3 +171,26 @@
   background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--gray2);
 }
 .game-frame-large { flex: 1; display: flex; flex-direction: column; padding: 32px 40px; }
+
+/* ─── MOBILE ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .tr-layout { grid-template-columns: 1fr !important; min-height: auto !important; }
+  .tr-sidebar {
+    position: static !important;
+    height: auto !important;
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 16px !important;
+  }
+  .tr-header {
+    padding: 24px 16px 0 !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+  }
+  .game-frame-large { padding: 20px 16px; }
+}
+
+@media (max-width: 600px) {
+  .game-frame { padding: 18px 14px !important; min-height: 320px; }
+}
