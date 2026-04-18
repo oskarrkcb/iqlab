@@ -2,13 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { useLang } from '../i18n/LanguageContext';
 import Footer from '../components/Footer';
 
 export default function Profile() {
   const { user, signOut } = useAuth();
   const nav = useNavigate();
-  const { lang, setLanguage } = useLang();
 
   const [displayName, setDisplayName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
@@ -26,7 +24,7 @@ export default function Profile() {
     (async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('display_name, avatar_url, bio, lang')
+        .select('display_name, avatar_url, bio')
         .eq('id', user.id)
         .single();
       if (!alive) return;
@@ -34,7 +32,6 @@ export default function Profile() {
         setDisplayName(data.display_name || '');
         setAvatarUrl(data.avatar_url || '');
         setBio(data.bio || '');
-        if (data.lang) setLanguage(data.lang);
       }
       setLoading(false);
     })();
@@ -52,7 +49,7 @@ export default function Profile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: trimmed, avatar_url: avatarUrl || null, bio: bio || null, lang })
+      .update({ display_name: trimmed, avatar_url: avatarUrl || null, bio: bio || null })
       .eq('id', user.id);
     setSaving(false);
     if (error) { setErr(error.message); return; }
