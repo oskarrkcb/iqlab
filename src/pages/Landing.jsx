@@ -81,7 +81,16 @@ export default function Landing() {
       {/* HERO */}
       <section className="lnd-hero">
         <div className="lnd-hero-bg" />
-        <div className="lnd-hero-img" />
+        <img
+          src="/mario-hero.webp"
+          alt=""
+          className="lnd-hero-img"
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
+          width="1200"
+          height="800"
+        />
         <div className="lnd-hero-content">
           <div className="lnd-eyebrow lnd-hero-fade" style={{animationDelay:'0.2s'}}>
             <div className="lnd-eyebrow-line" />
