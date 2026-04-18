@@ -150,7 +150,6 @@ export default function Profile() {
                     {uploading ? 'Lädt hoch …' : 'Bild auswählen'}
                   </span>
                   <input type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={uploading} />
-                  {avatarUrl && <span style={hintStyle}>Bild gesetzt ✓</span>}
                 </label>
                 <small style={hintStyle}>Max. 2 MB. JPG, PNG oder WebP.</small>
               </div>
