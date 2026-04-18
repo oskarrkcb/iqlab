@@ -15,7 +15,7 @@ test.describe('IQLab smoke', () => {
 
   test('public leaderboard route loads', async ({ page }) => {
     await page.goto(BASE + '/leaderboard');
-    await expect(page.getByText(/World Rankings|Lade Rangliste/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'World Rankings' })).toBeVisible();
   });
 
   test('privacy page is reachable', async ({ page }) => {
