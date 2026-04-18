@@ -49,8 +49,7 @@ export default function Profile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: trimmed, avatar_url: avatarUrl || null, bio: bio || null })
-      .eq('id', user.id);
+      .upsert({ id: user.id, display_name: trimmed, avatar_url: avatarUrl || null, bio: bio || null });
     setSaving(false);
     if (error) { setErr(error.message); return; }
     setMsg('Profil gespeichert.');
