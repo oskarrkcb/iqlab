@@ -66,12 +66,12 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div className="dashboard-page">
-      <div className="db-container" style={{ maxWidth: 820 }}>
-        <div className="db-header">
+    <div style={{ paddingTop: 66, minHeight: 'calc(100vh - 73px)' }}>
+      <div style={{ maxWidth: 820, margin: '0 auto', padding: '48px 24px 80px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40 }}>
           <div>
-            <h1 className="db-title">World Rankings</h1>
-            <p className="db-subtitle">Top Spieler auf IQLab — basierend auf Gesamtpunkten.</p>
+            <h1 style={{ fontSize: 'clamp(24px,2.5vw,36px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--white)', marginBottom: 4 }}>World Rankings</h1>
+            <p style={{ fontSize: 12, color: 'var(--gray2)', fontWeight: 300 }}>Top Spieler auf IQLab — basierend auf Gesamtpunkten.</p>
           </div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <button onClick={shareLeaderboard} style={shareBtn} title="Rangliste teilen">
@@ -104,7 +104,7 @@ export default function Leaderboard() {
                     key={entry.user_id}
                     to={`/player/${entry.user_id}`}
                     className={`db-lb-row ${isMe ? 'db-lb-you' : ''}`}
-                    style={{ textDecoration: 'none' }}
+                    style={{ textDecoration: 'none', display: 'grid', gridTemplateColumns: '40px 1fr 80px', color: 'inherit' }}
                   >
                     <span className="db-lb-rank">{i + 1}</span>
                     <span className="db-lb-name">
