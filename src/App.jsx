@@ -14,6 +14,7 @@ const NotFound = lazy(() => import('./pages/NotFound'));
 const Privacy = lazy(() => import('./pages/Privacy'));
 const Leaderboard = lazy(() => import('./pages/Leaderboard'));
 const Profile = lazy(() => import('./pages/Profile'));
+const PublicProfile = lazy(() => import('./pages/PublicProfile'));
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -40,6 +41,7 @@ export default function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+              <Route path="/player/:userId" element={<PublicProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Suspense>

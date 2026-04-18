@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useLang } from '../i18n/LanguageContext';
 import Footer from '../components/Footer';
 
 export default function Profile() {
   const { user, signOut } = useAuth();
   const nav = useNavigate();
+  const { lang, setLanguage } = useLang();
 
   const [displayName, setDisplayName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [bio, setBio] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [msg, setMsg] = useState(null);
   const [err, setErr] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -23,7 +26,7 @@ export default function Profile() {
     (async () => {
       const { data, error } = await supabase
         .from('profiles')
-        .select('display_name, avatar_url, bio')
+        .select('display_name, avatar_url, bio, lang')
         .eq('id', user.id)
         .single();
       if (!alive) return;
@@ -31,6 +34,7 @@ export default function Profile() {
         setDisplayName(data.display_name || '');
         setAvatarUrl(data.avatar_url || '');
         setBio(data.bio || '');
+        if (data.lang) setLanguage(data.lang);
       }
       setLoading(false);
     })();
@@ -48,11 +52,29 @@ export default function Profile() {
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
-      .update({ display_name: trimmed, avatar_url: avatarUrl || null, bio: bio || null })
+      .update({ display_name: trimmed, avatar_url: avatarUrl || null, bio: bio || null, lang })
       .eq('id', user.id);
     setSaving(false);
     if (error) { setErr(error.message); return; }
     setMsg('Profil gespeichert.');
+    setTimeout(() => setMsg(null), 2200);
+  };
+
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { setErr('Bild max. 2 MB.'); return; }
+    setUploading(true); setErr(null);
+    const ext = file.name.split('.').pop();
+    const path = `${user.id}/avatar.${ext}`;
+    const { error: upErr } = await supabase.storage.from('avatars').upload(path, file, { upsert: true });
+    if (upErr) { setErr(upErr.message); setUploading(false); return; }
+    const { data } = supabase.storage.from('avatars').getPublicUrl(path);
+    const url = data.publicUrl + `?t=${Date.now()}`;
+    setAvatarUrl(url);
+    await supabase.from('profiles').update({ avatar_url: url }).eq('id', user.id);
+    setUploading(false);
+    setMsg('Avatar gespeichert.');
     setTimeout(() => setMsg(null), 2200);
   };
 
@@ -125,18 +147,17 @@ export default function Profile() {
                 <small style={hintStyle}>3–24 Zeichen, sichtbar im Leaderboard.</small>
               </label>
 
-              <label style={labelStyle}>
-                <span>Avatar-URL (optional)</span>
-                <input
-                  type="url"
-                  value={avatarUrl}
-                  onChange={(e) => setAvatarUrl(e.target.value)}
-                  placeholder="https://…"
-                  style={inputStyle}
-                  autoComplete="off"
-                />
-                <small style={hintStyle}>Link zu einem Bild. Lass leer für Initialen.</small>
-              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray2)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Avatar</span>
+                <label style={{ display: 'inline-flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+                  <span style={{ ...secondaryBtn, padding: '8px 14px', fontSize: 12 }}>
+                    {uploading ? 'Lädt hoch …' : 'Bild auswählen'}
+                  </span>
+                  <input type="file" accept="image/*" onChange={handleAvatarUpload} style={{ display: 'none' }} disabled={uploading} />
+                  {avatarUrl && <span style={hintStyle}>Bild gesetzt ✓</span>}
+                </label>
+                <small style={hintStyle}>Max. 2 MB. JPG, PNG oder WebP.</small>
+              </div>
 
               <label style={labelStyle}>
                 <span>Bio (optional)</span>

@@ -128,6 +128,23 @@ export async function getUserRank() {
   return idx >= 0 ? { rank: idx + 1, ...lb[idx] } : null;
 }
 
+/** Get public profile data for any user */
+export async function getPublicProfile(userId) {
+  const [{ data: profile }, lb] = await Promise.all([
+    supabase.from('profiles').select('display_name, avatar_url, bio').eq('id', userId).single(),
+    getLeaderboard(1000),
+  ]);
+  const entry = lb.find(r => r.user_id === userId);
+  const rank = entry ? lb.findIndex(r => r.user_id === userId) + 1 : null;
+  return {
+    displayName: profile?.display_name || 'Anonymous',
+    avatarUrl: profile?.avatar_url || null,
+    bio: profile?.bio || null,
+    totalPoints: entry?.total_points ?? 0,
+    rank,
+  };
+}
+
 /** Get latest IQ result */
 export async function getLatestIQ() {
   const { data: { user } } = await supabase.auth.getUser();

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrainWave — IQ & Brain Training</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════ RESET & BASE ═══════════════════ */
+:root{
+  --bg:#09090b;--bg2:#0f0f13;--bg3:#16161c;--bg4:#1c1c24;--bg5:#232330;
+  --glass:rgba(22,22,28,.65);--glass2:rgba(28,28,36,.55);
+  --white:#f0f0f5;--gray1:#c8c8d4;--gray2:#8888a0;--gray3:#55556a;--gray4:#3a3a4e;--gray5:#28283a;
+  --accent:#a78bfa;--accent2:#7c5cfc;--accent3:#6343e0;
+  --glow:rgba(167,139,250,.15);--glow2:rgba(167,139,250,.25);
+  --green:#22c55e;--green-g:rgba(34,197,94,.15);
+  --red:#ef4444;--red-g:rgba(239,68,68,.15);
+  --orange:#f59e0b;--orange-g:rgba(245,158,11,.15);
+  --blue:#3b82f6;--blue-g:rgba(59,130,246,.15);
+  --r:14px;--r2:20px;--r3:28px;
+  --font:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--white);font-family:var(--font);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{font-family:var(--font);cursor:pointer;border:none}
+img{max-width:100%}
+
+/* ═══════════════════ UTILITY ═══════════════════ */
+.container{max-width:1100px;margin:0 auto;padding:0 24px}
+.hide{display:none!important}
+.page{display:none;animation:fadeUp .4s ease}.page.on{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 var(--glow2)}50%{box-shadow:0 0 20px 4px var(--glow2)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes rotate{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════════════ GLASS ═══════════════════ */
+.glass{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.06);border-radius:var(--r2)}
+.glass2{background:var(--glass2);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.04);border-radius:var(--r)}
+
+/* ═══════════════════ NAVBAR ═══════════════════ */
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;transition:all .3s}
+.nav.scrolled{background:rgba(9,9,11,.85);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,.05);padding:12px 0}
+.nav-inner{display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--accent),var(--accent3));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff}
+.nav-links{display:flex;gap:8px;align-items:center}
+.nav-links a,.nav-links button{padding:8px 16px;border-radius:10px;font-size:13px;font-weight:600;color:var(--gray2);transition:all .2s;background:none}
+.nav-links a:hover,.nav-links button:hover{color:var(--white);background:var(--bg4)}
+.nav-links .active{color:var(--white);background:var(--bg4)}
+.btn-cta{background:linear-gradient(135deg,var(--accent2),var(--accent3))!important;color:#fff!important;box-shadow:0 4px 20px var(--glow)}
+.btn-cta:hover{transform:translateY(-1px);box-shadow:0 6px 30px var(--glow2)!important}
+
+/* Mobile menu */
+.hamburger{display:none;background:none;border:none;color:var(--white);font-size:24px;padding:8px;cursor:pointer}
+@media(max-width:768px){
+  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border-bottom:1px solid var(--gray5);flex-direction:column;padding:16px;gap:4px}
+  .nav-links.open{display:flex}
+  .hamburger{display:block}
+}
+
+/* ═══════════════════ BUTTONS ═══════════════════ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;transition:all .2s;line-height:1.2}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,var(--accent2),var(--accent3));color:#fff;box-shadow:0 4px 20px var(--glow)}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 30px var(--glow2)}
+.btn-secondary{background:var(--bg4);color:var(--white);border:1px solid var(--gray4)}
+.btn-secondary:hover{border-color:var(--accent);background:var(--bg5)}
+.btn-ghost{background:transparent;color:var(--gray2);border:1px solid var(--gray4)}
+.btn-ghost:hover{color:var(--white);border-color:var(--gray3)}
+.btn-lg{padding:16px 36px;font-size:16px;border-radius:14px}
+.btn-sm{padding:8px 16px;font-size:12px;border-radius:10px}
+.btn-w{width:100%}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);color:#fff}
+.btn-green:hover{transform:translateY(-1px)}
+
+/* ═══════════════════ HERO ═══════════════════ */
+.hero{min-height:100vh;display:flex;align-items:center;position:relative;padding-top:80px;overflow:hidden}
+.hero-bg{position:absolute;inset:0;z-index:0}
+.hero-bg::before{content:'';position:absolute;top:-20%;left:10%;width:600px;height:600px;background:radial-gradient(circle,rgba(124,92,252,.12) 0%,transparent 70%);filter:blur(80px)}
+.hero-bg::after{content:'';position:absolute;bottom:-10%;right:5%;width:500px;height:500px;background:radial-gradient(circle,rgba(167,139,250,.08) 0%,transparent 70%);filter:blur(60px)}
+.hero-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.02) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse at 50% 50%,black 30%,transparent 70%)}
+.hero-content{position:relative;z-index:1;max-width:680px}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--glass);border:1px solid rgba(255,255,255,.08);border-radius:100px;padding:6px 16px 6px 8px;font-size:12px;font-weight:500;color:var(--gray1);margin-bottom:24px}
+.hero-badge span{background:var(--accent2);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px}
+.hero h1{font-size:clamp(40px,6vw,64px);font-weight:900;letter-spacing:-2px;line-height:1.05;margin-bottom:20px}
+.hero h1 .grad{background:linear-gradient(135deg,var(--accent),#c084fc,var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:18px;color:var(--gray2);line-height:1.7;margin-bottom:32px;max-width:520px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:40px;margin-top:48px}
+.hero-stat .num{font-family:var(--mono);font-size:32px;font-weight:800;color:var(--white)}
+.hero-stat .lbl{font-size:12px;color:var(--gray3);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+/* ═══════════════════ FEATURES ═══════════════════ */
+.section{padding:100px 0}
+.section-head{text-align:center;max-width:560px;margin:0 auto 48px}
+.section-head .tag{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px}
+.section-head h2{font-size:36px;font-weight:800;letter-spacing:-1px;margin-bottom:12px}
+.section-head p{color:var(--gray2);font-size:15px}
+
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.feat-card{background:var(--bg3);border:1px solid var(--gray5);border-radius:var(--r2);padding:28px 24px;transition:all .3s;position:relative;overflow:hidden}
+.feat-card:hover{border-color:rgba(167,139,250,.2);transform:translateY(-4px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:0;transition:opacity .3s}
+.feat-card:hover::before{opacity:1}
+.feat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:16px}
+.feat-card h3{font-size:16px;font-weight:700;margin-bottom:6px}
+.feat-card p{font-size:13px;color:var(--gray2);line-height:1.6}
+
+/* ═══════════════════ PRICING ═══════════════════ */
+.pricing-cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px;margin:0 auto}
+.price-card{background:var(--bg3);border:1px solid var(--gray5);border-radius:var(--r3);padding:36px 32px;position:relative}
+.price-card.pro{border-color:rgba(167,139,250,.3);background:linear-gradient(180deg,rgba(124,92,252,.06),var(--bg3))}
+.price-card.pro::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--accent2),var(--accent),var(--accent2))}
+.price-tag{font-size:12px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.price-amount{font-family:var(--mono);font-size:44px;font-weight:800;margin-bottom:4px}
+.price-amount span{font-size:16px;font-weight:500;color:var(--gray2)}
+.price-desc{font-size:13px;color:var(--gray3);margin-bottom:24px}
+.price-list{list-style:none;margin-bottom:28px}
+.price-list li{font-size:13px;color:var(--gray1);padding:8px 0;border-bottom:1px solid var(--gray5);display:flex;align-items:center;gap:10px}
+.price-list li::before{content:'✓';color:var(--green);font-weight:700;font-size:12px}
+.price-list li.no::before{content:'—';color:var(--gray4)}
+.price-list li.no{color:var(--gray3)}
+
+/* ═══════════════════ DASHBOARD ═══════════════════ */
+.dash{padding-top:90px}
+.dash-welcome{margin-bottom:28px}
+.dash-welcome h2{font-size:28px;font-weight:800;letter-spacing:-.5px}
+.dash-welcome p{color:var(--gray2);font-size:14px;margin-top:4px}
+
+.dash-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+.dash-card{background:var(--bg3);border:1px solid var(--gray5);border-radius:var(--r2);padding:24px;transition:all .3s}
+.dash-card:hover{border-color:rgba(167,139,250,.15)}
+.dash-card .dc-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:var(--gray3);margin-bottom:8px}
+.dash-card .dc-val{font-family:var(--mono);font-size:36px;font-weight:800}
+.dash-card .dc-sub{font-size:12px;color:var(--gray3);margin-top:4px}
+
+/* IQ Gauge */
+.iq-gauge{position:relative;width:200px;height:110px;margin:0 auto 16px}
+.iq-gauge svg{width:200px;height:110px}
+.iq-gauge .gauge-bg{fill:none;stroke:var(--bg5);stroke-width:12;stroke-linecap:round}
+.iq-gauge .gauge-fill{fill:none;stroke:url(#gaugeGrad);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1.5s ease}
+.iq-gauge .gauge-val{font-family:var(--mono);font-size:38px;font-weight:800;fill:var(--white);text-anchor:middle}
+.iq-gauge .gauge-lbl{font-size:11px;fill:var(--gray3);text-anchor:middle;text-transform:uppercase;letter-spacing:1px}
+
+/* Potential bar */
+.pot-bar{background:var(--bg5);border-radius:20px;height:10px;overflow:hidden;margin-top:8px}
+.pot-fill{height:100%;border-radius:20px;transition:width 1s ease;background:linear-gradient(90deg,var(--accent2),var(--accent),#c084fc)}
+
+/* Daily challenge */
+.daily-card{background:linear-gradient(135deg,rgba(124,92,252,.08),rgba(167,139,250,.04));border:1px solid rgba(167,139,250,.15);border-radius:var(--r2);padding:24px;margin-bottom:24px;display:flex;align-items:center;gap:20px}
+.daily-icon{width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,var(--accent2),var(--accent3));display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;animation:float 3s ease-in-out infinite}
+.daily-info{flex:1}
+.daily-info h3{font-size:16px;font-weight:700;margin-bottom:2px}
+.daily-info p{font-size:12px;color:var(--gray2)}
+.daily-timer{font-family:var(--mono);font-size:13px;color:var(--gray3);margin-top:6px}
+
+/* Training grid */
+.train-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:24px}
+.train-card{background:var(--bg3);border:1px solid var(--gray5);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .25s;display:flex;gap:16px;align-items:center}
+.train-card:hover{border-color:rgba(167,139,250,.2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.train-ico{width:48px;height:48px;border-radius:12px;background:var(--bg5);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.train-info h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.train-info p{font-size:11px;color:var(--gray3)}
+.train-info .train-tag{display:inline-block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 7px;border-radius:6px;margin-top:4px}
+.tag-logic{background:var(--blue-g);color:var(--blue)}
+.tag-math{background:var(--green-g);color:var(--green)}
+.tag-memory{background:var(--orange-g);color:var(--orange)}
+.tag-iq{background:rgba(167,139,250,.12);color:var(--accent)}
+
+/* Streak */
+.streak-row{display:flex;gap:6px;margin-top:12px}
+.streak-dot{width:32px;height:32px;border-radius:8px;background:var(--bg5);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gray4);border:1px solid var(--gray5)}
+.streak-dot.done{background:var(--green-g);color:var(--green);border-color:rgba(34,197,94,.2)}
+.streak-dot.today{border-color:var(--accent);color:var(--accent);animation:pulse 2s infinite}
+
+/* Progress chart simple */
+.progress-bars{margin-top:16px}
+.pbar{margin-bottom:12px}
+.pbar-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.pbar-head span:first-child{font-weight:600;color:var(--gray1)}
+.pbar-head span:last-child{font-family:var(--mono);font-weight:600;color:var(--accent)}
+.pbar-track{background:var(--bg5);border-radius:20px;height:6px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:20px;transition:width 1s ease}
+
+/* ═══════════════════ IQ TEST ═══════════════════ */
+.iq-intro{text-align:center;max-width:500px;margin:0 auto;padding:40px 0}
+.iq-intro h2{font-size:28px;font-weight:800;margin-bottom:12px}
+.iq-intro p{color:var(--gray2);font-size:14px;margin-bottom:24px}
+.iq-progress{display:flex;gap:4px;margin-bottom:24px}
+.iq-dot{flex:1;height:4px;border-radius:4px;background:var(--bg5);transition:background .3s}
+.iq-dot.done{background:var(--accent)}
+.iq-dot.current{background:var(--accent);animation:pulse 1.5s infinite}
+.iq-question{font-size:20px;font-weight:700;margin-bottom:24px;min-height:60px}
+.iq-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.iq-opt{background:var(--bg4);border:2px solid var(--gray5);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;font-size:16px;font-weight:600;transition:all .2s;font-family:var(--mono)}
+.iq-opt:hover{border-color:var(--accent);background:rgba(167,139,250,.05)}
+.iq-opt.sel{border-color:var(--accent);background:rgba(167,139,250,.1)}
+.iq-opt.correct{border-color:var(--green);background:var(--green-g)}
+.iq-opt.wrong{border-color:var(--red);background:var(--red-g)}
+
+/* IQ Result */
+.iq-result{text-align:center;padding:40px 0}
+.iq-result .big-score{font-family:var(--mono);font-size:80px;font-weight:900;background:linear-gradient(135deg,var(--accent),#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:20px 0}
+.iq-result .score-label{font-size:20px;font-weight:700;margin-bottom:8px}
+.iq-result .score-desc{color:var(--gray2);font-size:14px;max-width:400px;margin:0 auto 32px}
+.iq-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:450px;margin:0 auto 32px}
+.iq-bd{background:var(--bg4);border-radius:var(--r);padding:16px;text-align:center}
+.iq-bd .bd-val{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--accent)}
+.iq-bd .bd-lbl{font-size:10px;color:var(--gray3);text-transform:uppercase;letter-spacing:.8px;margin-top:4px}
+
+/* ═══════════════════ GAME CONTAINER ═══════════════════ */
+.game-frame{background:var(--bg3);border:1px solid var(--gray5);border-radius:var(--r2);padding:28px;min-height:400px}
+.game-stats{display:flex;gap:10px;margin-bottom:16px}
+.gs{flex:1;background:var(--bg4);border:1px solid var(--gray5);border-radius:var(--r);padding:10px;text-align:center}
+.gs-l{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--gray3)}
+.gs-v{font-family:var(--mono);font-size:20px;font-weight:700;margin-top:2px}
+.game-area{min-height:200px}
+
+/* Timer */
+.g-timer{background:var(--bg5);border-radius:20px;height:5px;overflow:hidden;margin-bottom:14px}
+.g-timer-bar{height:100%;background:var(--accent);border-radius:20px;transition:width .1s linear,background .3s;width:100%}
+.g-timer-bar.warn{background:var(--orange)}.g-timer-bar.danger{background:var(--red)}
+
+/* Shared game elements */
+.g-seq{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;margin:18px 0}
+.g-sn{font-family:var(--mono);font-size:24px;font-weight:600;background:var(--bg4);border:1px solid var(--gray5);border-radius:10px;padding:9px 14px;min-width:50px;text-align:center;animation:fadeUp .35s ease backwards}
+.g-sm{font-family:var(--mono);font-size:24px;font-weight:600;background:rgba(167,139,250,.08);border:2px dashed var(--accent);border-radius:10px;padding:9px 14px;min-width:50px;text-align:center;color:var(--accent);animation:pulse 2s ease-in-out infinite}
+.g-arrow{color:var(--gray4);font-size:13px}
+.g-input{background:var(--bg5);border:2px solid var(--gray5);border-radius:var(--r);padding:12px 16px;font-family:var(--mono);font-size:18px;color:var(--white);outline:none;transition:border .25s,box-shadow .25s;width:100%}
+.g-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.g-input::placeholder{color:var(--gray4)}
+.g-fb{text-align:center;padding:12px 16px;border-radius:var(--r);font-weight:600;font-size:14px;animation:pop .25s ease;margin-top:12px}
+@keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.g-fb-ok{background:var(--green-g);border:1px solid rgba(34,197,94,.3);color:#4ade80}
+.g-fb-err{background:var(--red-g);border:1px solid rgba(239,68,68,.3);color:#f87171}
+.g-fb-warn{background:var(--orange-g);border:1px solid rgba(245,158,11,.3);color:#fbbf24}
+.g-expl{background:var(--bg4);border:1px solid var(--gray5);border-radius:var(--r);padding:18px;margin-top:14px;animation:pop .35s ease}
+.g-expl h4{font-size:12px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+.g-expl ul{list-style:none;padding:0}
+.g-expl li{font-family:var(--mono);font-size:12px;padding:6px 10px;margin-bottom:4px;background:rgba(167,139,250,.04);border-radius:6px;border-left:3px solid var(--accent);color:var(--gray2);line-height:1.5}
+.g-expl .hl{color:var(--accent);font-weight:600}
+
+/* OOO grid */
+.g-oog{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:18px 0}
+.g-ooc{background:var(--bg4);border:2px solid var(--gray5);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .2s;font-family:var(--mono);font-size:20px;font-weight:600}
+.g-ooc:hover{border-color:var(--accent);transform:scale(1.02)}
+.g-ooc.ok{border-color:var(--green)!important;background:var(--green-g)!important}
+.g-ooc.no{border-color:var(--red)!important;background:var(--red-g)!important}
+
+/* Operator */
+.g-opr{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin:18px 0}
+.g-opn{font-family:var(--mono);font-size:26px;font-weight:700}
+.g-ops{width:44px;height:44px;background:var(--bg4);border:2px solid var(--gray5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:20px;font-weight:700;color:var(--accent);cursor:pointer;transition:all .2s}
+.g-ops.act{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}.g-ops.fill{background:rgba(167,139,250,.08)}
+.g-ops:hover{border-color:var(--accent)}
+.g-opeq{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--gray3)}
+.g-optgt{font-family:var(--mono);font-size:26px;font-weight:700;color:var(--green)}
+.g-opbs{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.g-opb{width:52px;height:44px;background:var(--bg4);border:2px solid var(--gray5);border-radius:10px;font-family:var(--mono);font-size:20px;font-weight:700;color:var(--white);cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.g-opb:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Memory display */
+.g-memd{font-family:var(--mono);font-size:44px;font-weight:700;letter-spacing:10px;text-align:center;padding:28px;color:var(--accent);min-height:90px;display:flex;align-items:center;justify-content:center;transition:color .3s}
+.g-memd.hid{color:transparent;text-shadow:0 0 40px var(--accent)}
+
+/* Speed */
+.g-spq{font-family:var(--mono);font-size:34px;font-weight:700;text-align:center;padding:18px;line-height:1.3}
+.g-spq .spo{color:var(--accent)}
+
+/* Estimate */
+.g-estq{font-family:var(--mono);font-size:26px;font-weight:700;text-align:center;padding:20px}
+.g-estg{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:18px 0}
+.g-estc{background:var(--bg4);border:2px solid var(--gray5);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s;font-family:var(--mono);font-size:20px;font-weight:600}
+.g-estc:hover{border-color:var(--accent)}.g-estc.ok{border-color:var(--green);background:var(--green-g)}
+.g-estc.no{border-color:var(--red);background:var(--red-g)}.g-estc.was{border-color:var(--green)}
+
+/* Matrix */
+.g-matg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:260px;margin:18px auto}
+.g-matc{aspect-ratio:1;background:var(--bg4);border:2px solid var(--gray5);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:24px;font-weight:700}
+.g-matc.mis{border:2px dashed var(--accent);color:var(--accent);animation:pulse 2s infinite}
+.g-mato{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:260px;margin:14px auto}
+.g-matop{background:var(--bg4);border:2px solid var(--gray5);border-radius:10px;padding:12px;text-align:center;cursor:pointer;font-family:var(--mono);font-size:20px;font-weight:600;transition:all .2s}
+.g-matop:hover{border-color:var(--accent)}.g-matop.ok{border-color:var(--green);background:var(--green-g)}
+.g-matop.no{border-color:var(--red);background:var(--red-g)}
+
+/* End screen */
+.g-end{text-align:center;padding:40px 20px}
+.g-end h3{font-size:22px;font-weight:700;margin-bottom:8px}
+.g-end .g-big{font-family:var(--mono);font-size:52px;font-weight:800;color:var(--accent);margin:16px 0}
+.g-end .g-det{color:var(--gray2);font-size:13px;margin-bottom:24px}
+.g-end-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+/* ═══════════════════ FOOTER ═══════════════════ */
+.footer{border-top:1px solid var(--gray5);padding:40px 0;margin-top:60px;text-align:center;color:var(--gray3);font-size:12px}
+.footer a{color:var(--gray2);transition:color .2s}.footer a:hover{color:var(--accent)}
+
+@media(max-width:768px){
+  .dash-grid{grid-template-columns:1fr}
+  .train-grid{grid-template-columns:1fr}
+  .features-grid{grid-template-columns:1fr}
+  .pricing-cards{grid-template-columns:1fr}
+  .hero-stats{flex-wrap:wrap;gap:24px}
+  .iq-breakdown{grid-template-columns:1fr}
+  .g-estg{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════ NAVBAR ═══════════════════ -->
+<nav class="nav" id="navbar">
+  <div class="container nav-inner">
+    <div class="logo" onclick="showPage('landing')"><div class="logo-icon">B</div>BrainWave</div>
+    <button class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('open')">☰</button>
+    <div class="nav-links" id="nav-links">
+      <a href="#" onclick="showPage('landing')" data-nav="landing">Home</a>
+      <a href="#" onclick="showPage('dashboard')" data-nav="dashboard">Dashboard</a>
+      <a href="#" onclick="showPage('training')" data-nav="training">Training</a>
+      <a href="#" onclick="showPage('iqtest')" data-nav="iqtest">IQ-Test</a>
+      <button class="btn-cta btn-sm" onclick="showPage('pricing')">Pro — 4,99€</button>
+    </div>
+  </div>
+</nav>
+
+<!-- SVG Defs -->
+<svg style="position:absolute;width:0;height:0">
+  <defs><linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#6343e0"/><stop offset="50%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#c084fc"/></linearGradient></defs>
+</svg>
+
+<!-- ═══════════════════ PAGE: LANDING ═══════════════════ -->
+<div class="page on" id="page-landing">
+  <section class="hero">
+    <div class="hero-bg"><div class="hero-grid"></div></div>
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge"><span>Neu</span> Jetzt mit personalisierten IQ-Tests</div>
+        <h1>Trainiere dein <span class="grad">Gehirn</span> auf höchstem Niveau</h1>
+        <p>Wissenschaftlich fundierte Übungen für IQ-Steigerung, Mustererkennung, logisches Denken und Gedächtnistraining — alles in einer Plattform.</p>
+        <div class="hero-btns">
+          <button class="btn btn-primary btn-lg" onclick="showPage('dashboard')">Jetzt starten</button>
+          <button class="btn btn-secondary btn-lg" onclick="showPage('iqtest')">Kostenloser IQ-Test</button>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="num">50+</div><div class="lbl">Übungen</div></div>
+          <div class="hero-stat"><div class="num">8</div><div class="lbl">Kategorien</div></div>
+          <div class="hero-stat"><div class="num">10K+</div><div class="lbl">Nutzer</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features-section">
+    <div class="container">
+      <div class="section-head">
+        <div class="tag">Features</div>
+        <h2>Alles was dein Gehirn braucht</h2>
+        <p>Strukturiertes Training mit Fortschrittsmessung und personalisierten Empfehlungen</p>
+      </div>
+      <div class="features-grid">
+        <div class="feat-card"><div class="feat-icon" style="background:var(--blue-g)">🧠</div><h3>IQ-Tracking</h3><p>Verfolge deinen geschätzten IQ-Wert über die Zeit und sieh deinen Fortschritt in Echtzeit</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(167,139,250,.12)">📊</div><h3>Potenzial-Analyse</h3><p>Erkenne wie viel ungenutztes Potenzial du noch hast und welche Bereiche du verbessern kannst</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:var(--green-g)">⚡</div><h3>Daily Challenges</h3><p>Tägliche Herausforderungen halten dein Training abwechslungsreich und konsistent</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:var(--orange-g)">🔢</div><h3>Muster-Erkennung</h3><p>Zahlenreihen, Matrizen und visuelle Muster — die Grundlage jedes IQ-Tests</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:var(--red-g)">🏆</div><h3>Streak-System</h3><p>Halte deine tägliche Serie aufrecht und verdiene Bonus-Punkte für Konsistenz</p></div>
+        <div class="feat-card"><div class="feat-icon" style="background:rgba(56,189,248,.12)">📖</div><h3>Erklärungen</h3><p>Detaillierte Schritt-für-Schritt Erklärungen bei jeder falschen Antwort — lerne aus Fehlern</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="pricing-section">
+    <div class="container">
+      <div class="section-head">
+        <div class="tag">Preise</div>
+        <h2>Einfach und fair</h2>
+        <p>Starte kostenlos oder schalte alles frei mit BrainWave Pro</p>
+      </div>
+      <div class="pricing-cards">
+        <div class="price-card">
+          <div class="price-tag">Free</div>
+          <div class="price-amount">0€ <span>/Monat</span></div>
+          <div class="price-desc">Perfekt zum Reinschnuppern</div>
+          <ul class="price-list">
+            <li>3 Übungen pro Tag</li>
+            <li>1 IQ-Test pro Woche</li>
+            <li>Basic Fortschritts-Tracking</li>
+            <li class="no">Daily Challenges</li>
+            <li class="no">Detaillierte Erklärungen</li>
+            <li class="no">Potenzial-Analyse</li>
+          </ul>
+          <button class="btn btn-secondary btn-w" onclick="showPage('dashboard')">Kostenlos starten</button>
+        </div>
+        <div class="price-card pro">
+          <div class="price-tag">Pro</div>
+          <div class="price-amount">4,99€ <span>/Monat</span></div>
+          <div class="price-desc">Unbegrenzter Zugriff auf alles</div>
+          <ul class="price-list">
+            <li>Unbegrenzte Übungen</li>
+            <li>Unbegrenzte IQ-Tests</li>
+            <li>Vollständiges Tracking</li>
+            <li>Tägliche Challenges</li>
+            <li>Schritt-für-Schritt Erklärungen</li>
+            <li>Potenzial-Analyse & Empfehlungen</li>
+          </ul>
+          <button class="btn btn-primary btn-w" onclick="USER.pro=true;showPage('dashboard')">Pro werden</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer"><div class="container">© 2026 BrainWave — <a href="#" onclick="showPage('landing')">Home</a> · <a href="#" onclick="showPage('dashboard')">Dashboard</a> · <a href="#" onclick="showPage('pricing')">Preise</a></div></div>
+</div>
+
+<!-- ═══════════════════ PAGE: DASHBOARD ═══════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="container dash">
+    <div class="dash-welcome">
+      <h2>Willkommen zurück!</h2>
+      <p>Hier ist dein Überblick — trainiere täglich für beste Ergebnisse.</p>
+    </div>
+
+    <!-- Daily Challenge -->
+    <div class="daily-card" onclick="showPage('training');setTimeout(()=>startGame('seq'),100)">
+      <div class="daily-icon">🏆</div>
+      <div class="daily-info">
+        <h3>Tägliche Challenge</h3>
+        <p>Heute: Zahlenreihen-Marathon — 10 Runden ohne Fehler</p>
+        <div class="daily-timer" id="daily-timer">Endet in 12:34:56</div>
+      </div>
+      <button class="btn btn-primary btn-sm">Starten</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="dash-grid">
+      <div class="dash-card">
+        <div class="dc-label">Dein IQ</div>
+        <div class="iq-gauge">
+          <svg viewBox="0 0 200 110">
+            <path class="gauge-bg" d="M 20 100 A 80 80 0 0 1 180 100"/>
+            <path class="gauge-fill" id="gauge-fill" d="M 20 100 A 80 80 0 0 1 180 100" stroke-dasharray="251" stroke-dashoffset="251"/>
+            <text class="gauge-val" x="100" y="90" id="gauge-val">—</text>
+            <text class="gauge-lbl" x="100" y="108">geschätzt</text>
+          </svg>
+        </div>
+        <div class="dc-sub" style="text-align:center" id="iq-label">Absolviere den IQ-Test</div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dc-label">Potenzial</div>
+        <div class="dc-val" style="color:var(--accent)" id="pot-val">78%</div>
+        <div class="dc-sub">deines Potenzials ausgeschöpft</div>
+        <div class="pot-bar"><div class="pot-fill" id="pot-fill" style="width:78%"></div></div>
+        <div class="progress-bars" style="margin-top:16px">
+          <div class="pbar"><div class="pbar-head"><span>Logik</span><span id="p-logic">72%</span></div><div class="pbar-track"><div class="pbar-fill" id="pf-logic" style="width:72%;background:var(--blue)"></div></div></div>
+          <div class="pbar"><div class="pbar-head"><span>Mathematik</span><span id="p-math">65%</span></div><div class="pbar-track"><div class="pbar-fill" id="pf-math" style="width:65%;background:var(--green)"></div></div></div>
+          <div class="pbar"><div class="pbar-head"><span>Gedächtnis</span><span id="p-mem">81%</span></div><div class="pbar-track"><div class="pbar-fill" id="pf-mem" style="width:81%;background:var(--orange)"></div></div></div>
+          <div class="pbar"><div class="pbar-head"><span>Muster</span><span id="p-pat">58%</span></div><div class="pbar-track"><div class="pbar-fill" id="pf-pat" style="width:58%;background:var(--accent)"></div></div></div>
+        </div>
+      </div>
+
+      <div class="dash-card">
+        <div class="dc-label">Aktivität</div>
+        <div class="dc-val" style="color:var(--green)" id="streak-val">3 Tage</div>
+        <div class="dc-sub">aktuelle Serie</div>
+        <div class="streak-row" id="streak-dots">
+          <div class="streak-dot done">Mo</div>
+          <div class="streak-dot done">Di</div>
+          <div class="streak-dot done">Mi</div>
+          <div class="streak-dot today">Do</div>
+          <div class="streak-dot">Fr</div>
+          <div class="streak-dot">Sa</div>
+          <div class="streak-dot">So</div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="dc-label">Gesamt</div>
+          <div style="display:flex;gap:20px;margin-top:8px">
+            <div><div style="font-family:var(--mono);font-size:20px;font-weight:700" id="total-ex">47</div><div style="font-size:10px;color:var(--gray3)">Übungen</div></div>
+            <div><div style="font-family:var(--mono);font-size:20px;font-weight:700" id="total-pts">1.240</div><div style="font-size:10px;color:var(--gray3)">Punkte</div></div>
+            <div><div style="font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green)" id="total-acc">73%</div><div style="font-size:10px;color:var(--gray3)">Genauigkeit</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Training -->
+    <h3 style="margin-bottom:14px;font-size:16px">Schnell-Training</h3>
+    <div class="train-grid">
+      <div class="train-card" onclick="showPage('training');setTimeout(()=>startGame('seq'),100)"><div class="train-ico">🔢</div><div class="train-info"><h4>Zahlenreihen</h4><p>Muster erkennen</p><span class="train-tag tag-logic">Logik</span></div></div>
+      <div class="train-card" onclick="showPage('training');setTimeout(()=>startGame('op'),100)"><div class="train-ico">➕</div><div class="train-info"><h4>Rechenrätsel</h4><p>Operatoren einsetzen</p><span class="train-tag tag-math">Mathe</span></div></div>
+      <div class="train-card" onclick="showPage('training');setTimeout(()=>startGame('mem'),100)"><div class="train-ico">🧠</div><div class="train-info"><h4>Zahlen merken</h4><p>Gedächtnis trainieren</p><span class="train-tag tag-memory">Gedächtnis</span></div></div>
+      <div class="train-card" onclick="showPage('training');setTimeout(()=>startGame('sp'),100)"><div class="train-ico">⚡</div><div class="train-info"><h4>Speed Math</h4><p>60 Sekunden Challenge</p><span class="train-tag tag-math">Mathe</span></div></div>
+    </div>
+
+    <button class="btn btn-secondary btn-w" onclick="showPage('training')" style="margin-bottom:40px">Alle Übungen anzeigen →</button>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: TRAINING HUB ═══════════════════ -->
+<div class="page" id="page-training">
+  <div class="container" style="padding-top:90px">
+    <div class="dash-welcome"><h2>Training</h2><p>Wähle eine Übung oder starte das Spiel deiner Wahl.</p></div>
+
+    <div id="training-hub">
+      <h3 style="margin-bottom:12px;font-size:14px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px">Logik & Muster</h3>
+      <div class="train-grid" style="margin-bottom:24px">
+        <div class="train-card" onclick="startGame('seq')"><div class="train-ico">🔢</div><div class="train-info"><h4>Zahlenreihen</h4><p>12 verschiedene Muster</p><span class="train-tag tag-logic">Logik</span></div></div>
+        <div class="train-card" onclick="startGame('ooo')"><div class="train-ico">🔍</div><div class="train-info"><h4>Odd One Out</h4><p>Finde den Ausreißer</p><span class="train-tag tag-logic">Logik</span></div></div>
+        <div class="train-card" onclick="startGame('mat')"><div class="train-ico">🧩</div><div class="train-info"><h4>Matrix-Rätsel</h4><p>3×3 Zahlengitter</p><span class="train-tag tag-iq">IQ</span></div></div>
+        <div class="train-card" onclick="startGame('est')"><div class="train-ico">📐</div><div class="train-info"><h4>Schätzfragen</h4><p>Schnelles Überschlagen</p><span class="train-tag tag-math">Mathe</span></div></div>
+      </div>
+      <h3 style="margin-bottom:12px;font-size:14px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px">Mathematik & Rechnen</h3>
+      <div class="train-grid" style="margin-bottom:24px">
+        <div class="train-card" onclick="startGame('op')"><div class="train-ico">➕</div><div class="train-info"><h4>Rechenrätsel</h4><p>Operatoren einsetzen</p><span class="train-tag tag-math">Mathe</span></div></div>
+        <div class="train-card" onclick="startGame('g24')"><div class="train-ico">🎯</div><div class="train-info"><h4>24-Spiel</h4><p>Zielzahl erreichen</p><span class="train-tag tag-math">Mathe</span></div></div>
+        <div class="train-card" onclick="startGame('sp')"><div class="train-ico">⚡</div><div class="train-info"><h4>Speed Math</h4><p>60 Sekunden Modus</p><span class="train-tag tag-math">Mathe</span></div></div>
+      </div>
+      <h3 style="margin-bottom:12px;font-size:14px;color:var(--gray2);text-transform:uppercase;letter-spacing:1px">Gedächtnis</h3>
+      <div class="train-grid" style="margin-bottom:40px">
+        <div class="train-card" onclick="startGame('mem')"><div class="train-ico">🧠</div><div class="train-info"><h4>Zahlen merken</h4><p>Steigende Schwierigkeit</p><span class="train-tag tag-memory">Gedächtnis</span></div></div>
+      </div>
+    </div>
+
+    <div id="training-game" style="display:none">
+      <button class="btn btn-ghost btn-sm" onclick="backToHub()" style="margin-bottom:16px">← Zurück zur Übersicht</button>
+      <div id="game-mount"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: IQ TEST ═══════════════════ -->
+<div class="page" id="page-iqtest">
+  <div class="container" style="padding-top:90px">
+    <div id="iq-content"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════ PAGE: PRICING ═══════════════════ -->
+<div class="page" id="page-pricing">
+  <div class="container" style="padding-top:100px">
+    <div class="section-head">
+      <div class="tag">Preise</div>
+      <h2>Investiere in dein Gehirn</h2>
+      <p>Unbegrenztes Training für weniger als ein Kaffee pro Woche</p>
+    </div>
+    <div class="pricing-cards">
+      <div class="price-card">
+        <div class="price-tag">Free</div>
+        <div class="price-amount">0€ <span>/Monat</span></div>
+        <div class="price-desc">Perfekt zum Reinschnuppern</div>
+        <ul class="price-list">
+          <li>3 Übungen pro Tag</li>
+          <li>1 IQ-Test pro Woche</li>
+          <li>Basic Fortschritts-Tracking</li>
+          <li class="no">Daily Challenges</li>
+          <li class="no">Detaillierte Erklärungen</li>
+          <li class="no">Potenzial-Analyse</li>
+        </ul>
+        <button class="btn btn-secondary btn-w" onclick="showPage('dashboard')">Kostenlos starten</button>
+      </div>
+      <div class="price-card pro">
+        <div class="price-tag">Pro — Beliebteste Wahl</div>
+        <div class="price-amount">4,99€ <span>/Monat</span></div>
+        <div class="price-desc">Unbegrenzter Zugriff auf alles</div>
+        <ul class="price-list">
+          <li>Unbegrenzte Übungen</li>
+          <li>Unbegrenzte IQ-Tests</li>
+          <li>Vollständiges Tracking</li>
+          <li>Tägliche Challenges</li>
+          <li>Schritt-für-Schritt Erklärungen</li>
+          <li>Potenzial-Analyse & Empfehlungen</li>
+        </ul>
+        <button class="btn btn-primary btn-w" onclick="USER.pro=true;showPage('dashboard')">Jetzt Pro werden</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//                    CORE APP LOGIC
+// ══════════════════════════════════════════════════════
+const $=id=>document.getElementById(id);
+const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick=a=>a[R(0,a.length-1)];
+const shuf=a=>{const b=[...a];for(let i=b.length-1;i>0;i--){const j=R(0,i);[b[i],b[j]]=[b[j],b[i]]}return b};
+
+// User state
+const USER={pro:false,iq:null,totalEx:47,totalPts:1240,streak:3,accuracy:73,potential:{logic:72,math:65,mem:81,pat:58}};
+let _t=null;
+
+// Navigation
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  $('page-'+id).classList.add('on');
+  document.querySelectorAll('[data-nav]').forEach(a=>a.classList.toggle('active',a.dataset.nav===id));
+  document.querySelector('.nav-links')?.classList.remove('open');
+  window.scrollTo(0,0);
+  clearInterval(_t);
+  if(id==='dashboard')updateDashboard();
+  if(id==='iqtest')initIQTest();
+}
+
+// Navbar scroll
+window.addEventListener('scroll',()=>{$('navbar').classList.toggle('scrolled',window.scrollY>20)});
+
+// Dashboard update
+function updateDashboard(){
+  if(USER.iq){
+    const pct=Math.min(1,Math.max(0,(USER.iq-70)/80));
+    $('gauge-fill').style.strokeDashoffset=251-(pct*251);
+    $('gauge-val').textContent=USER.iq;
+    const labels={70:'Unterdurchschnittlich',85:'Durchschnitt',100:'Überdurchschnittlich',115:'Hoch',130:'Sehr hoch',145:'Außergewöhnlich'};
+    let lbl='';for(const[t,l]of Object.entries(labels))if(USER.iq>=+t)lbl=l;
+    $('iq-label').textContent=lbl;
+  }
+  $('pot-val').textContent=Math.round((USER.potential.logic+USER.potential.math+USER.potential.mem+USER.potential.pat)/4)+'%';
+  $('pot-fill').style.width=Math.round((USER.potential.logic+USER.potential.math+USER.potential.mem+USER.potential.pat)/4)+'%';
+  $('total-ex').textContent=USER.totalEx;
+  $('total-pts').textContent=USER.totalPts.toLocaleString('de-DE');
+  $('total-acc').textContent=USER.accuracy+'%';
+  // Daily timer
+  const now=new Date();const end=new Date(now);end.setHours(23,59,59,999);
+  const diff=end-now;const h=Math.floor(diff/36e5);const m=Math.floor((diff%36e5)/6e4);const s=Math.floor((diff%6e4)/1e3);
+  $('daily-timer').textContent=`Endet in ${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+// ══════════════════════════════════════════════════════
+//                       IQ TEST
+// ══════════════════════════════════════════════════════
+const iqQuestions=[
+  {q:'Welche Zahl folgt? 2, 6, 18, 54, ...',opts:['108','162','148','96'],correct:0,cat:'pat',
+   ex:'Jede Zahl wird mit 3 multipliziert: 2×3=6, 6×3=18, 18×3=54, 54×3=162... Moment, 54×3=162. Aber die Reihe ist ×3, also: 54×3 = 162.'},
+  {q:'Welche Zahl folgt? 1, 1, 2, 3, 5, 8, ...',opts:['11','12','13','10'],correct:2,cat:'pat',
+   ex:'Fibonacci-Folge: Jede Zahl ist die Summe der zwei vorherigen. 5+8 = 13.'},
+  {q:'Wenn alle Rosen Blumen sind und manche Blumen schnell welken, welche Aussage ist korrekt?',opts:['Alle Rosen welken schnell','Manche Rosen könnten schnell welken','Keine Rose welkt schnell','Rosen sind keine Blumen'],correct:1,cat:'logic',
+   ex:'Logischer Schluss: Rosen sind Blumen, manche Blumen welken schnell — also könnten manche Rosen dazugehören.'},
+  {q:'25 × 48 = ?',opts:['1.100','1.200','1.250','1.150'],correct:1,cat:'math',
+   ex:'25 × 48 = 25 × 4 × 12 = 100 × 12 = 1.200'},
+  {q:'Welche Zahl fehlt? 3, 9, 27, _, 243',opts:['54','72','81','108'],correct:2,cat:'pat',
+   ex:'Geometrische Reihe ×3: 3, 9, 27, 81, 243'},
+  {q:'Ein Zug fährt 120 km in 1,5 Stunden. Wie schnell fährt er?',opts:['60 km/h','70 km/h','80 km/h','90 km/h'],correct:2,cat:'math',
+   ex:'120 ÷ 1,5 = 80 km/h'},
+  {q:'Welche Zahl folgt? 1, 4, 9, 16, 25, ...',opts:['30','36','34','32'],correct:1,cat:'pat',
+   ex:'Quadratzahlen: 1², 2², 3², 4², 5², 6² = 36'},
+  {q:'Welches Wort passt nicht? Apfel, Birne, Karotte, Kirsche',opts:['Apfel','Birne','Karotte','Kirsche'],correct:2,cat:'logic',
+   ex:'Karotte ist ein Gemüse, der Rest sind Früchte.'},
+  {q:'Wenn A > B und B > C, dann ist:',opts:['C > A','A > C','A = C','Unklar'],correct:1,cat:'logic',
+   ex:'Transitivität: Wenn A > B und B > C, dann ist A > C.'},
+  {q:'144 ÷ 12 + 7 × 3 = ?',opts:['33','39','45','30'],correct:0,cat:'math',
+   ex:'Punkt vor Strich: 144÷12 = 12, 7×3 = 21, 12+21 = 33'},
+  {q:'Welche Zahl folgt? 2, 3, 5, 7, 11, 13, ...',opts:['15','17','19','14'],correct:1,cat:'pat',
+   ex:'Primzahlen: Die nächste Primzahl nach 13 ist 17.'},
+  {q:'Wie viele Dreiecke hat ein Oktaeder?',opts:['4','6','8','12'],correct:2,cat:'logic',
+   ex:'Ein Oktaeder besteht aus 8 gleichseitigen Dreiecksflächen.'},
+  {q:'3² + 4² = ?',opts:['24','25','7','49'],correct:1,cat:'math',
+   ex:'3² + 4² = 9 + 16 = 25 (Pythagoras!)'},
+  {q:'Welche Zahl fehlt? 1, 3, 6, 10, _, 21',opts:['14','15','16','17'],correct:1,cat:'pat',
+   ex:'Dreieckszahlen: +2, +3, +4, +5, +6. Also 10+5 = 15.'},
+  {q:'Wenn der Tag nach dem Tag vor gestern Mittwoch ist, welcher Tag ist heute?',opts:['Dienstag','Mittwoch','Donnerstag','Freitag'],correct:2,cat:'logic',
+   ex:'Tag vor gestern = vorgestern. Tag nach vorgestern = gestern = Mittwoch. Also heute = Donnerstag.'},
+];
+
+let IQ={};
+function initIQTest(){
+  IQ={q:0,correct:0,answers:[],started:false,cats:{logic:0,math:0,pat:0,logicT:0,mathT:0,patT:0}};
+  $('iq-content').innerHTML=`<div class="iq-intro"><h2>IQ-Schnelltest</h2><p>${iqQuestions.length} Fragen aus den Bereichen Logik, Mathematik und Mustererkennung. Nimm dir Zeit und denke sorgfältig nach.</p><button class="btn btn-primary btn-lg" onclick="startIQ()">Test starten</button></div>`;
+}
+function startIQ(){IQ.started=true;IQ.questions=shuf([...iqQuestions]).slice(0,15);showIQQuestion()}
+function showIQQuestion(){
+  if(IQ.q>=IQ.questions.length)return showIQResult();
+  const q=IQ.questions[IQ.q];
+  const progress=IQ.questions.map((_,i)=>`<div class="iq-dot ${i<IQ.q?'done':i===IQ.q?'current':''}"></div>`).join('');
+  $('iq-content').innerHTML=`
+    <div class="iq-progress">${progress}</div>
+    <div class="game-frame">
+      <div style="font-size:12px;color:var(--gray3);margin-bottom:12px">Frage ${IQ.q+1} von ${IQ.questions.length}</div>
+      <div class="iq-question">${q.q}</div>
+      <div class="iq-options">${q.opts.map((o,i)=>`<div class="iq-opt" id="iq-o${i}" onclick="answerIQ(${i})">${o}</div>`).join('')}</div>
+      <div id="iq-fb"></div>
+    </div>`;
+}
+function answerIQ(idx){
+  if(IQ.locked)return;IQ.locked=true;
+  const q=IQ.questions[IQ.q];const ok=idx===q.correct;
+  $('iq-o'+idx).classList.add(ok?'correct':'wrong');
+  if(!ok)$('iq-o'+q.correct).classList.add('correct');
+  if(ok){IQ.correct++;IQ.cats[q.cat]=(IQ.cats[q.cat]||0)+1}
+  IQ.cats[q.cat+'T']=(IQ.cats[q.cat+'T']||0)+1;
+  if(!ok){
+    $('iq-fb').innerHTML=`<div class="g-expl" style="margin-top:16px"><h4>Erklärung</h4><p style="font-size:13px;color:var(--gray2);line-height:1.6">${q.ex}</p></div>`;
+  }
+  setTimeout(()=>{IQ.q++;IQ.locked=false;showIQQuestion()},ok?1200:3000);
+}
+function showIQResult(){
+  // Calculate IQ estimate (simplified)
+  const pct=IQ.correct/IQ.questions.length;
+  const iq=Math.round(70+pct*65+R(-3,3)); // 70-135 range
+  USER.iq=iq;
+  const logicPct=IQ.cats.logicT?Math.round(IQ.cats.logic/IQ.cats.logicT*100):0;
+  const mathPct=IQ.cats.mathT?Math.round(IQ.cats.math/IQ.cats.mathT*100):0;
+  const patPct=IQ.cats.patT?Math.round(IQ.cats.pat/IQ.cats.patT*100):0;
+  USER.potential.logic=Math.max(USER.potential.logic,logicPct);
+  USER.potential.math=Math.max(USER.potential.math,mathPct);
+  USER.potential.pat=Math.max(USER.potential.pat,patPct);
+
+  let desc='';
+  if(iq>=130)desc='Außergewöhnlich! Du gehörst zu den Top 2% der Bevölkerung.';
+  else if(iq>=115)desc='Überdurchschnittlich! Dein logisches Denken ist stark ausgeprägt.';
+  else if(iq>=100)desc='Guter Durchschnitt! Mit Training kannst du dich deutlich steigern.';
+  else desc='Es gibt viel Raum für Verbesserung — regelmäßiges Training wird helfen!';
+
+  $('iq-content').innerHTML=`
+    <div class="iq-result">
+      <h2>Dein Ergebnis</h2>
+      <div class="big-score">${iq}</div>
+      <div class="score-label">Geschätzter IQ-Wert</div>
+      <div class="score-desc">${desc}</div>
+      <div class="iq-breakdown">
+        <div class="iq-bd"><div class="bd-val">${logicPct}%</div><div class="bd-lbl">Logik</div></div>
+        <div class="iq-bd"><div class="bd-val">${mathPct}%</div><div class="bd-lbl">Mathematik</div></div>
+        <div class="iq-bd"><div class="bd-val">${patPct}%</div><div class="bd-lbl">Muster</div></div>
+      </div>
+      <p style="color:var(--gray3);font-size:12px;margin-bottom:24px">${IQ.correct} von ${IQ.questions.length} Fragen richtig</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary btn-lg" onclick="showPage('dashboard')">Zum Dashboard</button>
+        <button class="btn btn-secondary btn-lg" onclick="initIQTest()">Nochmal testen</button>
+        <button class="btn btn-ghost btn-lg" onclick="showPage('training')">Training starten</button>
+      </div>
+    </div>`;
+}
+
+// ══════════════════════════════════════════════════════
+//                    TRAINING GAMES
+// ══════════════════════════════════════════════════════
+function startGame(id){
+  $('training-hub').style.display='none';
+  $('training-game').style.display='block';
+  GAMES[id].init($('game-mount'));
+}
+function backToHub(){
+  clearInterval(_t);
+  $('training-hub').style.display='block';
+  $('training-game').style.display='none';
+  $('game-mount').innerHTML='';
+}
+function gFbOk(el,m){el.innerHTML=`<div class="g-fb g-fb-ok">${m}</div>`}
+function gFbErr(el,m){el.innerHTML=`<div class="g-fb g-fb-err">${m}</div>`}
+function gFbW(el,m){el.innerHTML=`<div class="g-fb g-fb-warn">${m}</div>`}
+function gTimer(bar,sec,cb){
+  clearInterval(_t);let left=sec;const mx=sec;
+  bar.style.width='100%';bar.className='g-timer-bar';
+  _t=setInterval(()=>{left-=.1;if(left<=0){left=0;clearInterval(_t);if(cb)cb()}
+    const p=(left/mx)*100;bar.style.width=p+'%';bar.className='g-timer-bar'+(p<20?' danger':p<35?' warn':'')},100);
+  return()=>left;
+}
+function gEnd(mount,score,label,gameId){
+  clearInterval(_t);
+  USER.totalEx++;USER.totalPts+=score;
+  mount.innerHTML=`<div class="g-end"><h3>Spiel vorbei!</h3><div class="g-big">${score}</div><div class="g-det">${label}</div><div class="g-end-btns"><button class="btn btn-primary" onclick="startGame('${gameId}')">Nochmal</button><button class="btn btn-secondary" onclick="backToHub()">Übersicht</button></div></div>`;
+}
+
+// ── Shared generators ──
+const seqGens=[
+  ()=>{const d=R(2,8),s=R(1,20),q=[];for(let i=0;i<6;i++)q.push(s+d*i);return{seq:q,rule:`+${d} pro Schritt`,ex:q=>{const df=[];for(let i=1;i<q.length;i++)df.push(q[i]-q[i-1]);return{steps:[`Differenzen: ${df.map(x=>'<span class="hl">+'+x+'</span>').join(', ')}`,`Jede Zahl +${d}`],f:`a(n) = ${s} + ${d}n`}}}},
+  ()=>{const d=R(2,6),s=R(30,60),q=[];for(let i=0;i<6;i++)q.push(s-d*i);return{seq:q,rule:`−${d}`,ex:q=>({steps:[`Jede Zahl −${d}`],f:`a(n) = ${s} − ${d}n`})}},
+  ()=>{const m=R(2,4),s=R(1,5),q=[];let v=s;for(let i=0;i<6;i++){q.push(v);v*=m}return{seq:q,rule:`×${m}`,ex:q=>({steps:q.slice(1).map((v,i)=>`${q[i]} × ${m} = <span class="hl">${v}</span>`),f:`a(n) = ${s} × ${m}ⁿ`})}},
+  ()=>{const o=R(1,5),q=[];for(let i=0;i<6;i++)q.push((i+o)**2);return{seq:q,rule:`Quadratzahlen`,ex:q=>({steps:q.map((v,i)=>`${i+o}² = <span class="hl">${v}</span>`),f:`a(n) = n²`})}},
+  ()=>{let a=R(1,5),b=R(1,5);const q=[a,b];for(let i=2;i<6;i++){const c=a+b;q.push(c);a=b;b=c}return{seq:q,rule:`Fibonacci`,ex:q=>({steps:[`Start: ${q[0]}, ${q[1]}`,...q.slice(2).map((v,i)=>`${q[i]}+${q[i+1]}=<span class="hl">${v}</span>`)],f:`a(n) = a(n-1) + a(n-2)`})}},
+  ()=>{const s=R(1,10),b=R(1,3),q=[s];for(let i=1;i<6;i++)q.push(q[i-1]+b+i);return{seq:q,rule:`Steigende Diff.`,ex:q=>{const df=[];for(let i=1;i<q.length;i++)df.push(q[i]-q[i-1]);return{steps:[`Diff: ${df.map(x=>'<span class="hl">'+x+'</span>').join(', ')}`],f:`+${b+1}, +${b+2}, +${b+3}...`}}}},
+  ()=>{const P=[2,3,5,7,11,13,17,19,23,29,31,37];const s=R(0,6);return{seq:P.slice(s,s+6),rule:`Primzahlen`,ex:q=>({steps:q.map(v=>`<span class="hl">${v}</span> = Primzahl`),f:`Primzahlenfolge`})}},
+  ()=>{const c=R(1,3),s=R(1,4),q=[s];for(let i=1;i<6;i++)q.push(q[i-1]*2+c);return{seq:q,rule:`×2+${c}`,ex:q=>({steps:q.slice(1).map((v,i)=>`${q[i]}×2+${c} = <span class="hl">${v}</span>`),f:`a(n) = a(n-1)×2+${c}`})}},
+];
+
+// ── GAME: Zahlenreihen ──
+const GAMES={};
+GAMES.seq={init(mount){
+  const S={sc:0,rn:0,mx:10,sr:0,pz:null,hn:false,wait:false};
+  function render(){mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Punkte</div><div class="gs-v" style="color:var(--accent)">${S.sc}</div></div><div class="gs"><div class="gs-l">Runde</div><div class="gs-v" style="color:var(--orange)">${S.rn}/${S.mx}</div></div><div class="gs"><div class="gs-l">Serie</div><div class="gs-v" style="color:var(--green)">${S.sr}</div></div></div><div class="g-timer"><div class="g-timer-bar" id="gt-seq"></div></div><div class="g-seq" id="gs-seq"></div><div style="display:flex;gap:8px"><input class="g-input" id="gi-seq" placeholder="?" autocomplete="off" style="flex:1"><button class="btn btn-primary" id="gb-seq">Prüfen</button></div><div style="display:flex;gap:8px;margin-top:8px"><button class="btn btn-ghost btn-sm" id="gh-seq" style="flex:1">Hinweis</button><button class="btn btn-ghost btn-sm" id="gk-seq" style="flex:1">Überspringen</button></div><div id="gf-seq"></div><div id="ge-seq"></div></div>`; wire()}
+  function wire(){
+    document.getElementById('gb-seq').onclick=submit;
+    document.getElementById('gh-seq').onclick=hint;
+    document.getElementById('gk-seq').onclick=skip;
+    document.getElementById('gi-seq').onkeydown=e=>{if(e.key==='Enter'){S.wait?next():submit()}};
+  }
+  function next(){
+    S.rn++;if(S.rn>S.mx)return gEnd(mount,S.sc,`${S.sc} Punkte`,'seq');
+    S.hn=false;S.wait=false;render();
+    const g=pick(seqGens)();const hi=R(2,g.seq.length-1);
+    S.pz={...g,hi,ans:g.seq[hi]};
+    const d=document.getElementById('gs-seq');d.innerHTML='';
+    g.seq.forEach((n,i)=>{if(i>0)d.innerHTML+=`<span class="g-arrow">→</span>`;d.innerHTML+=i===hi?`<span class="g-sm" id="gm-seq">?</span>`:`<span class="g-sn">${n}</span>`});
+    document.getElementById('gi-seq').focus();
+    gTimer(document.getElementById('gt-seq'),22,()=>{S.sr=0;reveal();gFbErr(document.getElementById('gf-seq'),`Zeit! Antwort: <b>${S.pz.ans}</b>`);showEx()});
+  }
+  function reveal(){clearInterval(_t);const m=document.getElementById('gm-seq');if(m){m.textContent=S.pz.ans;m.className='g-sn';m.style.color='var(--accent)'}document.getElementById('gi-seq').disabled=true;document.getElementById('gb-seq').disabled=true}
+  function submit(){const v=parseInt(document.getElementById('gi-seq').value.trim());if(isNaN(v))return;reveal();if(v===S.pz.ans){const pts=10+(S.hn?0:10);S.sc+=pts;S.sr++;gFbOk(document.getElementById('gf-seq'),`Richtig! +${pts} · ${S.pz.rule}`);setTimeout(next,1500)}else{S.sr=0;gFbErr(document.getElementById('gf-seq'),`Falsch! Antwort: <b>${S.pz.ans}</b>`);showEx()}}
+  function showEx(){S.wait=true;const data=S.pz.ex(S.pz.seq);let h=`<div class="g-expl"><h4>Erklärung</h4><ul>`;data.steps.forEach(s=>h+=`<li>${s}</li>`);h+=`</ul>`;if(data.f)h+=`<div style="margin-top:8px;padding:8px;background:rgba(167,139,250,.06);border-radius:8px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:600">${data.f}</div>`;h+=`</div><button class="btn btn-green btn-w" style="margin-top:12px" onclick="document.getElementById('ge-seq').innerHTML='';GAMES.seq._next()">Weiter →</button>`;document.getElementById('ge-seq').innerHTML=h}
+  function hint(){if(S.pz){S.hn=true;gFbW(document.getElementById('gf-seq'),'💡 '+S.pz.rule)}}
+  function skip(){reveal();S.sr=0;gFbErr(document.getElementById('gf-seq'),`Übersprungen: <b>${S.pz.ans}</b>`);showEx()}
+  this._next=next;next();
+}};
+
+// ── GAME: Rechenrätsel ──
+GAMES.op={init(mount){
+  const S={sc:0,rn:0,mx:10,sr:0,nums:[],tgt:0,sl:[],act:0,cOps:[],wait:false};
+  function ev(nums,ops){try{let e='';nums.forEach((n,i)=>{e+=n;if(i<ops.length)e+=({'+':'+','−':'-','×':'*','÷':'/'}[ops[i]])});const r=eval(e);return Math.abs(r-Math.round(r))<1e-9?Math.round(r):null}catch{return null}}
+  function gen(){const ops=['+','−','×','÷'];for(let a=0;a<200;a++){const n=R(3,4),nums=[],co=[];for(let i=0;i<n;i++)nums.push(R(1,12));for(let i=0;i<n-1;i++)co.push(pick(ops));const r=ev(nums,co);if(r!==null&&Number.isInteger(r)&&r>0&&r<200)return{nums,ops:co,target:r}}return{nums:[3,4,5],ops:['+','×'],target:23}}
+  function render(){
+    const d=document.getElementById('go-d');if(!d)return;d.innerHTML='';
+    S.nums.forEach((n,i)=>{d.innerHTML+=`<span class="g-opn">${n}</span>`;if(i<S.sl.length)d.innerHTML+=`<span class="g-ops ${S.sl[i]?'fill':''} ${i===S.act?'act':''}" data-si="${i}">${S.sl[i]||'?'}</span>`});
+    d.innerHTML+=`<span class="g-opeq">=</span><span class="g-optgt">${S.tgt}</span>`;
+    d.querySelectorAll('.g-ops').forEach(el=>el.onclick=()=>{S.act=+el.dataset.si;render()});
+  }
+  function next(){
+    S.rn++;if(S.rn>S.mx)return gEnd(mount,S.sc,`${S.sc} Punkte`,'op');S.wait=false;
+    const p=gen();S.nums=p.nums;S.tgt=p.target;S.cOps=p.ops;S.sl=new Array(p.ops.length).fill('');S.act=0;
+    mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Punkte</div><div class="gs-v" style="color:var(--accent)">${S.sc}</div></div><div class="gs"><div class="gs-l">Runde</div><div class="gs-v" style="color:var(--orange)">${S.rn}/${S.mx}</div></div><div class="gs"><div class="gs-l">Serie</div><div class="gs-v" style="color:var(--green)">${S.sr}</div></div></div><div class="g-timer"><div class="g-timer-bar" id="gt-op"></div></div><p style="text-align:center;color:var(--gray3);font-size:12px;margin-bottom:8px">Setze +, −, × oder ÷ ein</p><div class="g-opr" id="go-d"></div><div class="g-opbs"><div class="g-opb" data-op="+">+</div><div class="g-opb" data-op="−">−</div><div class="g-opb" data-op="×">×</div><div class="g-opb" data-op="÷">÷</div></div><div style="display:flex;gap:8px;justify-content:center"><button class="btn btn-primary" id="go-sub">Prüfen</button><button class="btn btn-ghost" id="go-clr">Reset</button><button class="btn btn-ghost" id="go-skp">Skip</button></div><div id="gf-op"></div><div id="ge-op"></div></div>`;
+    document.querySelectorAll('.g-opb').forEach(b=>b.onclick=()=>{if(S.wait)return;if(S.act<S.sl.length){S.sl[S.act]=b.dataset.op;if(S.act<S.sl.length-1)S.act++;render()}});
+    document.getElementById('go-sub').onclick=submit;
+    document.getElementById('go-clr').onclick=()=>{S.sl.fill('');S.act=0;render()};
+    document.getElementById('go-skp').onclick=skip;
+    render();
+    gTimer(document.getElementById('gt-op'),25,()=>{S.sr=0;S.wait=true;gFbErr(document.getElementById('gf-op'),`Zeit! ${fmtSol()}`);document.getElementById('ge-op').innerHTML=`<button class="btn btn-green btn-w" style="margin-top:12px" onclick="GAMES.op._next()">Weiter →</button>`});
+  }
+  function fmtSol(){return S.nums.map((n,i)=>i<S.cOps.length?`${n} ${S.cOps[i]}`:`${n}`).join(' ')+` = ${S.tgt}`}
+  function submit(){if(S.sl.includes(''))return;clearInterval(_t);S.wait=true;const r=ev(S.nums,S.sl);if(r===S.tgt){S.sc+=15;S.sr++;gFbOk(document.getElementById('gf-op'),'Richtig! +15');setTimeout(next,1500)}else{S.sr=0;gFbErr(document.getElementById('gf-op'),`Ergebnis: ${r??'?'} — nicht ${S.tgt}`);document.getElementById('ge-op').innerHTML=`<div class="g-expl"><h4>Lösung</h4><ul><li>${fmtSol()}</li></ul></div><button class="btn btn-green btn-w" style="margin-top:12px" onclick="GAMES.op._next()">Weiter →</button>`}}
+  function skip(){clearInterval(_t);S.sr=0;S.wait=true;gFbErr(document.getElementById('gf-op'),fmtSol());document.getElementById('ge-op').innerHTML=`<button class="btn btn-green btn-w" style="margin-top:12px" onclick="GAMES.op._next()">Weiter →</button>`}
+  this._next=next;next();
+}};
+
+// ── GAME: 24-Spiel ──
+GAMES.g24={init(mount){
+  const S={sc:0,rn:0,mx:10,sk:0,nums:[]};
+  function hasSol(nums){const ops=[(a,b)=>a+b,(a,b)=>a-b,(a,b)=>a*b,(a,b)=>b?a/b:NaN];function solve(a){if(a.length===1)return Math.abs(a[0]-24)<.001;for(let i=0;i<a.length;i++)for(let j=0;j<a.length;j++){if(i===j)continue;const r=a.filter((_,k)=>k!==i&&k!==j);for(const op of ops){const v=op(a[i],a[j]);if(!isNaN(v)&&isFinite(v)&&solve([...r,v]))return true}}return false}return solve(nums)}
+  function next(){
+    S.rn++;if(S.rn>S.mx)return gEnd(mount,S.sc,`${S.sc}/${S.mx} gelöst`,'g24');
+    let nums;do{nums=[R(1,9),R(1,9),R(1,9),R(1,9)]}while(!hasSol(nums));S.nums=nums;
+    mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Gelöst</div><div class="gs-v" style="color:var(--accent)">${S.sc}</div></div><div class="gs"><div class="gs-l">Runde</div><div class="gs-v" style="color:var(--orange)">${S.rn}/${S.mx}</div></div><div class="gs"><div class="gs-l">Skip</div><div class="gs-v" style="color:var(--red)">${S.sk}</div></div></div><p style="text-align:center;color:var(--gray3);font-size:12px;margin-bottom:16px">Bilde genau 24 mit +, −, ×, ÷ und Klammern</p><div style="display:flex;gap:12px;justify-content:center;margin-bottom:16px">${nums.map(n=>`<div style="width:56px;height:56px;background:var(--bg4);border:2px solid var(--gray5);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:26px;font-weight:700">${n}</div>`).join('')}</div><input class="g-input" id="gi-24" placeholder="z.B. (${nums[0]}+${nums[1]})*(${nums[2]}-${nums[3]})" autocomplete="off" style="font-size:17px"><div style="display:flex;gap:8px;margin-top:12px;justify-content:center"><button class="btn btn-primary" id="gb-24">Prüfen</button><button class="btn btn-ghost" id="gs-24">Skip</button></div><div id="gf-24" style="margin-top:12px"></div></div>`;
+    document.getElementById('gb-24').onclick=submit;
+    document.getElementById('gs-24').onclick=()=>{S.sk++;gFbW(document.getElementById('gf-24'),'Übersprungen');setTimeout(next,1000)};
+    document.getElementById('gi-24').onkeydown=e=>{if(e.key==='Enter')submit()};
+    document.getElementById('gi-24').focus();
+  }
+  function submit(){
+    let expr=document.getElementById('gi-24').value.trim();if(!expr)return;
+    expr=expr.replace(/×/g,'*').replace(/÷/g,'/');const san=expr.replace(/[^0-9+\-*/().]/g,'');
+    const digs=(san.match(/\d+/g)||[]).map(Number);
+    if(digs.length!==4){gFbErr(document.getElementById('gf-24'),'Verwende genau 4 Zahlen!');return}
+    if([...digs].sort((a,b)=>a-b).join()!==[...S.nums].sort((a,b)=>a-b).join()){gFbErr(document.getElementById('gf-24'),'Falsche Zahlen!');return}
+    try{const r=Function('"use strict";return('+san+')')();if(Math.abs(r-24)<.001){S.sc++;gFbOk(document.getElementById('gf-24'),'24 erreicht!');document.getElementById('gi-24').disabled=true;setTimeout(next,1400)}else gFbErr(document.getElementById('gf-24'),`= ${Math.round(r*100)/100}, nicht 24`)}catch{gFbErr(document.getElementById('gf-24'),'Ungültiger Ausdruck!')}
+  }
+  this._next=next;next();
+}};
+
+// ── GAME: Zahlen merken ──
+GAMES.mem={init(mount){
+  const S={lv:4,bst:0,sr:0,seq:'',phase:'idle'};
+  function next(){
+    S.seq='';for(let i=0;i<S.lv;i++)S.seq+=R(0,9);S.phase='show';
+    mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Ziffern</div><div class="gs-v" style="color:var(--accent)">${S.lv}</div></div><div class="gs"><div class="gs-l">Rekord</div><div class="gs-v" style="color:var(--orange)">${S.bst}</div></div><div class="gs"><div class="gs-l">Serie</div><div class="gs-v" style="color:var(--green)">${S.sr}</div></div></div><p style="text-align:center;color:var(--gray3);font-size:12px" id="gm-msg">Merke dir ${S.lv} Ziffern!</p><div class="g-memd" id="gm-d">${S.seq}</div><input class="g-input" id="gm-in" placeholder="Eingeben..." autocomplete="off" style="display:none;margin-top:12px"><button class="btn btn-primary btn-w" id="gm-go" style="display:none;margin-top:12px">Prüfen</button><div id="gf-mem" style="margin-top:12px"></div></div>`;
+    setTimeout(()=>{
+      const d=document.getElementById('gm-d');if(!d)return;d.textContent='•'.repeat(S.lv);d.className='g-memd hid';
+      document.getElementById('gm-msg').textContent='Jetzt eingeben!';
+      const inp=document.getElementById('gm-in');inp.style.display='block';inp.value='';inp.focus();
+      const btn=document.getElementById('gm-go');btn.style.display='block';
+      btn.onclick=submit;inp.onkeydown=e=>{if(e.key==='Enter')submit()};S.phase='input';
+    },900+S.lv*350);
+  }
+  function submit(){
+    if(S.phase!=='input')return;S.phase='done';
+    const v=document.getElementById('gm-in').value.trim();
+    document.getElementById('gm-in').disabled=true;document.getElementById('gm-go').disabled=true;
+    document.getElementById('gm-d').textContent=S.seq;document.getElementById('gm-d').className='g-memd';
+    if(v===S.seq){S.sr++;S.lv++;if(S.lv>S.bst)S.bst=S.lv;gFbOk(document.getElementById('gf-mem'),`Richtig! Nächstes: ${S.lv} Ziffern`);setTimeout(next,1500)}
+    else{S.sr=0;S.lv=Math.max(4,S.lv-1);gFbErr(document.getElementById('gf-mem'),`Falsch! Es war: <b>${S.seq}</b>`);setTimeout(next,2500)}
+  }
+  this._next=next;next();
+}};
+
+// ── GAME: Speed Math ──
+GAMES.sp={init(mount){
+  const S={sc:0,sr:0,ans:0,tl:60};
+  mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Punkte</div><div class="gs-v" style="color:var(--accent)" id="gsp-sc">0</div></div><div class="gs"><div class="gs-l">Zeit</div><div class="gs-v" style="color:var(--red)" id="gsp-tm">60</div></div><div class="gs"><div class="gs-l">Serie</div><div class="gs-v" style="color:var(--green)" id="gsp-sr">0</div></div></div><div class="g-timer"><div class="g-timer-bar" id="gt-sp"></div></div><div class="g-spq" id="gsp-q"></div><div style="display:flex;gap:8px"><input class="g-input" id="gi-sp" placeholder="?" autocomplete="off" style="flex:1"><button class="btn btn-primary" id="gb-sp">OK</button></div><div id="gf-sp" style="margin-top:8px"></div></div>`;
+  const bar=document.getElementById('gt-sp');bar.style.width='100%';bar.className='g-timer-bar';
+  clearInterval(_t);S.tl=60;
+  _t=setInterval(()=>{S.tl-=.1;document.getElementById('gsp-tm').textContent=Math.ceil(S.tl);const p=(S.tl/60)*100;bar.style.width=p+'%';bar.className='g-timer-bar'+(p<20?' danger':p<33?' warn':'');if(S.tl<=0){clearInterval(_t);gEnd(mount,S.sc,`${S.sc} Punkte in 60s`,'sp')}},100);
+  function genQ(){const ops=['+','−','×'];const op=pick(ops);let a,b;if(op==='+'){a=R(5,99);b=R(5,99);S.ans=a+b}else if(op==='−'){a=R(20,99);b=R(5,a);S.ans=a-b}else{a=R(2,12);b=R(2,12);S.ans=a*b}document.getElementById('gsp-q').innerHTML=`${a} <span class="spo">${op}</span> ${b}`;document.getElementById('gi-sp').value='';document.getElementById('gi-sp').disabled=false;document.getElementById('gi-sp').focus();document.getElementById('gf-sp').innerHTML=''}
+  function submit(){const v=parseInt(document.getElementById('gi-sp').value.trim());if(isNaN(v))return;if(v===S.ans){S.sr++;const pts=5+Math.min(S.sr,10);S.sc+=pts;S.tl=Math.min(60,S.tl+1.5);gFbOk(document.getElementById('gf-sp'),`+${pts} · +1.5s`)}else{S.sr=0;S.tl=Math.max(0,S.tl-2);gFbErr(document.getElementById('gf-sp'),`${S.ans} · −2s`)}document.getElementById('gsp-sc').textContent=S.sc;document.getElementById('gsp-sr').textContent=S.sr;setTimeout(genQ,500)}
+  document.getElementById('gb-sp').onclick=submit;document.getElementById('gi-sp').onkeydown=e=>{if(e.key==='Enter')submit()};
+  genQ();
+}};
+
+// ── GAME: Odd One Out ──
+const oooGens=[
+  ()=>{const d=R(2,7),s=R(1,20),n=[];for(let i=0;i<5;i++)n.push(s+d*i);const oi=R(0,4);n[oi]+=R(1,4)*(Math.random()>.5?1:-1);if(n[oi]===s+d*oi)n[oi]++;return{nums:n,oi,rule:`Reihe +${d} — <b>${n[oi]}</b> passt nicht`}},
+  ()=>{const n=[];for(let i=0;i<6;i++)n.push(R(1,25)*2);const oi=R(0,5);n[oi]=R(1,25)*2+1;return{nums:n,oi,rule:`Alle gerade — <b>${n[oi]}</b> ungerade`}},
+  ()=>{const n=[];for(let i=0;i<6;i++)n.push(R(0,24)*2+1);const oi=R(0,5);n[oi]=R(1,25)*2;return{nums:n,oi,rule:`Alle ungerade — <b>${n[oi]}</b> gerade`}},
+  ()=>{const P=[2,3,5,7,11,13,17,19,23,29];const n=shuf(P).slice(0,5);const oi=R(0,4);n[oi]=pick([4,6,8,9,10,12,14,15]);return{nums:n,oi,rule:`Primzahlen — <b>${n[oi]}</b> keine`}},
+  ()=>{const b=R(3,7);const n=[];for(let i=1;i<=5;i++)n.push(b*i);const oi=R(0,4);n[oi]+=R(1,b-1);return{nums:n,oi,rule:`Vielfache von ${b} — <b>${n[oi]}</b> nicht`}},
+];
+GAMES.ooo={init(mount){
+  const S={sc:0,rn:0,mx:10,sr:0,ans:false};
+  function next(){
+    S.rn++;if(S.rn>S.mx)return gEnd(mount,S.sc,`${S.sc} Punkte`,'ooo');S.ans=false;S.pz=pick(oooGens)();
+    mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Punkte</div><div class="gs-v" style="color:var(--accent)">${S.sc}</div></div><div class="gs"><div class="gs-l">Runde</div><div class="gs-v" style="color:var(--orange)">${S.rn}/${S.mx}</div></div><div class="gs"><div class="gs-l">Serie</div><div class="gs-v" style="color:var(--green)">${S.sr}</div></div></div><p style="text-align:center;color:var(--gray3);font-size:12px;margin-bottom:8px">Welche Zahl passt nicht?</p><div class="g-oog" id="go-ooo"></div><div id="gf-ooo"></div><div id="ge-ooo"></div></div>`;
+    const g=document.getElementById('go-ooo');S.pz.nums.forEach((n,i)=>{const d=document.createElement('div');d.className='g-ooc';d.textContent=n;d.onclick=()=>pickOoo(i,d);g.appendChild(d)});
+  }
+  function pickOoo(i,el){
+    if(S.ans)return;S.ans=true;const ok=i===S.pz.oi;
+    el.classList.add(ok?'ok':'no');
+    if(!ok)document.getElementById('go-ooo').children[S.pz.oi].classList.add('ok');
+    if(ok){S.sc+=15;S.sr++;gFbOk(document.getElementById('gf-ooo'),'Richtig! +15');setTimeout(next,1500)}
+    else{S.sr=0;gFbErr(document.getElementById('gf-ooo'),'Falsch!');document.getElementById('ge-ooo').innerHTML=`<div class="g-expl"><h4>Erklärung</h4><ul><li>${S.pz.rule}</li></ul></div><button class="btn btn-green btn-w" style="margin-top:12px" onclick="GAMES.ooo._next()">Weiter →</button>`}
+  }
+  this._next=next;next();
+}};
+
+// ── GAME: Schätzfragen ──
+GAMES.est={init(mount){
+  const S={sc:0,rn:0,mx:10,sr:0,ans:false};
+  function gen(){const t=R(0,4);let q,res;if(t===0){const a=R(12,99),b=R(12,99);res=a*b;q=`${a} × ${b}`}else if(t===1){const a=R(100,999),b=R(100,999);res=a+b;q=`${a} + ${b}`}else if(t===2){const a=R(200,999),b=R(10,a-1);res=a-b;q=`${a} − ${b}`}else if(t===3){const a=R(4,25);res=a*a;q=`${a}²`}else{const a=R(11,99),b=R(3,9);res=a*b;q=`${a} × ${b}`}let ch=new Set([res]);while(ch.size<3){const o=Math.max(1,Math.round(Math.abs(res)*R(10,35)/100));ch.add(res+(Math.random()>.5?o:-o))}ch=shuf([...ch]);return{q,res,ch,ci:ch.indexOf(res)}}
+  function next(){
+    S.rn++;if(S.rn>S.mx)return gEnd(mount,S.sc,`${S.sc} Punkte`,'est');S.ans=false;S.pz=gen();
+    mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Punkte</div><div class="gs-v" style="color:var(--accent)">${S.sc}</div></div><div class="gs"><div class="gs-l">Runde</div><div class="gs-v" style="color:var(--orange)">${S.rn}/${S.mx}</div></div><div class="gs"><div class="gs-l">Serie</div><div class="gs-v" style="color:var(--green)">${S.sr}</div></div></div><div class="g-timer"><div class="g-timer-bar" id="gt-est"></div></div><div class="g-estq">${S.pz.q} = ?</div><div class="g-estg" id="go-est"></div><div id="gf-est"></div></div>`;
+    const g=document.getElementById('go-est');S.pz.ch.forEach((v,i)=>{const d=document.createElement('div');d.className='g-estc';d.id='ge-'+i;d.textContent=v.toLocaleString('de-DE');d.onclick=()=>pickEst(i);g.appendChild(d)});
+    gTimer(document.getElementById('gt-est'),10,()=>{S.ans=true;S.sr=0;document.getElementById('ge-'+S.pz.ci).classList.add('was');gFbErr(document.getElementById('gf-est'),`Zeit! ${S.pz.res.toLocaleString('de-DE')}`);setTimeout(next,2200)});
+  }
+  function pickEst(i){if(S.ans)return;S.ans=true;clearInterval(_t);const ok=i===S.pz.ci;document.getElementById('ge-'+i).classList.add(ok?'ok':'no');if(!ok)document.getElementById('ge-'+S.pz.ci).classList.add('was');if(ok){S.sc+=15;S.sr++;gFbOk(document.getElementById('gf-est'),'Richtig! +15')}else{S.sr=0;gFbErr(document.getElementById('gf-est'),`${S.pz.res.toLocaleString('de-DE')}`)}setTimeout(next,1800)}
+  this._next=next;next();
+}};
+
+// ── GAME: Matrix ──
+const matGens=[
+  ()=>{const t=R(12,30);const g=[];for(let r=0;r<3;r++){const a=R(1,t-3),b=R(1,t-a-2),c=t-a-b;g.push([a,b,c])}return{g,rule:`Jede Zeile = <b>${t}</b>`}},
+  ()=>{const t=R(12,30);const g=[[],[],[]];for(let c=0;c<3;c++){const a=R(1,t-3),b=R(1,t-a-2),d=t-a-b;g[0][c]=a;g[1][c]=b;g[2][c]=d}return{g,rule:`Jede Spalte = <b>${t}</b>`}},
+  ()=>{const g=[];for(let r=0;r<3;r++){const s=R(1,10),d=R(2,6);g.push([s,s+d,s+2*d])}return{g,rule:`Arithmetische Reihe pro Zeile`}},
+  ()=>{const g=[];for(let r=0;r<3;r++){const a=R(2,7),b=R(2,7);g.push([a,b,a*b])}return{g,rule:`Zeile: Sp1 × Sp2 = Sp3`}},
+  ()=>{const g=[];for(let r=0;r<3;r++){const a=R(2,9),b=R(2,9);g.push([a,b,a+b])}return{g,rule:`Zeile: Sp1 + Sp2 = Sp3`}},
+];
+GAMES.mat={init(mount){
+  const S={sc:0,rn:0,mx:10,sr:0,ans:false};
+  function next(){
+    S.rn++;if(S.rn>S.mx)return gEnd(mount,S.sc,`${S.sc} Punkte`,'mat');S.ans=false;
+    const p=pick(matGens)();const hr=R(0,2),hc=R(0,2);const answer=p.g[hr][hc];S.answer=answer;S.rule=p.rule;
+    let opts=new Set([answer]);while(opts.size<4){const o=answer+R(-5,5);if(o>0)opts.add(o)}opts=shuf([...opts]);S.ci=opts.indexOf(answer);
+    mount.innerHTML=`<div class="game-frame"><div class="game-stats"><div class="gs"><div class="gs-l">Punkte</div><div class="gs-v" style="color:var(--accent)">${S.sc}</div></div><div class="gs"><div class="gs-l">Runde</div><div class="gs-v" style="color:var(--orange)">${S.rn}/${S.mx}</div></div><div class="gs"><div class="gs-l">Serie</div><div class="gs-v" style="color:var(--green)">${S.sr}</div></div></div><p style="text-align:center;color:var(--gray3);font-size:12px;margin-bottom:8px">Finde die fehlende Zahl</p><div class="g-matg" id="go-mat"></div><div class="g-mato" id="go-mato"></div><div id="gf-mat"></div><div id="ge-mat"></div></div>`;
+    const g=document.getElementById('go-mat');for(let r=0;r<3;r++)for(let c=0;c<3;c++){const d=document.createElement('div');d.className='g-matc'+(r===hr&&c===hc?' mis':'');d.textContent=r===hr&&c===hc?'?':p.g[r][c];g.appendChild(d)}
+    const o=document.getElementById('go-mato');opts.forEach((v,i)=>{const d=document.createElement('div');d.className='g-matop';d.id='gmo-'+i;d.textContent=v;d.onclick=()=>pickMat(i);o.appendChild(d)});
+  }
+  function pickMat(i){
+    if(S.ans)return;S.ans=true;const ok=i===S.ci;
+    document.getElementById('gmo-'+i).classList.add(ok?'ok':'no');
+    if(!ok)document.getElementById('gmo-'+S.ci).classList.add('ok');
+    if(ok){S.sc+=15;S.sr++;gFbOk(document.getElementById('gf-mat'),'Richtig! +15');setTimeout(next,1500)}
+    else{S.sr=0;gFbErr(document.getElementById('gf-mat'),`Antwort: <b>${S.answer}</b>`);document.getElementById('ge-mat').innerHTML=`<div class="g-expl"><h4>Erklärung</h4><ul><li>${S.rule}</li><li>Fehlend: <span class="hl">${S.answer}</span></li></ul></div><button class="btn btn-green btn-w" style="margin-top:12px" onclick="GAMES.mat._next()">Weiter →</button>`}
+  }
+  this._next=next;next();
+}};
+
+// Init
+updateDashboard();
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080808; color: #fff; font-family: 'Inter', system-ui, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; gap: 48px; padding: 48px; }
+  h1 { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; }
+  .sub { color: #555; font-size: 13px; margin-top: 8px; }
+  .group-label { font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: #3b82f6; margin-bottom: 16px; }
+  .group { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; max-width: 900px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
+  a.version-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    background: #141414; border: 1px solid rgba(255,255,255,0.07);
+    padding: 28px 40px; border-radius: 4px; text-decoration: none; color: #fff;
+    transition: border-color 0.2s, background 0.2s; cursor: pointer; min-width: 180px;
+  }
+  a.version-btn:hover { border-color: #3b82f6; background: #161a24; }
+  .v-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: #3b82f6; }
+  .v-title { font-size: 17px; font-weight: 800; }
+  .v-desc { font-size: 11px; color: #444; text-align: center; line-height: 1.5; }
+  .divider { width: 100%; max-width: 900px; height: 1px; background: rgba(255,255,255,0.06); }
+</style>
+</head>
+<body>
+  <div style="text-align:center">
+    <h1>IQLab Mockups</h1>
+    <p class="sub">Click to open a page</p>
+  </div>
+
+  <div class="group">
+    <div class="group-label">Homepage</div>
+    <div class="row">
+      <a class="version-btn" href="/files/homepage-v4a.html" target="_blank">
+        <div class="v-label">Approved</div>
+        <div class="v-title">Home — V4a</div>
+        <div class="v-desc">Neuro brain hero<br>shifted right, dark</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="group">
+    <div class="group-label">Inner Pages</div>
+    <div class="row">
+      <a class="version-btn" href="/files/dashboard-v1.html" target="_blank">
+        <div class="v-label">Dashboard</div>
+        <div class="v-title">Dashboard</div>
+        <div class="v-desc">IQ gauge, leaderboard<br>heatmap, stats</div>
+      </a>
+      <a class="version-btn" href="/files/training-v1.html" target="_blank">
+        <div class="v-label">Training</div>
+        <div class="v-title">Training</div>
+        <div class="v-desc">17 game cards<br>sidebar settings</div>
+      </a>
+      <a class="version-btn" href="/files/iqtest-v1.html" target="_blank">
+        <div class="v-label">IQ Test</div>
+        <div class="v-title">IQ Test</div>
+        <div class="v-desc">Intro → Test → Result<br>all 3 phases</div>
+      </a>
+    </div>
+  </div>
+</body>
+</html>

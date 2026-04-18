@@ -5,6 +5,15 @@ import { getLeaderboard } from '../stats';
 import { useAuth } from '../context/AuthContext';
 import './Dashboard.css';
 
+function shareLeaderboard() {
+  const url = `${window.location.origin}/leaderboard`;
+  if (navigator.share) {
+    navigator.share({ title: 'IQLab World Rankings', url });
+  } else {
+    navigator.clipboard.writeText(url);
+  }
+}
+
 const RANKS = [
   { name: 'Bronze',      min: 0,     color: '#cd7f32', bg: 'rgba(205,127,50,0.12)' },
   { name: 'Silver',      min: 500,   color: '#a8a8a8', bg: 'rgba(168,168,168,0.12)' },
@@ -36,6 +45,8 @@ function RankBadge({ points }) {
   );
 }
 
+const shareBtn = { padding: '8px 14px', background: 'var(--bg3)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--white)', fontSize: 12, fontWeight: 600, cursor: 'pointer' };
+
 export default function Leaderboard() {
   const { user } = useAuth();
   const [rows, setRows] = useState([]);
@@ -62,9 +73,14 @@ export default function Leaderboard() {
             <h1 className="db-title">World Rankings</h1>
             <p className="db-subtitle">Top Spieler auf IQLab — basierend auf Gesamtpunkten.</p>
           </div>
-          {!user && (
-            <Link to="/login" className="btn btn-primary">Jetzt mitspielen</Link>
-          )}
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button onClick={shareLeaderboard} style={shareBtn} title="Rangliste teilen">
+              ↗ Teilen
+            </button>
+            {!user && (
+              <Link to="/login" className="btn btn-primary">Jetzt mitspielen</Link>
+            )}
+          </div>
         </div>
 
         <div className="db-card" style={{ marginTop: 24 }}>
@@ -84,7 +100,12 @@ export default function Leaderboard() {
               {rows.map((entry, i) => {
                 const isMe = user?.id === entry.user_id;
                 return (
-                  <div key={entry.user_id} className={`db-lb-row ${isMe ? 'db-lb-you' : ''}`}>
+                  <Link
+                    key={entry.user_id}
+                    to={`/player/${entry.user_id}`}
+                    className={`db-lb-row ${isMe ? 'db-lb-you' : ''}`}
+                    style={{ textDecoration: 'none' }}
+                  >
                     <span className="db-lb-rank">{i + 1}</span>
                     <span className="db-lb-name">
                       {entry.display_name || 'Anonymous'}
@@ -92,7 +113,7 @@ export default function Leaderboard() {
                       <RankBadge points={entry.total_points} />
                     </span>
                     <span className="db-lb-elo">{Number(entry.total_points).toLocaleString()}</span>
-                  </div>
+                  </Link>
                 );
               })}
             </>

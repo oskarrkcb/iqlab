@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IQLab — Premium Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --black: #080808;
+  --dark: #0f0f0f;
+  --dark2: #161616;
+  --dark3: #1e1e1e;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.04);
+  --white: #ffffff;
+  --gray1: #e8e8e8;
+  --gray2: #a0a0a0;
+  --gray3: #555;
+  --blue: #3b82f6;
+  --blue-glow: rgba(59,130,246,0.15);
+  --font: 'Inter', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--font); background: var(--black); color: var(--white); overflow-x: hidden; }
+
+/* ══════════ NAVBAR ══════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px; height: 68px;
+  background: rgba(8,8,8,0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.nav-logo {
+  font-size: 13px; font-weight: 800; letter-spacing: 0.18em;
+  color: var(--white); text-transform: uppercase;
+}
+.nav-links { display: flex; gap: 36px; }
+.nav-links a {
+  font-size: 13px; font-weight: 400; color: var(--gray2);
+  text-decoration: none; letter-spacing: 0.01em;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--white); }
+.nav-cta {
+  font-size: 12px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--white); color: var(--black);
+  padding: 9px 22px; border: none; cursor: pointer;
+  border-radius: 2px; transition: opacity 0.2s;
+}
+.nav-cta:hover { opacity: 0.88; }
+
+/* ══════════ HERO ══════════ */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 0 48px 80px;
+  position: relative; overflow: hidden;
+}
+
+/* Layered background like jeskojets */
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 70% 40%, rgba(59,130,246,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 20% 80%, rgba(59,130,246,0.05) 0%, transparent 50%),
+    linear-gradient(180deg, #080808 0%, #0d0d0d 100%);
+}
+
+/* Animated grid */
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 30%, black 30%, transparent 80%);
+}
+
+/* Floating orbs */
+.orb1 {
+  position: absolute; width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%);
+  top: -100px; right: -100px; pointer-events: none;
+  animation: orb-float 8s ease-in-out infinite;
+}
+.orb2 {
+  position: absolute; width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(59,130,246,0.04) 0%, transparent 70%);
+  bottom: 100px; left: 10%; pointer-events: none;
+  animation: orb-float 12s ease-in-out infinite reverse;
+}
+@keyframes orb-float {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-30px) scale(1.05); }
+}
+
+.hero-content {
+  position: relative; z-index: 2;
+  max-width: 1200px; width: 100%;
+}
+
+/* Small tag */
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.15em;
+  color: var(--blue); text-transform: uppercase; margin-bottom: 32px;
+}
+.hero-eyebrow-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 8px var(--blue);
+  animation: pulse 2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+/* Big headline */
+.hero-headline {
+  font-size: clamp(52px, 7vw, 96px);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  color: var(--white);
+  margin-bottom: 12px;
+}
+.hero-headline .line2 {
+  display: block;
+  background: linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.4) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-headline .accent {
+  display: block; color: var(--blue);
+  -webkit-text-fill-color: var(--blue);
+}
+
+.hero-bottom {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-top: 64px; gap: 48px;
+}
+.hero-sub {
+  font-size: 16px; color: var(--gray2); line-height: 1.7;
+  max-width: 440px; font-weight: 300;
+}
+.hero-actions {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 20px;
+}
+.btn-hero {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--white); color: var(--black);
+  padding: 16px 32px; border: none; cursor: pointer; border-radius: 2px;
+  transition: all 0.2s; white-space: nowrap;
+}
+.btn-hero:hover { background: #e0e0e0; gap: 18px; }
+.btn-hero-ghost {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+  background: transparent; color: var(--gray2);
+  padding: 14px 24px; border: 1px solid rgba(255,255,255,0.12); cursor: pointer; border-radius: 2px;
+  transition: all 0.2s; white-space: nowrap;
+}
+.btn-hero-ghost:hover { border-color: rgba(255,255,255,0.3); color: var(--white); }
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  z-index: 2;
+}
+.scroll-line {
+  width: 1px; height: 48px;
+  background: linear-gradient(180deg, transparent, rgba(255,255,255,0.3));
+  animation: scroll-line 2s ease-in-out infinite;
+}
+@keyframes scroll-line { 0%,100%{opacity:0.3;transform:scaleY(1)} 50%{opacity:1;transform:scaleY(1.2)} }
+.scroll-text { font-size: 9px; letter-spacing: 0.2em; color: var(--gray3); text-transform: uppercase; }
+
+/* ══════════ STATS BAR ══════════ */
+.stats-bar {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--dark2);
+}
+.stats-bar-inner {
+  max-width: 1200px; margin: 0 auto; padding: 0 48px;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+}
+.stat-block {
+  padding: 36px 24px; text-align: center;
+  border-right: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.stat-block:last-child { border-right: none; }
+.stat-block::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 100%, rgba(59,130,246,0.05), transparent);
+  opacity: 0; transition: opacity 0.3s;
+}
+.stat-block:hover::before { opacity: 1; }
+.stat-big {
+  font-size: 40px; font-weight: 900; font-family: var(--mono);
+  color: var(--white); letter-spacing: -0.04em; line-height: 1;
+}
+.stat-desc { font-size: 11px; color: var(--gray3); margin-top: 6px; letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ══════════ MARQUEE ══════════ */
+.marquee-section {
+  padding: 24px 0; overflow: hidden;
+  border-bottom: 1px solid var(--border);
+  background: var(--dark);
+}
+.marquee-track {
+  display: flex; gap: 64px;
+  animation: marquee 30s linear infinite;
+  white-space: nowrap;
+}
+@keyframes marquee { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+.marquee-item {
+  font-size: 12px; font-weight: 600; letter-spacing: 0.15em;
+  color: var(--gray3); text-transform: uppercase;
+  display: flex; align-items: center; gap: 16px;
+}
+.marquee-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gray3); }
+
+/* ══════════ FEATURE SECTION ══════════ */
+.section { padding: 120px 48px; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+
+.section-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+  color: var(--blue); text-transform: uppercase; margin-bottom: 20px;
+}
+h2 {
+  font-size: clamp(32px, 4vw, 56px); font-weight: 900;
+  letter-spacing: -0.03em; color: var(--white); line-height: 1.05;
+  margin-bottom: 20px;
+}
+h2 .muted { color: var(--gray3); }
+.section-sub {
+  font-size: 16px; color: var(--gray2); line-height: 1.7;
+  font-weight: 300; max-width: 500px;
+}
+
+/* Bento grid for features */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border);
+  margin-top: 64px;
+}
+.bento-card {
+  background: var(--dark2);
+  padding: 40px 36px;
+  position: relative; overflow: hidden;
+  transition: background 0.3s;
+}
+.bento-card:hover { background: var(--dark3); }
+.bento-card.wide { grid-column: span 2; }
+.bento-card.tall { grid-row: span 2; }
+.bento-card::before {
+  content: ''; position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 50% at 0% 100%, rgba(59,130,246,0.06), transparent);
+  opacity: 0; transition: opacity 0.4s;
+}
+.bento-card:hover::before { opacity: 1; }
+
+.card-num { font-family: var(--mono); font-size: 11px; color: var(--gray3); letter-spacing: 0.1em; margin-bottom: 20px; }
+.card-title { font-size: 20px; font-weight: 700; color: var(--white); margin-bottom: 12px; letter-spacing: -0.01em; }
+.card-desc { font-size: 14px; color: var(--gray2); line-height: 1.7; font-weight: 300; }
+.card-tag {
+  display: inline-block; margin-top: 20px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--blue); text-transform: uppercase;
+  border: 1px solid rgba(59,130,246,0.3); padding: 4px 10px; border-radius: 2px;
+}
+
+/* Visual element inside bento */
+.bento-visual {
+  margin-top: 28px;
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 20px; background: var(--dark);
+}
+.mini-bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.mini-bar-label { font-size: 11px; color: var(--gray3); width: 100px; flex-shrink: 0; }
+.mini-bar-track { flex: 1; height: 2px; background: rgba(255,255,255,0.06); border-radius: 1px; }
+.mini-bar-fill { height: 100%; background: var(--blue); border-radius: 1px; }
+.mini-val { font-family: var(--mono); font-size: 11px; color: var(--gray2); width: 32px; text-align: right; }
+
+/* ══════════ GAMES SECTION ══════════ */
+.games-section { background: var(--dark); padding: 120px 48px; border-top: 1px solid var(--border); }
+.games-header {
+  max-width: 1200px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-bottom: 64px;
+}
+.games-grid {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--border);
+  border: 1px solid var(--border);
+}
+.game-card {
+  background: var(--dark2); padding: 28px 24px;
+  cursor: pointer; transition: background 0.2s;
+  position: relative; overflow: hidden;
+}
+.game-card:hover { background: var(--dark3); }
+.game-card::after {
+  content: '→'; position: absolute; bottom: 24px; right: 24px;
+  font-size: 14px; color: var(--gray3);
+  transition: all 0.2s;
+}
+.game-card:hover::after { color: var(--blue); transform: translateX(4px); }
+.game-cat {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
+  color: var(--blue); text-transform: uppercase; margin-bottom: 12px;
+}
+.game-name { font-size: 16px; font-weight: 700; color: var(--white); margin-bottom: 8px; }
+.game-desc { font-size: 12px; color: var(--gray2); line-height: 1.6; font-weight: 300; }
+
+/* ══════════ DASHBOARD PREVIEW ══════════ */
+.preview-section {
+  padding: 120px 48px;
+  background: linear-gradient(180deg, var(--black) 0%, #050a14 50%, var(--black) 100%);
+  border-top: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.preview-section::before {
+  content: ''; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(59,130,246,0.05) 0%, transparent 70%);
+}
+.preview-inner { max-width: 1200px; margin: 0 auto; position: relative; }
+.preview-head { text-align: center; margin-bottom: 64px; }
+
+/* Mock dashboard UI */
+.mock-dashboard {
+  border: 1px solid var(--border);
+  background: var(--dark2);
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px var(--border);
+}
+.mock-topbar {
+  background: var(--dark); padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mock-body { display: grid; grid-template-columns: 220px 1fr; min-height: 340px; }
+.mock-sidebar-panel {
+  border-right: 1px solid var(--border);
+  padding: 24px 20px;
+}
+.mock-nav-item {
+  padding: 8px 12px; border-radius: 3px; margin-bottom: 4px;
+  font-size: 12px; color: var(--gray3); display: flex; align-items: center; gap: 10px;
+}
+.mock-nav-item.active { background: rgba(59,130,246,0.1); color: var(--blue); }
+.mock-main-panel { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.mock-kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+.mock-kpi {
+  background: var(--dark); border: 1px solid var(--border);
+  border-radius: 4px; padding: 16px;
+}
+.mock-kpi-val { font-family: var(--mono); font-size: 24px; font-weight: 700; color: var(--white); }
+.mock-kpi-val.blue { color: var(--blue); }
+.mock-kpi-label { font-size: 10px; color: var(--gray3); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 4px; }
+.mock-chart-area {
+  flex: 1; background: var(--dark); border: 1px solid var(--border);
+  border-radius: 4px; padding: 16px; min-height: 120px;
+  display: flex; align-items: flex-end; gap: 6px;
+}
+.mock-bar {
+  flex: 1; border-radius: 2px 2px 0 0;
+  background: rgba(59,130,246,0.2); min-height: 20px;
+  transition: background 0.2s;
+}
+.mock-bar.active { background: var(--blue); }
+
+/* ══════════ TESTIMONIAL / QUOTE ══════════ */
+.quote-section {
+  padding: 120px 48px;
+  background: var(--dark2);
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+.quote-text {
+  font-size: clamp(24px, 3vw, 40px); font-weight: 300;
+  color: var(--white); line-height: 1.4; letter-spacing: -0.01em;
+  max-width: 800px; margin: 0 auto 24px;
+}
+.quote-text em { font-style: normal; color: var(--blue); font-weight: 600; }
+.quote-source { font-size: 12px; color: var(--gray3); letter-spacing: 0.1em; text-transform: uppercase; }
+
+/* ══════════ CTA ══════════ */
+.cta-section {
+  padding: 160px 48px;
+  position: relative; overflow: hidden;
+  border-top: 1px solid var(--border);
+}
+.cta-bg {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #050a18 0%, #080808 50%, #050a18 100%);
+}
+.cta-glow {
+  position: absolute; width: 800px; height: 400px;
+  background: radial-gradient(ellipse, rgba(59,130,246,0.12) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%,-50%);
+}
+.cta-inner {
+  max-width: 1200px; margin: 0 auto; position: relative; z-index: 2;
+  text-align: center;
+}
+.cta-eyebrow {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  color: var(--blue); text-transform: uppercase; margin-bottom: 24px;
+}
+.cta-title {
+  font-size: clamp(40px, 6vw, 80px); font-weight: 900;
+  letter-spacing: -0.04em; color: var(--white); line-height: 0.95;
+  margin-bottom: 48px;
+}
+.cta-title .dim { color: var(--gray3); }
+.cta-actions { display: flex; gap: 16px; justify-content: center; align-items: center; }
+
+/* ══════════ FOOTER ══════════ */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 48px;
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--dark);
+}
+.footer-logo { font-size: 13px; font-weight: 800; letter-spacing: 0.18em; color: var(--white); }
+.footer-links { display: flex; gap: 32px; }
+.footer-links a { font-size: 12px; color: var(--gray3); text-decoration: none; letter-spacing: 0.03em; }
+.footer-links a:hover { color: var(--white); }
+.footer-copy { font-size: 11px; color: var(--gray3); letter-spacing: 0.05em; }
+</style>
+</head>
+<body>
+
+<!-- ══ NAVBAR ══ -->
+<nav>
+  <span class="nav-logo">IQLab</span>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#">Dashboard</a>
+    <a href="#">Training</a>
+    <a href="#">IQ Test</a>
+  </div>
+  <button class="nav-cta">Training starten</button>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="orb1"></div>
+  <div class="orb2"></div>
+
+  <div class="hero-content">
+    <div class="hero-eyebrow">
+      <div class="hero-eyebrow-dot"></div>
+      Cognitive Performance Platform
+    </div>
+    <h1 class="hero-headline">
+      Schärfe deinen<br>
+      <span class="line2">Verstand.</span>
+      <span class="accent">Täglich.</span>
+    </h1>
+    <div class="hero-bottom">
+      <p class="hero-sub">
+        17 wissenschaftlich fundierte Übungen in 6 kognitiven Bereichen. Messe, trainiere und steigere deine geistige Leistung — messbar, strukturiert, kostenlos.
+      </p>
+      <div class="hero-actions">
+        <button class="btn-hero">Training starten <span>→</span></button>
+        <button class="btn-hero-ghost">IQ Test machen <span>↗</span></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-line"></div>
+    <span class="scroll-text">Scroll</span>
+  </div>
+</section>
+
+<!-- ══ STATS BAR ══ -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-block">
+      <div class="stat-big">17</div>
+      <div class="stat-desc">Übungen</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">6</div>
+      <div class="stat-desc">Kognitive Bereiche</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">5 min</div>
+      <div class="stat-desc">Pro Session</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">Free</div>
+      <div class="stat-desc">Für immer kostenlos</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MARQUEE ══ -->
+<div class="marquee-section">
+  <div class="marquee-track">
+    <span class="marquee-item">Number Series <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Matrix Puzzle <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Dual N-Back <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Speed Math <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Ravens Matrices <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Schulte Tables <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Stroop Test <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Mental Rotation <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Chimp Test <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Algo Thinking <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Marathon Mode <span class="marquee-dot"></span></span>
+    <span class="marquee-item">vs Bot <span class="marquee-dot"></span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="marquee-item">Number Series <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Matrix Puzzle <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Dual N-Back <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Speed Math <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Ravens Matrices <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Schulte Tables <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Stroop Test <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Mental Rotation <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Chimp Test <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Algo Thinking <span class="marquee-dot"></span></span>
+    <span class="marquee-item">Marathon Mode <span class="marquee-dot"></span></span>
+    <span class="marquee-item">vs Bot <span class="marquee-dot"></span></span>
+  </div>
+</div>
+
+<!-- ══ FEATURES BENTO ══ -->
+<section class="section" style="background: var(--dark); border-top: 1px solid var(--border);">
+  <div class="section-inner">
+    <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:64px;">
+      <div>
+        <div class="section-eyebrow">Was dich erwartet</div>
+        <h2>Kognitives Training<br><span class="muted">neu gedacht.</span></h2>
+      </div>
+      <p class="section-sub">Kein Rätselraten. Kein Plateau. Nur strukturiertes Training mit messbaren Ergebnissen.</p>
+    </div>
+
+    <div class="bento">
+      <div class="bento-card wide">
+        <div class="card-num">01 — Performance Tracking</div>
+        <div class="card-title">Dein Fortschritt, live gemessen</div>
+        <div class="card-desc">Jede Session wird gespeichert. Du siehst genau wo du stehst — in Arbeitsgedächtnis, Logik, Rechengeschwindigkeit, Fokus und mehr. Kein Schätzen mehr.</div>
+        <div class="bento-visual">
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">Working Memory</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:78%"></div></div>
+            <span class="mini-val">78%</span>
+          </div>
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">Processing Speed</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:62%"></div></div>
+            <span class="mini-val">62%</span>
+          </div>
+          <div class="mini-bar-row">
+            <span class="mini-bar-label">Logic</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:85%"></div></div>
+            <span class="mini-val">85%</span>
+          </div>
+          <div class="mini-bar-row" style="margin-bottom:0">
+            <span class="mini-bar-label">Focus</span>
+            <div class="mini-bar-track"><div class="mini-bar-fill" style="width:71%"></div></div>
+            <span class="mini-val">71%</span>
+          </div>
+        </div>
+      </div>
+      <div class="bento-card">
+        <div class="card-num">02 — IQ Assessment</div>
+        <div class="card-title">Ermittle deine Baseline</div>
+        <div class="card-desc">15-Fragen-Test aus Logik, Mathe und Mustererkennung. Zeigt deinen geschätzten IQ und deine Stärken auf einen Blick.</div>
+        <span class="card-tag">IQ Test →</span>
+      </div>
+      <div class="bento-card">
+        <div class="card-num">03 — 17 Übungen</div>
+        <div class="card-title">Für jeden Bereich das richtige Training</div>
+        <div class="card-desc">Von Dual N-Back bis Ravens Matrices — gezieltes Training für Gedächtnis, Logik, Reaktion, Fokus und mehr.</div>
+        <span class="card-tag">Training →</span>
+      </div>
+      <div class="bento-card">
+        <div class="card-num">04 — Marathon Mode</div>
+        <div class="card-title">Kontinuierlich. Ohne Pause.</div>
+        <div class="card-desc">Mehrere Übungen in Serie — mit Zeitmodus, Schwierigkeitsstufen und Multi-Set-Sessions für intensive Einheiten.</div>
+        <span class="card-tag">Marathon →</span>
+      </div>
+      <div class="bento-card">
+        <div class="card-num">05 — vs Bot</div>
+        <div class="card-title">Dein ELO-Rating steht auf dem Spiel</div>
+        <div class="card-desc">Tritt gegen eine KI an und steige in der Rangliste auf. 1v1-Matches gegen andere Spieler kommen bald.</div>
+        <span class="card-tag">Bald: 1v1 →</span>
+      </div>
+      <div class="bento-card">
+        <div class="card-num">06 — Free forever</div>
+        <div class="card-title">Keine Bezahlschranken. Kein Paywall.</div>
+        <div class="card-desc">Alle Übungen, alle Features, alle Statistiken — vollständig kostenlos. Weil kognitives Training für alle zugänglich sein sollte.</div>
+        <span class="card-tag" style="color:var(--white);border-color:rgba(255,255,255,0.2);">100% Kostenlos</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ GAMES ══ -->
+<section class="games-section">
+  <div class="games-header">
+    <div>
+      <div class="section-eyebrow">Trainingsmodule</div>
+      <h2>17 Übungen.<br><span class="muted">6 Bereiche.</span></h2>
+    </div>
+    <button class="btn-hero-ghost">Alle ansehen →</button>
+  </div>
+  <div class="games-grid">
+    <div class="game-card"><div class="game-cat">Logic</div><div class="game-name">Number Series</div><div class="game-desc">Zahlenreihen-Muster erkennen</div></div>
+    <div class="game-card"><div class="game-cat">IQ</div><div class="game-name">Matrix Puzzle</div><div class="game-desc">Visuelle Analogien lösen</div></div>
+    <div class="game-card"><div class="game-cat">Memory</div><div class="game-name">Dual N-Back</div><div class="game-desc">Arbeitsgedächtnis maximieren</div></div>
+    <div class="game-card"><div class="game-cat">Math</div><div class="game-name">Speed Math</div><div class="game-desc">Rechengeschwindigkeit steigern</div></div>
+    <div class="game-card"><div class="game-cat">Focus</div><div class="game-name">Schulte Tables</div><div class="game-desc">Periphere Wahrnehmung trainieren</div></div>
+    <div class="game-card"><div class="game-cat">IQ</div><div class="game-name">Ravens Matrices</div><div class="game-desc">Abstrakte Denkfähigkeit</div></div>
+    <div class="game-card"><div class="game-cat">Memory</div><div class="game-name">Chimp Test</div><div class="game-desc">Visuelles Kurzzeitgedächtnis</div></div>
+    <div class="game-card"><div class="game-cat">Logic</div><div class="game-name">Syllogisms</div><div class="game-desc">Logisches Schlussfolgern</div></div>
+  </div>
+</section>
+
+<!-- ══ DASHBOARD PREVIEW ══ -->
+<section class="preview-section">
+  <div class="preview-inner">
+    <div class="preview-head">
+      <div class="section-eyebrow">Dashboard</div>
+      <h2>Alles im Blick.<br><span class="muted">Jederzeit.</span></h2>
+    </div>
+    <div class="mock-dashboard">
+      <div class="mock-topbar">
+        <div class="mock-dot" style="background:#ff5f57"></div>
+        <div class="mock-dot" style="background:#ffbd2e"></div>
+        <div class="mock-dot" style="background:#28c840"></div>
+        <span style="margin-left:16px; font-size:11px; color:var(--gray3); font-family:var(--mono);">iqlab.app/dashboard</span>
+      </div>
+      <div class="mock-body">
+        <div class="mock-sidebar-panel">
+          <div style="font-size:11px;color:var(--gray3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:16px;">Navigation</div>
+          <div class="mock-nav-item active">◈ Dashboard</div>
+          <div class="mock-nav-item">▷ Training</div>
+          <div class="mock-nav-item">◎ IQ Test</div>
+          <div class="mock-nav-item">≡ Leaderboard</div>
+        </div>
+        <div class="mock-main-panel">
+          <div class="mock-kpi-row">
+            <div class="mock-kpi"><div class="mock-kpi-val blue">127</div><div class="mock-kpi-label">IQ Score</div></div>
+            <div class="mock-kpi"><div class="mock-kpi-val">1,247</div><div class="mock-kpi-label">ELO Rating</div></div>
+            <div class="mock-kpi"><div class="mock-kpi-val">12</div><div class="mock-kpi-label">Day Streak</div></div>
+          </div>
+          <div class="mock-chart-area">
+            <div class="mock-bar" style="height:40%"></div>
+            <div class="mock-bar" style="height:55%"></div>
+            <div class="mock-bar" style="height:45%"></div>
+            <div class="mock-bar" style="height:70%"></div>
+            <div class="mock-bar" style="height:60%"></div>
+            <div class="mock-bar" style="height:80%"></div>
+            <div class="mock-bar active" style="height:90%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ QUOTE ══ -->
+<section class="quote-section">
+  <p class="quote-text">"Der Verstand ist wie ein Muskel — er braucht <em>tägliches Training</em>, gezielten Widerstand und messbare Fortschritte."</p>
+  <span class="quote-source">— Neurowissenschaftliche Grundlage von IQLab</span>
+</section>
+
+<!-- ══ CTA ══ -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <div class="cta-glow"></div>
+  <div class="cta-inner">
+    <div class="cta-eyebrow">Bereit?</div>
+    <div class="cta-title">
+      Starte heute.<br>
+      <span class="dim">Kostenlos. Für immer.</span>
+    </div>
+    <div class="cta-actions">
+      <button class="btn-hero">Training starten →</button>
+      <button class="btn-hero-ghost">IQ Test machen</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══ -->
+<footer>
+  <span class="footer-logo">IQLab</span>
+  <div class="footer-links">
+    <a href="#">Dashboard</a>
+    <a href="#">Training</a>
+    <a href="#">IQ Test</a>
+    <a href="#">Datenschutz</a>
+  </div>
+  <span class="footer-copy">© 2026 IQLab</span>
+</footer>
+
+</body>
+</html>

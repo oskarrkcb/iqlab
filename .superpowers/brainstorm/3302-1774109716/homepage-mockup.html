@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IQLab — Homepage Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f5f5f5; color: #111; }
+
+  /* ── NAVBAR ── */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 48px; height: 64px;
+    background: rgba(245,245,245,0.85); backdrop-filter: blur(12px);
+    border-bottom: 1px solid #e0e0e0;
+    position: sticky; top: 0; z-index: 100;
+  }
+  .nav-logo { font-size: 14px; font-weight: 800; letter-spacing: 0.15em; color: #111; }
+  .nav-links { display: flex; gap: 32px; }
+  .nav-links a { font-size: 13px; color: #666; text-decoration: none; letter-spacing: 0.02em; }
+  .nav-links a:hover { color: #111; }
+  .nav-cta {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+    background: #111; color: #fff; padding: 8px 18px;
+    border: none; cursor: pointer; border-radius: 3px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 90vh; display: flex; align-items: center;
+    padding: 80px 48px;
+    position: relative; overflow: hidden;
+  }
+  /* Subtle grid background like refractweb */
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 0%, black 40%, transparent 100%);
+  }
+  .hero-inner { max-width: 1200px; margin: 0 auto; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; position: relative; }
+  .hero-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: #666; margin-bottom: 24px; text-transform: uppercase; }
+  .hero-tag::before { content: ''; width: 24px; height: 1px; background: #999; display: block; }
+  h1 { font-size: clamp(40px, 5vw, 64px); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; color: #111; margin-bottom: 24px; }
+  h1 span { color: #2563eb; }
+  .hero-sub { font-size: 16px; color: #666; line-height: 1.7; margin-bottom: 40px; max-width: 420px; }
+  .hero-actions { display: flex; gap: 12px; align-items: center; }
+  .btn-primary { background: #111; color: #fff; padding: 12px 28px; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; border: none; cursor: pointer; border-radius: 3px; }
+  .btn-ghost { background: transparent; color: #666; padding: 12px 20px; font-size: 13px; font-weight: 600; border: 1px solid #d0d0d0; cursor: pointer; border-radius: 3px; }
+
+  /* Stats panel */
+  .hero-panel {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 28px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+  }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .panel-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #999; text-transform: uppercase; }
+  .panel-badge { font-size: 10px; color: #16a34a; background: rgba(22,163,74,0.08); padding: 3px 8px; border-radius: 20px; font-weight: 700; }
+  .panel-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+  .stat-item { }
+  .stat-val { font-size: 26px; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: #111; letter-spacing: -0.02em; }
+  .stat-val.blue { color: #2563eb; }
+  .stat-key { font-size: 10px; color: #999; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+  .panel-bars { display: flex; flex-direction: column; gap: 12px; }
+  .bar-row { display: flex; align-items: center; gap: 12px; }
+  .bar-label { font-size: 11px; color: #666; width: 110px; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 3px; background: #ebebeb; border-radius: 2px; }
+  .bar-fill { height: 100%; background: #111; border-radius: 2px; }
+  .bar-fill.blue { background: #2563eb; }
+  .bar-pct { font-size: 10px; color: #999; font-family: monospace; width: 28px; text-align: right; }
+  .panel-footer { margin-top: 20px; padding-top: 16px; border-top: 1px solid #f0f0f0; font-size: 11px; color: #999; display: flex; justify-content: space-between; }
+
+  /* ── STATS BAR ── */
+  .stats-bar { border-top: 1px solid #e0e0e0; border-bottom: 1px solid #e0e0e0; background: #fff; padding: 28px 48px; }
+  .stats-bar-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); }
+  .stat-block { text-align: center; padding: 0 24px; border-right: 1px solid #f0f0f0; }
+  .stat-block:last-child { border-right: none; }
+  .stat-big { font-size: 32px; font-weight: 800; font-family: monospace; color: #111; letter-spacing: -0.03em; }
+  .stat-desc { font-size: 12px; color: #999; margin-top: 4px; letter-spacing: 0.03em; }
+
+  /* ── SECTION ── */
+  .section { padding: 96px 48px; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #999; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: #e8e8e8; }
+  h2 { font-size: clamp(28px, 3.5vw, 44px); font-weight: 800; letter-spacing: -0.025em; color: #111; margin-bottom: 16px; line-height: 1.1; }
+  .section-sub { font-size: 15px; color: #666; line-height: 1.7; max-width: 520px; margin-bottom: 56px; }
+
+  /* Why cards */
+  .why-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; }
+  .why-card { background: #fff; padding: 36px; }
+  .why-card:hover { background: #fafafa; }
+  .why-num { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; color: #bbb; font-family: monospace; margin-bottom: 16px; }
+  .why-text { font-size: 15px; color: #333; line-height: 1.7; margin-bottom: 12px; }
+  .why-cite { font-size: 11px; color: #bbb; font-style: italic; }
+
+  /* Games grid */
+  .games-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: #e0e0e0; border: 1px solid #e0e0e0; margin-top: 48px; }
+  .game-card { background: #fff; padding: 28px 24px; cursor: pointer; transition: background 0.15s; }
+  .game-card:hover { background: #f8f8f8; }
+  .game-cat { font-size: 10px; font-weight: 700; letter-spacing: 0.12em; color: #2563eb; text-transform: uppercase; margin-bottom: 10px; }
+  .game-name { font-size: 15px; font-weight: 700; color: #111; margin-bottom: 6px; }
+  .game-desc { font-size: 12px; color: #888; line-height: 1.5; }
+  .game-arrow { margin-top: 16px; font-size: 16px; color: #ccc; }
+
+  /* How steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: 1px solid #e0e0e0; background: #e0e0e0; }
+  .step { background: #fff; padding: 40px 32px; border: none; }
+  .step-num { font-size: 48px; font-weight: 800; font-family: monospace; color: #ebebeb; line-height: 1; margin-bottom: 20px; }
+  .step-title { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 10px; }
+  .step-desc { font-size: 13px; color: #888; line-height: 1.7; }
+
+  /* CTA section */
+  .cta-section { padding: 96px 48px; background: #111; }
+  .cta-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; }
+  .cta-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; color: #555; text-transform: uppercase; margin-bottom: 12px; }
+  .cta-title { font-size: clamp(28px, 3vw, 42px); font-weight: 800; letter-spacing: -0.025em; color: #fff; line-height: 1.1; }
+  .btn-white { background: #fff; color: #111; padding: 14px 32px; font-size: 13px; font-weight: 800; letter-spacing: 0.06em; border: none; cursor: pointer; border-radius: 3px; }
+
+  /* Footer */
+  footer { border-top: 1px solid #e0e0e0; padding: 32px 48px; display: flex; justify-content: space-between; align-items: center; background: #f5f5f5; }
+  .footer-logo { font-size: 13px; font-weight: 800; letter-spacing: 0.15em; }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 12px; color: #999; text-decoration: none; }
+  .footer-copy { font-size: 11px; color: #bbb; }
+
+  .zoom-note { position: fixed; bottom: 16px; right: 16px; background: #111; color: #fff; font-size: 11px; padding: 8px 14px; border-radius: 4px; font-family: monospace; opacity: 0.7; }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <span class="nav-logo">IQLAB</span>
+  <div class="nav-links">
+    <a href="#">Home</a>
+    <a href="#">Dashboard</a>
+    <a href="#">Training</a>
+    <a href="#">IQ Test</a>
+  </div>
+  <button class="nav-cta">START TRAINING</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">Cognitive Training</div>
+      <h1>Trainiere deinen<br><span>Verstand</span> täglich.</h1>
+      <p class="hero-sub">17 wissenschaftlich fundierte Übungen in 6 kognitiven Bereichen. Messbare Fortschritte. Kostenlos.</p>
+      <div class="hero-actions">
+        <button class="btn-primary">JETZT STARTEN →</button>
+        <button class="btn-ghost">IQ Test machen</button>
+      </div>
+    </div>
+    <div class="hero-panel">
+      <div class="panel-header">
+        <span class="panel-title">Session Overview</span>
+        <span class="panel-badge">↑ Day 12 Streak</span>
+      </div>
+      <div class="panel-stats">
+        <div class="stat-item">
+          <div class="stat-val blue">127</div>
+          <div class="stat-key">IQ Score</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">+14%</div>
+          <div class="stat-key">Memory</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-val">218ms</div>
+          <div class="stat-key">Reaction</div>
+        </div>
+      </div>
+      <div class="panel-bars">
+        <div class="bar-row">
+          <span class="bar-label">Working Memory</span>
+          <div class="bar-track"><div class="bar-fill blue" style="width:78%"></div></div>
+          <span class="bar-pct">78%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Processing Speed</span>
+          <div class="bar-track"><div class="bar-fill" style="width:62%"></div></div>
+          <span class="bar-pct">62%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Logic</span>
+          <div class="bar-track"><div class="bar-fill blue" style="width:85%"></div></div>
+          <span class="bar-pct">85%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Focus</span>
+          <div class="bar-track"><div class="bar-fill" style="width:70%"></div></div>
+          <span class="bar-pct">70%</span>
+        </div>
+      </div>
+      <div class="panel-footer">
+        <span>IQLab — Local</span>
+        <span>Free forever</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-block">
+      <div class="stat-big">17</div>
+      <div class="stat-desc">Übungen</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">6</div>
+      <div class="stat-desc">Kognitive Bereiche</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">5 min</div>
+      <div class="stat-desc">Pro Session</div>
+    </div>
+    <div class="stat-block">
+      <div class="stat-big">Free</div>
+      <div class="stat-desc">Für immer kostenlos</div>
+    </div>
+  </div>
+</div>
+
+<!-- WHY SECTION -->
+<section class="section" style="background:#fff;">
+  <div class="section-inner">
+    <div class="section-label">Warum kognitives Training</div>
+    <h2>Was die Wissenschaft sagt</h2>
+    <p class="section-sub">Forschungsbasierte Erkenntnisse über den Einfluss von Training auf die kognitive Leistung.</p>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-num">01</div>
+        <p class="why-text">"Regelmäßiges kognitives Training verbessert das Arbeitsgedächtnis messbar um bis zu 30% innerhalb von 8 Wochen."</p>
+        <span class="why-cite">— Journal of Cognitive Enhancement, 2021</span>
+      </div>
+      <div class="why-card">
+        <div class="why-num">02</div>
+        <p class="why-text">"Schnelles logisches Denken ist trainierbar — Studien zeigen signifikante Verbesserungen bei täglicher Übung."</p>
+        <span class="why-cite">— Psychological Science, 2020</span>
+      </div>
+      <div class="why-card">
+        <div class="why-num">03</div>
+        <p class="why-text">"Dual-N-Back-Training erhöht die flüssige Intelligenz bei gesunden Erwachsenen nachweislich."</p>
+        <span class="why-cite">— PNAS, 2008</span>
+      </div>
+      <div class="why-card">
+        <div class="why-num">04</div>
+        <p class="why-text">"Mentale Fitness schützt langfristig vor kognitivem Abbau — je früher begonnen, desto größer der Effekt."</p>
+        <span class="why-cite">— Neurology, 2019</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="section-inner">
+    <div class="section-label">So funktioniert's</div>
+    <h2>Drei Schritte zum Ziel</h2>
+    <div class="steps" style="margin-top:48px;">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-title">IQ Baseline messen</div>
+        <p class="step-desc">Starte mit dem IQ-Test um deinen Ausgangswert zu ermitteln und deine Schwächen zu identifizieren.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-title">Täglich trainieren</div>
+        <p class="step-desc">Wähle aus 17 Übungen in 6 Bereichen. Anpassbare Schwierigkeit, Zeitmodi und Serienlängen.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-title">Fortschritt verfolgen</div>
+        <p class="step-desc">Das Dashboard zeigt dir messbare Verbesserungen, Highscores und deine Streak über Zeit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GAME PREVIEW -->
+<section class="section" style="background:#fff; padding-top:64px; padding-bottom:64px;">
+  <div class="section-inner">
+    <div class="section-label">Übungen</div>
+    <h2>17 Trainings-Module</h2>
+    <div class="games-grid">
+      <div class="game-card"><div class="game-cat">Logic</div><div class="game-name">Number Series</div><div class="game-desc">Erkenne Muster in Zahlenreihen</div><div class="game-arrow">→</div></div>
+      <div class="game-card"><div class="game-cat">IQ</div><div class="game-name">Matrix Puzzle</div><div class="game-desc">Visuelle Analogien lösen</div><div class="game-arrow">→</div></div>
+      <div class="game-card"><div class="game-cat">Memory</div><div class="game-name">Dual N-Back</div><div class="game-desc">Arbeitsgedächtnis maximieren</div><div class="game-arrow">→</div></div>
+      <div class="game-card"><div class="game-cat">Math</div><div class="game-name">Speed Math</div><div class="game-desc">Rechengeschwindigkeit steigern</div><div class="game-arrow">→</div></div>
+      <div class="game-card"><div class="game-cat">Focus</div><div class="game-name">Schulte Tables</div><div class="game-desc">Periphere Wahrnehmung trainieren</div><div class="game-arrow">→</div></div>
+      <div class="game-card"><div class="game-cat">IQ</div><div class="game-name">Ravens Matrices</div><div class="game-desc">Abstrakte Denkfähigkeit</div><div class="game-arrow">→</div></div>
+      <div class="game-card"><div class="game-cat">Memory</div><div class="game-name">Chimp Test</div><div class="game-desc">Visuelles Kurzzeitgedächtnis</div><div class="game-arrow">→</div></div>
+      <div class="game-card" style="background:#f8f8f8;display:flex;align-items:center;justify-content:center;">
+        <div style="text-align:center;color:#bbb;font-size:13px;">+10 weitere →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-inner">
+    <div>
+      <div class="cta-label">Bereit?</div>
+      <div class="cta-title">Starte heute.<br>Kostenlos. Für immer.</div>
+    </div>
+    <button class="btn-white">TRAINING STARTEN →</button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">IQLAB</span>
+  <div class="footer-links">
+    <a href="#">Dashboard</a>
+    <a href="#">Training</a>
+    <a href="#">IQ Test</a>
+  </div>
+  <span class="footer-copy">© 2026 IQLab</span>
+</footer>
+
+<div class="zoom-note">Homepage Mockup — Scroll to see full page</div>
+
+</body>
+</html>
