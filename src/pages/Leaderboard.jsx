@@ -66,8 +66,8 @@ export default function Leaderboard() {
   }, []);
 
   return (
-    <div style={{ paddingTop: 66, minHeight: 'calc(100vh - 73px)' }}>
-      <div style={{ maxWidth: 820, margin: '0 auto', padding: '48px 24px 80px' }}>
+    <div style={{ paddingTop: 66, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, maxWidth: 820, width: '100%', margin: '0 auto', padding: '48px 24px 80px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 40 }}>
           <div>
             <h1 style={{ fontSize: 'clamp(24px,2.5vw,36px)', fontWeight: 800, letterSpacing: '-0.03em', color: 'var(--white)', marginBottom: 4 }}>World Rankings</h1>
