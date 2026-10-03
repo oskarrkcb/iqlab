@@ -3,8 +3,10 @@ import { GameStats, GameTimer, Feedback, GameEnd, HighScoreBanner, NumPad, apply
 import { R, pick } from './utils';
 
 const GAME_ID = 'sp';
+const ZEN_QUESTIONS = 30; // Zen: a fixed set of problems at your own pace, no clock
 
-export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium' }) {
+export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium', timerMode = 'timed' }) {
+  const zen = timerMode === 'zen';
   const sessionDuration = Math.max(10, timeLimit);
   const [sc, setSc] = useState(0);
   const [sr, setSr] = useState(0);
@@ -65,16 +67,18 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
     scRef.current = 0; srRef.current = 0; okRef.current = 0; answeredRef.current = 0; timeRef.current = sessionDuration;
     setTimeLeft(sessionDuration);
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      timeRef.current -= 0.1;
-      setTimeLeft(timeRef.current);
-      if (timeRef.current <= 0) {
-        clearInterval(timerRef.current);
-        setEnded(true);
-      }
-    }, 100);
+    if (!zen) {
+      timerRef.current = setInterval(() => {
+        timeRef.current -= 0.1;
+        setTimeLeft(timeRef.current);
+        if (timeRef.current <= 0) {
+          clearInterval(timerRef.current);
+          setEnded(true);
+        }
+      }, 100);
+    }
     genQ();
-  }, [genQ, sessionDuration]);
+  }, [genQ, sessionDuration, zen]);
 
   useEffect(() => { startGame(); return () => clearInterval(timerRef.current); }, []); // eslint-disable-line
 
@@ -87,21 +91,34 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
       srRef.current++;
       const pts = 5 + Math.min(srRef.current, 10);
       scRef.current += pts;
-      timeRef.current = Math.min(sessionDuration, timeRef.current + 1.5);
       setSr(srRef.current);
       setSc(scRef.current);
-      setFb({ type: 'ok', msg: `+${pts} · +1.5s` });
+      if (zen) {
+        setFb({ type: 'ok', msg: `+${pts}` });
+      } else {
+        timeRef.current = Math.min(sessionDuration, timeRef.current + 1.5);
+        setFb({ type: 'ok', msg: `+${pts} · +1.5s` });
+      }
     } else {
       srRef.current = 0;
-      timeRef.current = Math.max(0, timeRef.current - 2);
       setSr(0);
-      setFb({ type: 'err', msg: `${answer} · −2s` });
+      if (zen) {
+        setFb({ type: 'err', msg: `${answer}` });
+      } else {
+        timeRef.current = Math.max(0, timeRef.current - 2);
+        setFb({ type: 'err', msg: `${answer} · −2s` });
+      }
+    }
+    if (zen && answeredRef.current >= ZEN_QUESTIONS) {
+      setTimeout(() => setEnded(true), 600);
+      return;
     }
     setTimeout(genQ, 500);
   };
 
   if (ended) {
-    return <GameEnd gameId={GAME_ID} score={scRef.current} correct={okRef.current} total={answeredRef.current} label={`${scRef.current} pts · ${sessionDuration}s session`} onReplay={startGame} onBack={onBack} />;
+    const label = zen ? `${scRef.current} pts · ${ZEN_QUESTIONS} problems (Zen)` : `${scRef.current} pts · ${sessionDuration}s session`;
+    return <GameEnd gameId={GAME_ID} score={scRef.current} correct={okRef.current} total={answeredRef.current} label={label} onReplay={startGame} onBack={onBack} />;
   }
 
   return (
@@ -109,10 +126,12 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
       <HighScoreBanner gameId={GAME_ID} />
       <GameStats stats={[
         { label: 'Points', value: sc, color: 'var(--accent)' },
-        { label: 'Time', value: Math.ceil(Math.max(0, timeLeft)), color: 'var(--red)' },
+        zen
+          ? { label: 'Problem', value: `${Math.min(answeredRef.current + 1, ZEN_QUESTIONS)}/${ZEN_QUESTIONS}`, color: 'var(--orange)' }
+          : { label: 'Time', value: Math.ceil(Math.max(0, timeLeft)), color: 'var(--red)' },
         { label: 'Streak', value: sr, color: 'var(--green)' },
       ]} />
-      <GameTimer timeLeft={timeLeft} maxTime={sessionDuration} />
+      {!zen && <GameTimer timeLeft={timeLeft} maxTime={sessionDuration} />}
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
         Solve the math problem as fast as you can. Enter your answer and press OK.
       </p>

@@ -94,7 +94,8 @@ function ShapeGrid({ shape, size = 40, color = 'var(--accent)' }) {
 
 const TIME_LIMIT = { easy: 20, medium: 15, hard: 12, 'really-hard': 10 };
 
-export default function MentalRotation({ onBack, difficulty = 'medium' }) {
+export default function MentalRotation({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const zen = timerMode === 'zen'; // Zen: no countdown
   const timeLimit = TIME_LIMIT[difficulty] || 15;
   const optionCount = DIFF_OPTIONS[difficulty] || 4;
   const cellSize = DIFF_CELL[difficulty] || 36;
@@ -162,16 +163,18 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
 
     setTimeLeft(timeLimit);
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 0.1) { clearInterval(timerRef.current); return 0; }
-        return prev - 0.1;
-      });
-    }, 100);
+    if (!zen) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 0.1) { clearInterval(timerRef.current); return 0; }
+          return prev - 0.1;
+        });
+      }, 100);
+    }
   }, [state.rn]);
 
   useEffect(() => {
-    if (timeLeft <= 0 && !answered) {
+    if (!zen && timeLeft <= 0 && !answered) {
       setAnswered(true);
       setState(s => ({ ...s, sr: 0 }));
       setFb({ type: 'err', msg: "Time's up!" });
@@ -217,7 +220,7 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
         { label: 'Round', value: `${state.rn}/${MX}`, color: 'var(--orange)' },
         { label: 'Streak', value: state.sr, color: 'var(--green)' },
       ]} />
-      <GameTimer timeLeft={timeLeft} maxTime={timeLimit} />
+      {!zen && <GameTimer timeLeft={timeLeft} maxTime={timeLimit} />}
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
         Which option is a rotation of the original? (Not a mirror/reflection)
       </p>

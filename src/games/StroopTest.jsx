@@ -18,7 +18,10 @@ const COLOR_COUNT = { easy: 4, medium: 6, hard: 6, 'really-hard': 8 };
 const SESSION_TIME = { easy: 45, medium: 45, hard: 40, 'really-hard': 30 };
 const CONGRUENT_RATE = { easy: 0, medium: 0, hard: 0.25, 'really-hard': 0.30 };
 
-export default function StroopTest({ onBack, difficulty = 'medium' }) {
+const ZEN_QUESTIONS = 40; // Zen: a fixed set of words at your own pace, no clock
+
+export default function StroopTest({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const zen = timerMode === 'zen';
   const COLOR_MAP = ALL_COLORS.slice(0, COLOR_COUNT[difficulty] || 6);
   const sessionTime = SESSION_TIME[difficulty] || 45;
   const congruentRate = CONGRUENT_RATE[difficulty] || 0;
@@ -79,16 +82,18 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
     setTimeLeft(sessionTime);
     setMode('playing');
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      timeRef.current -= 0.1;
-      setTimeLeft(timeRef.current);
-      if (timeRef.current <= 0) {
-        clearInterval(timerRef.current);
-        setEnded(true);
-      }
-    }, 100);
+    if (!zen) {
+      timerRef.current = setInterval(() => {
+        timeRef.current -= 0.1;
+        setTimeLeft(timeRef.current);
+        if (timeRef.current <= 0) {
+          clearInterval(timerRef.current);
+          setEnded(true);
+        }
+      }, 100);
+    }
     genQ();
-  }, [genQ, sessionTime]);
+  }, [genQ, sessionTime, zen]);
 
   useEffect(() => () => clearInterval(timerRef.current), []);
   useEffect(() => { scRef.current = sc; }, [sc]);
@@ -102,17 +107,21 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
       srRef.current++;
       const pts = 5 + Math.min(srRef.current, 10);
       scRef.current += pts;
-      timeRef.current = Math.min(sessionTime, timeRef.current + 0.8);
+      if (!zen) timeRef.current = Math.min(sessionTime, timeRef.current + 0.8);
       setSr(srRef.current); setSc(scRef.current);
       setFb({ type: 'ok', msg: `+${pts}` });
     } else {
       srRef.current = 0;
-      timeRef.current = Math.max(0, timeRef.current - 3);
+      if (!zen) timeRef.current = Math.max(0, timeRef.current - 3);
       setSr(0);
-      setFb({ type: 'err', msg: `${options[correctIdx].name} · −3s` });
+      setFb({ type: 'err', msg: zen ? options[correctIdx].name : `${options[correctIdx].name} · −3s` });
+    }
+    if (zen && answeredRef.current >= ZEN_QUESTIONS) {
+      setTimeout(() => setEnded(true), 600);
+      return;
     }
     setTimeout(genQ, 600);
-  }, [answered, correctIdx, options, genQ, sessionTime]);
+  }, [answered, correctIdx, options, genQ, sessionTime, zen]);
 
   useKeySelect(answer, options.length || 4, answered);
 
@@ -139,17 +148,20 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
   }
 
   if (ended) {
-    return <GameEnd gameId={GAME_ID} score={scRef.current} correct={okRef.current} total={answeredRef.current} label={`${scRef.current} points in ${sessionTime}s`} onReplay={startGame} onBack={onBack} />;
+    const label = zen ? `${scRef.current} points · ${ZEN_QUESTIONS} words (Zen)` : `${scRef.current} points in ${sessionTime}s`;
+    return <GameEnd gameId={GAME_ID} score={scRef.current} correct={okRef.current} total={answeredRef.current} label={label} onReplay={startGame} onBack={onBack} />;
   }
 
   return (
     <div className="game-frame">
       <GameStats stats={[
         { label: 'Points', value: sc, color: 'var(--accent)' },
-        { label: 'Time', value: Math.ceil(Math.max(0, timeLeft)), color: 'var(--red)' },
+        zen
+          ? { label: 'Word', value: `${Math.min(answeredRef.current + 1, ZEN_QUESTIONS)}/${ZEN_QUESTIONS}`, color: 'var(--orange)' }
+          : { label: 'Time', value: Math.ceil(Math.max(0, timeLeft)), color: 'var(--red)' },
         { label: 'Streak', value: sr, color: 'var(--green)' },
       ]} />
-      <GameTimer timeLeft={timeLeft} maxTime={sessionTime} />
+      {!zen && <GameTimer timeLeft={timeLeft} maxTime={sessionTime} />}
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
         {questionMode === 'word' ? 'Name what the WORD says, ignore the color!' : 'Name the COLOR of the text, not the word itself.'}
       </p>

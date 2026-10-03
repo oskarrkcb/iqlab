@@ -47,7 +47,8 @@ function generate(difficulty = 'medium') {
   return { q, res, choices, ci: choices.indexOf(res) };
 }
 
-export default function Estimation({ onBack, difficulty = 'medium' }) {
+export default function Estimation({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const zen = timerMode === 'zen'; // Zen: no countdown
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [puzzle, setPuzzle] = useState(null);
   const [answered, setAnswered] = useState(false);
@@ -68,7 +69,7 @@ export default function Estimation({ onBack, difficulty = 'medium' }) {
     setPuzzle(generate(difficulty));
     setTimeLeft(10);
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
+    if (!zen) timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 0.1) { clearInterval(timerRef.current); return 0; }
         return prev - 0.1;
@@ -77,7 +78,7 @@ export default function Estimation({ onBack, difficulty = 'medium' }) {
   }, [state.rn, difficulty]);
 
   useEffect(() => {
-    if (timeLeft <= 0 && puzzle && !answered) {
+    if (!zen && timeLeft <= 0 && puzzle && !answered) {
       setAnswered(true);
       setState(s => ({ ...s, sr: 0 }));
       setFb({ type: 'err', msg: `Time's up! ${puzzle.res.toLocaleString()}` });
@@ -113,7 +114,7 @@ export default function Estimation({ onBack, difficulty = 'medium' }) {
         { label: 'Round', value: `${state.rn}/${MX}`, color: 'var(--orange)' },
         { label: 'Streak', value: state.sr, color: 'var(--green)' },
       ]} />
-      <GameTimer timeLeft={timeLeft} maxTime={10} />
+      {!zen && <GameTimer timeLeft={timeLeft} maxTime={10} />}
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
         Estimate the quantity shown. The closest guess wins the most points.
       </p>

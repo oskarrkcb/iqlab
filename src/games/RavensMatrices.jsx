@@ -270,8 +270,8 @@ function CellContent({ cell }) {
   return <span style={{ fontSize: cell.size, color: cell.color }}>{cell.shape}</span>;
 }
 
-export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
-  const timeLimit = RAVENS_TIME[difficulty] ?? null;
+export default function RavensMatrices({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const timeLimit = timerMode === 'zen' ? null : RAVENS_TIME[difficulty] ?? null; // Zen: no countdown
   const optionCount = RAVENS_OPTS[difficulty] || 4;
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [puzzle, setPuzzle] = useState(null);

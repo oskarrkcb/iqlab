@@ -69,8 +69,8 @@ function getMatGens(difficulty) {
   return hardMatGens; // really-hard: only hard generators
 }
 
-export default function MatrixPuzzle({ onBack, difficulty = 'medium' }) {
-  const timeLimit = MAT_TIME[difficulty] ?? null;
+export default function MatrixPuzzle({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const timeLimit = timerMode === 'zen' ? null : MAT_TIME[difficulty] ?? null; // Zen: no countdown
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [grid, setGrid] = useState(null);
   const [hidden, setHidden] = useState({ r: 0, c: 0 });

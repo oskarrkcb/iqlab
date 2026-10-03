@@ -509,6 +509,12 @@ export default function Training() {
                       Zen
                     </button>
                   </div>
+                  {timerMode === 'zen' && (
+                    <p className="tr-sidebar-hint">
+                      No countdowns: puzzles wait for you, Speed Math and Stroop become a fixed set at your own pace.
+                      In reaction and memory games (Go/No-Go, Chimp, Dual N-Back, Corsi …) the timing is the task itself, so it stays.
+                    </p>
+                  )}
                 </div>
 
                 <div className="tr-sidebar-divider" />

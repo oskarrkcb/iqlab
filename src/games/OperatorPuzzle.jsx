@@ -59,7 +59,8 @@ function generate(difficulty = 'medium') {
   return { nums: [3, 4, 5], ops: ['+', '×'], target: 23 };
 }
 
-export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
+export default function OperatorPuzzle({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const zen = timerMode === 'zen'; // Zen: no countdown
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [puzzle, setPuzzle] = useState(null);
   const [slots, setSlots] = useState([]);
@@ -87,7 +88,7 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
     setActiveSlot(0);
     setTimeLeft(25);
     clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
+    if (!zen) timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 0.1) { clearInterval(timerRef.current); return 0; }
         return prev - 0.1;
@@ -96,7 +97,7 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
   }, [state.rn]);
 
   useEffect(() => {
-    if (timeLeft <= 0 && puzzle && !waiting) {
+    if (!zen && timeLeft <= 0 && puzzle && !waiting) {
       setWaiting(true);
       setState(s => ({ ...s, sr: 0 }));
       setFb({ type: 'err', msg: `Time's up! ${fmtSol(puzzle)}` });
@@ -150,7 +151,7 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
         { label: 'Round', value: `${state.rn}/${MX}`, color: 'var(--orange)' },
         { label: 'Streak', value: state.sr, color: 'var(--green)' },
       ]} />
-      <GameTimer timeLeft={timeLeft} maxTime={25} />
+      {!zen && <GameTimer timeLeft={timeLeft} maxTime={25} />}
       {puzzle && (
         <>
           <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 8 }}>Insert +, −, × or ÷ — × and ÷ are calculated before + and −</p>

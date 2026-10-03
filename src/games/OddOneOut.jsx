@@ -131,8 +131,8 @@ function fixCount(puzzle, targetCount) {
   return { nums: newNums, oi, rule };
 }
 
-export default function OddOneOut({ onBack, difficulty = 'medium' }) {
-  const timeLimit = TIME_LIMIT[difficulty] ?? null;
+export default function OddOneOut({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const timeLimit = timerMode === 'zen' ? null : TIME_LIMIT[difficulty] ?? null; // Zen: no countdown
   const count = ITEM_COUNT[difficulty] || 6;
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [puzzle, setPuzzle] = useState(null);

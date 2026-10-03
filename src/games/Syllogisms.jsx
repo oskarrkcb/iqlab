@@ -146,8 +146,8 @@ function getPuzzle(difficulty) {
 
 const SYL_TIME = { hard: 30, 'really-hard': 20 };
 
-export default function Syllogisms({ onBack, difficulty = 'medium' }) {
-  const timeLimit = SYL_TIME[difficulty] ?? null;
+export default function Syllogisms({ onBack, difficulty = 'medium', timerMode = 'timed' }) {
+  const timeLimit = timerMode === 'zen' ? null : SYL_TIME[difficulty] ?? null; // Zen: no countdown
   const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [puzzle, setPuzzle] = useState(null);
   const [answered, setAnswered] = useState(false);
