@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLang } from '../i18n/LanguageContext';
 import Footer from '../components/Footer';
-import { SessionContext } from '../games/GameShell';
+import { SessionContext, GameSettingsContext } from '../games/GameShell';
+import { nextDifficulty, LEVEL_LABELS } from '../games/adaptive';
 import NumberSeries from '../games/NumberSeries';
 import OperatorPuzzle from '../games/OperatorPuzzle';
 import Game24 from '../games/Game24';
@@ -20,7 +21,7 @@ import ChimpTest from '../games/ChimpTest';
 import AlgoThinking from '../games/AlgoThinking';
 import VsBot from '../games/VsBot';
 import MarathonMode from '../games/MarathonMode';
-import { getHighScore } from '../stats';
+import { getHighScore, getHistory } from '../stats';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import './Training.css';
@@ -86,12 +87,12 @@ function fmtLimit(s) {
   return `${sec}s`;
 }
 
-/** Small inline high-score chip shown on game cards */
-function ScoreChip({ gameId }) {
+/** Small inline high-score chip shown on game cards (for the selected difficulty) */
+function ScoreChip({ gameId, difficulty }) {
   const [hs, setHs] = useState(0);
   useEffect(() => {
-    getHighScore(gameId).then(setHs);
-  }, [gameId]);
+    getHighScore(gameId, difficulty).then(setHs);
+  }, [gameId, difficulty]);
   if (!hs) return null;
   return (
     <span className="train-hs-chip">
@@ -117,6 +118,8 @@ export default function Training() {
   const navigate = useNavigate();
   const [timerMode, setTimerMode] = useState('timed');
   const [difficulty, setDifficulty] = useState('medium');
+  // The level actually played — differs from `difficulty` in Auto mode
+  const [playDifficulty, setPlayDifficulty] = useState('medium');
   const [seriesType, setSeriesType] = useState('mixed');
   const [helpLevel, setHelpLevel] = useState('none');
   const [category, setCategory] = useState('all');
@@ -202,11 +205,16 @@ export default function Training() {
   // Cleanup on unmount
   useEffect(() => () => clearInterval(sessionTimerRef.current), []);
 
-  const startGame = (id) => {
+  const startGame = async (id) => {
     if (!user && !FREE_GAMES.includes(id)) {
       navigate('/login');
       return;
     }
+    // Auto: pick the level from how your last game of this kind went
+    const level = difficulty === 'auto'
+      ? nextDifficulty(user ? await getHistory(id, 10) : [])
+      : difficulty;
+    setPlayDifficulty(level);
     setActiveGame(id);
     setCurrentSet(1);
     setGameKey(k => k + 1);
@@ -235,6 +243,14 @@ export default function Training() {
   };
 
   const GameComponent = activeGame ? GAME_COMPONENTS[activeGame] : null;
+  const isAuto = difficulty === 'auto';
+  const marathonDifficulty = isAuto ? 'medium' : difficulty;
+
+  // Records are kept per level; in Auto mode "Play again" re-picks the level
+  const gameSettings = {
+    difficulty: playDifficulty,
+    restart: isAuto && activeGame ? () => startGame(activeGame) : null,
+  };
 
   // Session context value — consumed by GameEnd in GameShell.jsx
   const sessionCtx = reps > 1 ? {
@@ -266,14 +282,16 @@ export default function Training() {
                 </div>
               </div>
               <div className="game-frame-large">
-                <MarathonMode
-                  onBack={handleBack}
-                  difficulty={difficulty}
-                  timerMode={timerMode}
-                  timeLimit={timeLimit}
-                  helpLevel={helpLevel}
-                  seriesType={seriesType}
-                />
+                <GameSettingsContext.Provider value={{ difficulty: marathonDifficulty, restart: null }}>
+                  <MarathonMode
+                    onBack={handleBack}
+                    difficulty={marathonDifficulty}
+                    timerMode={timerMode}
+                    timeLimit={timeLimit}
+                    helpLevel={helpLevel}
+                    seriesType={seriesType}
+                  />
+                </GameSettingsContext.Provider>
               </div>
             </div>
           </div>
@@ -373,7 +391,7 @@ export default function Training() {
                 <div className="tr-sidebar-section">
                   <div className="tr-sidebar-label">Difficulty</div>
                   <div className="diff-pills">
-                    {['Easy', 'Medium', 'Hard', 'Really Hard'].map(d => {
+                    {['Easy', 'Medium', 'Hard', 'Really Hard', 'Auto'].map(d => {
                       const val = d.toLowerCase().replace(' ', '-');
                       const active = difficulty === val;
                       return (
@@ -385,6 +403,11 @@ export default function Training() {
                       );
                     })}
                   </div>
+                  {isAuto && (
+                    <p className="tr-sidebar-hint">
+                      Each game starts at the level your last result earned: ≥85% correct → one level up, under 50% → one level down.
+                    </p>
+                  )}
                 </div>
 
                 <div className="tr-sidebar-divider" />
@@ -450,7 +473,7 @@ export default function Training() {
                           <div key={game.id} className={`tr-card${locked ? ' tr-card--locked' : ''}`} onClick={() => startGame(game.id)}>
                             <div className="tr-card-top">
                               <div className="tr-card-icon"><GameIcon type={game.icon} /></div>
-                              {!locked && <ScoreChip gameId={game.id} />}
+                              {!locked && <ScoreChip gameId={game.id} difficulty={isAuto ? undefined : difficulty} />}
                               {isFree && !user && <span className="tr-free-tag">Free</span>}
                             </div>
                             <div className="tr-card-cat">{game.category}</div>
@@ -480,7 +503,7 @@ export default function Training() {
                           <div key={game.id} className={`tr-card${locked ? ' tr-card--locked' : ''}`} onClick={() => startGame(game.id)}>
                             <div className="tr-card-top">
                               <div className="tr-card-icon"><GameIcon type={game.icon} /></div>
-                              {!locked && <ScoreChip gameId={game.id} />}
+                              {!locked && <ScoreChip gameId={game.id} difficulty={isAuto ? undefined : difficulty} />}
                             </div>
                             <div className="tr-card-cat">{game.category}</div>
                             <div className="tr-card-title">{game.name}</div>
@@ -515,6 +538,11 @@ export default function Training() {
                   {t.game.back}
                 </button>
                 <div className="session-bar-info">
+                  {isAuto && (
+                    <div className="session-limit-pill" title="Auto difficulty">
+                      Auto · {LEVEL_LABELS[playDifficulty]}
+                    </div>
+                  )}
                   {reps > 1 && (
                     <div className="session-sets-pill">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
@@ -537,18 +565,20 @@ export default function Training() {
 
               <div className="game-frame-large">
                 <SessionContext.Provider value={sessionCtx}>
-                  {GameComponent && (
-                    <GameComponent
-                      key={gameKey}
-                      onBack={handleBack}
-                      difficulty={difficulty}
-                      timerMode={timerMode}
-                      timeLimit={timeLimit}
-                      reps={reps}
-                      helpLevel={helpLevel}
-                      seriesType={seriesType}
-                    />
-                  )}
+                  <GameSettingsContext.Provider value={gameSettings}>
+                    {GameComponent && (
+                      <GameComponent
+                        key={gameKey}
+                        onBack={handleBack}
+                        difficulty={playDifficulty}
+                        timerMode={timerMode}
+                        timeLimit={timeLimit}
+                        reps={reps}
+                        helpLevel={helpLevel}
+                        seriesType={seriesType}
+                      />
+                    )}
+                  </GameSettingsContext.Provider>
                 </SessionContext.Provider>
               </div>
             </div>

@@ -6,16 +6,24 @@ import './GameShell.css';
 export const SessionContext = createContext(null);
 export const useSession = () => useContext(SessionContext);
 
+// ── Game settings: the difficulty actually played (records are kept per level),
+// plus restart() in Auto mode so "Play again" picks the next level ──
+export const GameSettingsContext = createContext(null);
+export const useGameSettings = () => useContext(GameSettingsContext);
+
+const LEVEL_NAMES = { easy: 'Easy', medium: 'Medium', hard: 'Hard', 'really-hard': 'Really Hard' };
+
 export function HighScoreBanner({ gameId }) {
+  const difficulty = useGameSettings()?.difficulty;
   const [hs, setHs] = useState(0);
   useEffect(() => {
-    getHighScore(gameId).then(setHs);
-  }, [gameId]);
+    getHighScore(gameId, difficulty).then(setHs);
+  }, [gameId, difficulty]);
   if (!hs) return null;
   return (
     <div className="g-highscore">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-      <span>Personal Best: <strong>{hs}</strong></span>
+      <span>Personal Best{difficulty ? ` (${LEVEL_NAMES[difficulty] || difficulty})` : ''}: <strong>{hs}</strong></span>
     </div>
   );
 }
@@ -155,23 +163,36 @@ function ShareButton({ score, label, gameId }) {
  * Props: gameId, score, correct, total, label, onReplay, onBack
  */
 export function GameEnd({ gameId, score, correct, total, label, onReplay, onBack }) {
+  const settings = useGameSettings();
+  const difficulty = settings?.difficulty;
   const [highScore, setHighScore] = useState(0);
   const [history, setHistory] = useState([]);
+  const savedRef = useRef(null);
 
-  // Record this game and then load stats
+  // Record this game and then load stats for the same difficulty
   useEffect(() => {
     async function saveAndLoad() {
       if (gameId && score != null) {
-        await recordGame(gameId, { score, correct: correct ?? 0, total: total ?? 0 });
+        await recordGame(gameId, { score, correct: correct ?? 0, total: total ?? 0, difficulty });
       }
       if (gameId) {
-        const [hs, hist] = await Promise.all([getHighScore(gameId), getHistory(gameId, 8)]);
+        const [hs, hist] = await Promise.all([getHighScore(gameId, difficulty), getHistory(gameId, 8, difficulty)]);
         setHighScore(hs);
         setHistory(hist);
       }
     }
-    saveAndLoad();
-  }, [gameId, score, correct, total]);
+    savedRef.current = saveAndLoad();
+  }, [gameId, score, correct, total, difficulty]);
+
+  // In Auto mode, "Play again" waits for the save and then lets Training pick the next level
+  const replay = async () => {
+    if (settings?.restart) {
+      await savedRef.current;
+      settings.restart();
+    } else {
+      onReplay();
+    }
+  };
 
   const session = useSession();
   const isInSession = session && session.totalSets > 1;
@@ -180,8 +201,10 @@ export function GameEnd({ gameId, score, correct, total, label, onReplay, onBack
   const isNewRecord = score >= highScore && score > 0 && highScore > 0;
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : null;
 
-  const prevAttempts = history.slice(0, -1).slice(-5);
-  const chartData = history.map(h => h.score);
+  // history is newest first and already contains this game
+  const chrono = [...history].reverse();
+  const prevAttempts = chrono.slice(0, -1).slice(-5);
+  const chartData = chrono.map(h => h.score);
   const chartMax = Math.max(...chartData, 1);
 
   return (
@@ -221,7 +244,7 @@ export function GameEnd({ gameId, score, correct, total, label, onReplay, onBack
         )}
         <div className="g-eval-stat">
           <div className="g-eval-val" style={{ color: 'var(--orange)' }}>{highScore}</div>
-          <div className="g-eval-lbl">Best</div>
+          <div className="g-eval-lbl">Best{difficulty ? ` · ${LEVEL_NAMES[difficulty] || difficulty}` : ''}</div>
         </div>
       </div>
 
@@ -289,11 +312,11 @@ export function GameEnd({ gameId, score, correct, total, label, onReplay, onBack
         ) : isInSession && isLastSet ? (
           <>
             <button className="btn btn-primary" onClick={onBack}>Session Summary</button>
-            <button className="btn btn-secondary" onClick={onReplay}>Play Again</button>
+            <button className="btn btn-secondary" onClick={replay}>Play Again</button>
           </>
         ) : (
           <>
-            <button className="btn btn-primary" onClick={onReplay}>Play Again</button>
+            <button className="btn btn-primary" onClick={replay}>Play Again</button>
             <button className="btn btn-secondary" onClick={onBack}>Back</button>
           </>
         )}

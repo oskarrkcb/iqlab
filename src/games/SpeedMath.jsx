@@ -19,6 +19,8 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
   const timeRef = useRef(sessionDuration);
   const srRef = useRef(0);
   const scRef = useRef(0);
+  const okRef = useRef(0);
+  const answeredRef = useRef(0);
 
   const genQ = useCallback(() => {
     let q = '', ans = 0;
@@ -60,7 +62,7 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
 
   const startGame = useCallback(() => {
     setSc(0); setSr(0); setEnded(false);
-    scRef.current = 0; srRef.current = 0; timeRef.current = sessionDuration;
+    scRef.current = 0; srRef.current = 0; okRef.current = 0; answeredRef.current = 0; timeRef.current = sessionDuration;
     setTimeLeft(sessionDuration);
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
@@ -79,7 +81,9 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
   const submit = () => {
     const v = parseInt(input.trim());
     if (isNaN(v)) return;
+    answeredRef.current++;
     if (v === answer) {
+      okRef.current++;
       srRef.current++;
       const pts = 5 + Math.min(srRef.current, 10);
       scRef.current += pts;
@@ -97,7 +101,7 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
   };
 
   if (ended) {
-    return <GameEnd gameId={GAME_ID} score={scRef.current} label={`${scRef.current} pts · ${sessionDuration}s session`} onReplay={startGame} onBack={onBack} />;
+    return <GameEnd gameId={GAME_ID} score={scRef.current} correct={okRef.current} total={answeredRef.current} label={`${scRef.current} pts · ${sessionDuration}s session`} onReplay={startGame} onBack={onBack} />;
   }
 
   return (

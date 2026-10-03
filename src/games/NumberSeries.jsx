@@ -5,7 +5,7 @@ import { pick, getSeqGens, getSeqGensByType, R } from './utils';
 const GAME_ID = 'seq';
 
 export default function NumberSeries({ onBack, difficulty = 'medium', seriesType = 'mixed', timerMode = 'timed' }) {
-  const [state, setState] = useState({ sc: 0, rn: 0, sr: 0 });
+  const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [puzzle, setPuzzle] = useState(null);
   const [input, setInput] = useState('');
   const [fb, setFb] = useState(null);
@@ -76,7 +76,7 @@ export default function NumberSeries({ onBack, difficulty = 'medium', seriesType
     stopTimer(); setRevealed(true);
     if (v === puzzle.ans) {
       const pts = 10 + (hinted ? 0 : 10);
-      setState(s => ({ ...s, sc: s.sc + pts, sr: s.sr + 1 }));
+      setState(s => ({ ...s, sc: s.sc + pts, sr: s.sr + 1, ok: s.ok + 1 }));
       setFb({ type: 'ok', msg: `Correct! +${pts} · ${puzzle.rule}` });
       setTimeout(nextRound, 1500);
     } else {
@@ -103,7 +103,7 @@ export default function NumberSeries({ onBack, difficulty = 'medium', seriesType
   };
 
   if (ended) {
-    return <GameEnd gameId={GAME_ID} score={state.sc} correct={state.sc > 0 ? Math.round(state.sc / 20) : 0} total={MX} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); setTimeout(() => nextRound(), 0); }} onBack={onBack} />;
+    return <GameEnd gameId={GAME_ID} score={state.sc} correct={state.ok} total={MX} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0, ok: 0 }); setEnded(false); setTimeout(() => nextRound(), 0); }} onBack={onBack} />;
   }
 
   return (

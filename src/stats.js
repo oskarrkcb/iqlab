@@ -39,16 +39,19 @@ export async function recordIQResult({ iqScore, correct, total, logicPct, mathPc
   return data;
 }
 
-/** Get high score for a game */
-export async function getHighScore(gameId) {
+/** Get high score for a game — only at one difficulty if given */
+export async function getHighScore(gameId, difficulty) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 0;
 
-  const { data } = await supabase
+  let query = supabase
     .from('game_results')
     .select('score')
     .eq('user_id', user.id)
-    .eq('game_id', gameId)
+    .eq('game_id', gameId);
+  if (difficulty) query = query.eq('difficulty', difficulty);
+
+  const { data } = await query
     .order('score', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -56,16 +59,19 @@ export async function getHighScore(gameId) {
   return data?.score ?? 0;
 }
 
-/** Get last N results for a game */
-export async function getHistory(gameId, n = 10) {
+/** Get last N results for a game (newest first) — only at one difficulty if given */
+export async function getHistory(gameId, n = 10, difficulty) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const { data } = await supabase
+  let query = supabase
     .from('game_results')
     .select('*')
     .eq('user_id', user.id)
-    .eq('game_id', gameId)
+    .eq('game_id', gameId);
+  if (difficulty) query = query.eq('difficulty', difficulty);
+
+  const { data } = await query
     .order('created_at', { ascending: false })
     .limit(n);
 

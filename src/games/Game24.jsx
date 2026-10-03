@@ -101,7 +101,7 @@ export default function Game24({ onBack, difficulty = 'medium' }) {
   };
 
   if (ended) {
-    return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc}/${MX} solved`} onReplay={() => { setState({ sc: 0, rn: 0, sk: 0 }); setEnded(false); }} onBack={onBack} />;
+    return <GameEnd gameId={GAME_ID} score={state.sc} correct={state.sc} total={MX} label={`${state.sc}/${MX} solved`} onReplay={() => { setState({ sc: 0, rn: 0, sk: 0 }); setEnded(false); }} onBack={onBack} />;
   }
 
   return (

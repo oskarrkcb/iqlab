@@ -69,6 +69,7 @@
 
 /* Difficulty pills */
 .tr-sidebar-section .diff-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.tr-sidebar-hint { font-size: 11px; line-height: 1.5; color: var(--gray2); margin: 10px 0 0; }
 .tr-sidebar-section .diff-pills button {
   padding: 4px 10px; border-radius: 999px; font-size: 12px;
   background: var(--bg3); color: var(--gray2);

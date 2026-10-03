@@ -40,6 +40,8 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
   const timeRef = useRef(45);
   const scRef = useRef(0);
   const srRef = useRef(0);
+  const okRef = useRef(0);
+  const answeredRef = useRef(0);
 
   const genQ = useCallback(() => {
     const isCongruent = Math.random() < congruentRate;
@@ -73,7 +75,7 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
 
   const startGame = useCallback(() => {
     setSc(0); setSr(0); setEnded(false);
-    scRef.current = 0; srRef.current = 0; timeRef.current = sessionTime;
+    scRef.current = 0; srRef.current = 0; okRef.current = 0; answeredRef.current = 0; timeRef.current = sessionTime;
     setTimeLeft(sessionTime);
     setMode('playing');
     clearInterval(timerRef.current);
@@ -94,7 +96,9 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
   const answer = useCallback((i) => {
     if (answered) return;
     setAnswered(true);
+    answeredRef.current++;
     if (i === correctIdx) {
+      okRef.current++;
       srRef.current++;
       const pts = 5 + Math.min(srRef.current, 10);
       scRef.current += pts;
@@ -135,7 +139,7 @@ export default function StroopTest({ onBack, difficulty = 'medium' }) {
   }
 
   if (ended) {
-    return <GameEnd gameId={GAME_ID} score={scRef.current} label={`${scRef.current} points in ${sessionTime}s`} onReplay={startGame} onBack={onBack} />;
+    return <GameEnd gameId={GAME_ID} score={scRef.current} correct={okRef.current} total={answeredRef.current} label={`${scRef.current} points in ${sessionTime}s`} onReplay={startGame} onBack={onBack} />;
   }
 
   return (

@@ -98,7 +98,7 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
   const timeLimit = TIME_LIMIT[difficulty] || 15;
   const optionCount = DIFF_OPTIONS[difficulty] || 4;
   const cellSize = DIFF_CELL[difficulty] || 36;
-  const [state, setState] = useState({ sc: 0, rn: 0, sr: 0 });
+  const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [original, setOriginal] = useState([]);
   const [options, setOptions] = useState([]);
   const [correctIdx, setCorrectIdx] = useState(0);
@@ -186,7 +186,7 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
     setAnswered(true); stopTimer();
     const ok = i === correctIdx;
     if (ok) {
-      setState(s => ({ ...s, sc: s.sc + 10, sr: s.sr + 1 }));
+      setState(s => ({ ...s, sc: s.sc + 10, sr: s.sr + 1, ok: s.ok + 1 }));
       setFb({ type: 'ok', msg: 'Correct! +10' });
     } else {
       setState(s => ({ ...s, sr: 0 }));
@@ -201,8 +201,10 @@ export default function MentalRotation({ onBack, difficulty = 'medium' }) {
     <GameEnd
       gameId={GAME_ID}
       score={state.sc}
+      correct={state.ok}
+      total={MX}
       label={`${state.sc} points · ${MX} shapes`}
-      onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); }}
+      onReplay={() => { setState({ sc: 0, rn: 0, sr: 0, ok: 0 }); setEnded(false); }}
       onBack={onBack}
     />
   );

@@ -60,7 +60,7 @@ function generate(difficulty = 'medium') {
 }
 
 export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
-  const [state, setState] = useState({ sc: 0, rn: 0, sr: 0 });
+  const [state, setState] = useState({ sc: 0, rn: 0, sr: 0, ok: 0 });
   const [puzzle, setPuzzle] = useState(null);
   const [slots, setSlots] = useState([]);
   const [activeSlot, setActiveSlot] = useState(0);
@@ -121,7 +121,7 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
     stopTimer(); setWaiting(true);
     const r = evalOps(puzzle.nums, slots);
     if (r === puzzle.target) {
-      setState(s => ({ ...s, sc: s.sc + 15, sr: s.sr + 1 }));
+      setState(s => ({ ...s, sc: s.sc + 15, sr: s.sr + 1, ok: s.ok + 1 }));
       setFb({ type: 'ok', msg: 'Correct! +15' });
       setTimeout(nextRound, 1500);
     } else {
@@ -139,7 +139,7 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
   };
 
   if (ended) {
-    return <GameEnd gameId={GAME_ID} score={state.sc} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0 }); setEnded(false); }} onBack={onBack} />;
+    return <GameEnd gameId={GAME_ID} score={state.sc} correct={state.ok} total={MX} label={`${state.sc} points`} onReplay={() => { setState({ sc: 0, rn: 0, sr: 0, ok: 0 }); setEnded(false); }} onBack={onBack} />;
   }
 
   return (
