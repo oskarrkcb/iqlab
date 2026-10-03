@@ -7,18 +7,21 @@ export const SessionContext = createContext(null);
 export const useSession = () => useContext(SessionContext);
 
 // ── Game settings: the difficulty actually played (records are kept per level),
-// plus restart() in Auto mode so "Play again" picks the next level ──
+// restart() for Auto mode / daily challenge, and recordAs to store the result
+// under another id (the daily challenge uses "daily-YYYY-MM-DD") ──
 export const GameSettingsContext = createContext(null);
 export const useGameSettings = () => useContext(GameSettingsContext);
 
 const LEVEL_NAMES = { easy: 'Easy', medium: 'Medium', hard: 'Hard', 'really-hard': 'Really Hard' };
 
 export function HighScoreBanner({ gameId }) {
-  const difficulty = useGameSettings()?.difficulty;
+  const settings = useGameSettings();
+  const difficulty = settings?.difficulty;
+  const recordId = settings?.recordAs ?? gameId;
   const [hs, setHs] = useState(0);
   useEffect(() => {
-    getHighScore(gameId, difficulty).then(setHs);
-  }, [gameId, difficulty]);
+    getHighScore(recordId, difficulty).then(setHs);
+  }, [recordId, difficulty]);
   if (!hs) return null;
   return (
     <div className="g-highscore">
@@ -165,6 +168,7 @@ function ShareButton({ score, label, gameId }) {
 export function GameEnd({ gameId, score, correct, total, label, onReplay, onBack }) {
   const settings = useGameSettings();
   const difficulty = settings?.difficulty;
+  const recordId = gameId ? settings?.recordAs ?? gameId : null;
   const [highScore, setHighScore] = useState(0);
   const [history, setHistory] = useState([]);
   const savedRef = useRef(null);
@@ -172,17 +176,17 @@ export function GameEnd({ gameId, score, correct, total, label, onReplay, onBack
   // Record this game and then load stats for the same difficulty
   useEffect(() => {
     async function saveAndLoad() {
-      if (gameId && score != null) {
-        await recordGame(gameId, { score, correct: correct ?? 0, total: total ?? 0, difficulty });
+      if (recordId && score != null) {
+        await recordGame(recordId, { score, correct: correct ?? 0, total: total ?? 0, difficulty });
       }
-      if (gameId) {
-        const [hs, hist] = await Promise.all([getHighScore(gameId, difficulty), getHistory(gameId, 8, difficulty)]);
+      if (recordId) {
+        const [hs, hist] = await Promise.all([getHighScore(recordId, difficulty), getHistory(recordId, 8, difficulty)]);
         setHighScore(hs);
         setHistory(hist);
       }
     }
     savedRef.current = saveAndLoad();
-  }, [gameId, score, correct, total, difficulty]);
+  }, [recordId, score, correct, total, difficulty]);
 
   // In Auto mode, "Play again" waits for the save and then lets Training pick the next level
   const replay = async () => {

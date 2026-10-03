@@ -2,7 +2,26 @@
 //                    SHARED UTILITIES
 // ══════════════════════════════════════════════════════
 
-export const R = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+// Random source: Math.random normally, a seeded generator during the daily
+// challenge so everyone gets exactly the same puzzles that day.
+let rand = Math.random;
+export const rnd = () => rand();
+export function setSeed(seed) { rand = seed == null ? Math.random : mulberry32(seed); }
+export function seedFromString(s) {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mulberry32(a) {
+  return () => {
+    a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+export const R = (a, b) => Math.floor(rand() * (b - a + 1)) + a;
 export const pick = (a) => a[R(0, a.length - 1)];
 export const shuf = (a) => {
   const b = [...a];
@@ -839,7 +858,7 @@ export const seqGens = [
   // 51. Digit rotation: 52814 → 28145 → 81452 …
   () => {
     const digits = shuf([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 5);
-    const left = Math.random() < 0.5;
+    const left = rnd() < 0.5;
     const q = [];
     let d = digits;
     for (let i = 0; i < 6; i++) {
@@ -1128,7 +1147,7 @@ export const oooGens = [
     const d = R(2, 7), s = R(1, 20), n = [];
     for (let i = 0; i < 5; i++) n.push(s + d * i);
     const oi = R(0, 4);
-    n[oi] += R(1, 4) * (Math.random() > 0.5 ? 1 : -1);
+    n[oi] += R(1, 4) * (rnd() > 0.5 ? 1 : -1);
     if (n[oi] === s + d * oi) n[oi]++;
     return { nums: n, oi, rule: `Series +${d} — <b>${n[oi]}</b> doesn't fit` };
   },

@@ -3,6 +3,8 @@ import { useLang } from '../i18n/LanguageContext';
 import Footer from '../components/Footer';
 import { SessionContext, GameSettingsContext } from '../games/GameShell';
 import { nextDifficulty, LEVEL_LABELS } from '../games/adaptive';
+import { setSeed, seedFromString } from '../games/utils';
+import { todayKey, dailyGame, dailyRecordId, dailySeedText, getMyDaily, getDailyLeaderboard, DAILY_DIFFICULTY } from '../daily';
 import NumberSeries from '../games/NumberSeries';
 import OperatorPuzzle from '../games/OperatorPuzzle';
 import Game24 from '../games/Game24';
@@ -117,6 +119,79 @@ function ScoreChip({ gameId, difficulty }) {
   );
 }
 
+const DAILY_TEXT = {
+  de: {
+    title: 'Tages-Challenge',
+    sub: g => `Heute: ${g} · Hard · alle bekommen dieselben Rätsel`,
+    play: 'Jetzt spielen',
+    practice: 'Nochmal üben',
+    login: 'Anmelden zum Mitspielen',
+    mine: (s, rank) => `Dein Ergebnis: ${s} Punkte${rank ? ` · Platz ${rank}` : ''}`,
+    firstOnly: 'Nur dein erster Versuch zählt für die Rangliste.',
+    noOne: 'Heute hat noch niemand gespielt – sei die oder der Erste!',
+    missing: 'Die Tages-Rangliste ist noch nicht eingerichtet.',
+  },
+  en: {
+    title: 'Daily Challenge',
+    sub: g => `Today: ${g} · Hard · everyone gets the same puzzles`,
+    play: 'Play now',
+    practice: 'Practise again',
+    login: 'Sign in to take part',
+    mine: (s, rank) => `Your result: ${s} points${rank ? ` · rank ${rank}` : ''}`,
+    firstOnly: 'Only your first try counts for the ranking.',
+    noOne: 'Nobody has played today yet – be the first!',
+    missing: 'The daily ranking is not set up yet.',
+  },
+};
+
+function DailyCard({ user, lang, gameName, onPlay, onLogin }) {
+  const tx = DAILY_TEXT[lang] || DAILY_TEXT.en;
+  const key = todayKey();
+  const [mine, setMine] = useState(null);
+  const [board, setBoard] = useState({ rows: [], error: null });
+
+  useEffect(() => {
+    if (!user) return;
+    Promise.all([getMyDaily(key), getDailyLeaderboard(key, 5)]).then(([m, b]) => { setMine(m); setBoard(b); });
+  }, [user, key]);
+
+  const rank = board.rows.findIndex(r => r.user_id === user?.id) + 1;
+
+  return (
+    <div className="tr-daily">
+      <div className="tr-daily-head">
+        <div>
+          <div className="tr-daily-title">{tx.title} · {key.split('-').reverse().join('.')}</div>
+          <div className="tr-daily-sub">{tx.sub(gameName)}</div>
+        </div>
+        {user ? (
+          <button className={`btn ${mine ? 'btn-ghost' : 'btn-primary'} btn-sm`} onClick={onPlay}>{mine ? tx.practice : tx.play}</button>
+        ) : (
+          <button className="btn btn-secondary btn-sm" onClick={onLogin}>{tx.login}</button>
+        )}
+      </div>
+      {user && mine && <div className="tr-daily-mine">{tx.mine(mine.score, rank)} <span>{tx.firstOnly}</span></div>}
+      {user && (
+        board.error ? (
+          <div className="tr-daily-note">{tx.missing}</div>
+        ) : board.rows.length === 0 ? (
+          <div className="tr-daily-note">{tx.noOne}</div>
+        ) : (
+          <ol className="tr-daily-board">
+            {board.rows.map((r, i) => (
+              <li key={r.user_id} className={r.user_id === user.id ? 'me' : ''}>
+                <span className="tr-daily-pos">{i + 1}</span>
+                <span className="tr-daily-name">{r.display_name || 'Anonymous'}</span>
+                <span className="tr-daily-score">{r.score}</span>
+              </li>
+            ))}
+          </ol>
+        )
+      )}
+    </div>
+  );
+}
+
 // Category → game IDs map for filtering
 const CATEGORY_MAP = {
   math:   ['est', 'op', 'g24', 'sp', 'seq', 'tricks'],
@@ -128,7 +203,7 @@ const CATEGORY_MAP = {
 };
 
 export default function Training() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,6 +211,8 @@ export default function Training() {
   const [difficulty, setDifficulty] = useState('medium');
   // The level actually played — differs from `difficulty` in Auto mode
   const [playDifficulty, setPlayDifficulty] = useState('medium');
+  // { key: 'YYYY-MM-DD' } while the daily challenge is being played
+  const [daily, setDaily] = useState(null);
   const [seriesType, setSeriesType] = useState('mixed');
   const [helpLevel, setHelpLevel] = useState('none');
   const [category, setCategory] = useState('all');
@@ -231,6 +308,8 @@ export default function Training() {
       navigate('/login');
       return;
     }
+    setSeed(null);
+    setDaily(null);
     // Auto: pick the level from how your last game of this kind went
     const level = difficulty === 'auto'
       ? nextDifficulty(user ? await getHistory(id, 10) : [])
@@ -260,8 +339,23 @@ export default function Training() {
     setGameKey(k => k + 1);
   }, []);
 
+  // Daily challenge: same seed for everyone, fixed settings, no session timer
+  const startDaily = () => {
+    if (!user) { navigate('/login'); return; }
+    const key = todayKey();
+    stopSessionTimer();
+    setSeed(seedFromString(dailySeedText(key)));
+    setDaily({ key });
+    setPlayDifficulty(DAILY_DIFFICULTY);
+    setActiveGame(dailyGame(key));
+    setCurrentSet(1);
+    setGameKey(k => k + 1);
+  };
+
   const handleBack = useCallback(() => {
     stopSessionTimer();
+    setSeed(null);
+    setDaily(null);
     setActiveGame(null);
     setMarathonActive(false);
     setCurrentSet(1);
@@ -276,11 +370,13 @@ export default function Training() {
   const isAuto = difficulty === 'auto';
   const marathonDifficulty = isAuto ? 'medium' : difficulty;
 
-  // Records are kept per level; in Auto mode "Play again" re-picks the level
-  const gameSettings = {
-    difficulty: playDifficulty,
-    restart: isAuto && activeGame ? () => startGame(activeGame) : null,
-  };
+  // Records are kept per level; in Auto mode "Play again" re-picks the level.
+  // The daily challenge stores results as "daily-YYYY-MM-DD" and replays the same puzzles.
+  const gameSettings = daily
+    ? { difficulty: DAILY_DIFFICULTY, recordAs: dailyRecordId(daily.key), restart: startDaily }
+    : { difficulty: playDifficulty, restart: isAuto && activeGame ? () => startGame(activeGame) : null };
+  const allGames = [...EXISTING_GAMES, ...ADVANCED_MODES];
+  const nameOf = id => allGames.find(g => g.id === id)?.name ?? id;
 
   // Session context value — consumed by GameEnd in GameShell.jsx
   const sessionCtx = reps > 1 ? {
@@ -478,6 +574,14 @@ export default function Training() {
               {/* RIGHT — GAME GRID */}
               <main className="tr-main">
 
+                <DailyCard
+                  user={user}
+                  lang={lang}
+                  gameName={nameOf(dailyGame(todayKey()))}
+                  onPlay={startDaily}
+                  onLogin={() => navigate('/login')}
+                />
+
                 {/* Category tabs */}
                 <div className="tr-cat-tabs">
                   {['All', 'Math', 'Logic', 'Memory', 'Speed', 'IQ', 'Focus'].map(cat => (
@@ -568,18 +672,21 @@ export default function Training() {
                   {t.game.back}
                 </button>
                 <div className="session-bar-info">
-                  {isAuto && (
+                  {daily && (
+                    <div className="session-limit-pill">{(DAILY_TEXT[lang] || DAILY_TEXT.en).title} · Hard</div>
+                  )}
+                  {isAuto && !daily && (
                     <div className="session-limit-pill" title="Auto difficulty">
                       Auto · {LEVEL_LABELS[playDifficulty]}
                     </div>
                   )}
-                  {reps > 1 && (
+                  {reps > 1 && !daily && (
                     <div className="session-sets-pill">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
                       Set {currentSet}/{reps}
                     </div>
                   )}
-                  {timerMode === 'timed' && (
+                  {timerMode === 'timed' && !daily && (
                     <div className="session-limit-pill">
                       {fmtLimit(timeLimit)}
                     </div>
@@ -594,18 +701,18 @@ export default function Training() {
               </div>
 
               <div className="game-frame-large">
-                <SessionContext.Provider value={sessionCtx}>
+                <SessionContext.Provider value={daily ? null : sessionCtx}>
                   <GameSettingsContext.Provider value={gameSettings}>
                     {GameComponent && (
                       <GameComponent
                         key={gameKey}
                         onBack={handleBack}
                         difficulty={playDifficulty}
-                        timerMode={timerMode}
-                        timeLimit={timeLimit}
-                        reps={reps}
-                        helpLevel={helpLevel}
-                        seriesType={seriesType}
+                        timerMode={daily ? 'timed' : timerMode}
+                        timeLimit={daily ? 60 : timeLimit}
+                        reps={daily ? 1 : reps}
+                        helpLevel={daily ? 'none' : helpLevel}
+                        seriesType={daily ? 'mixed' : seriesType}
                       />
                     )}
                   </GameSettingsContext.Provider>

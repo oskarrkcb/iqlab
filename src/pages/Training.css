@@ -70,6 +70,21 @@
 /* Difficulty pills */
 .tr-sidebar-section .diff-pills { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
 .tr-sidebar-hint { font-size: 11px; line-height: 1.5; color: var(--gray2); margin: 10px 0 0; }
+
+/* Daily challenge card */
+.tr-daily { background: var(--bg3); border: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 16px 18px; margin-bottom: 20px; }
+.tr-daily-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.tr-daily-title { font-size: 15px; font-weight: 700; color: var(--white); }
+.tr-daily-sub { font-size: 12px; color: var(--gray2); margin-top: 3px; }
+.tr-daily-mine { margin-top: 12px; font-size: 13px; color: var(--white); font-weight: 600; }
+.tr-daily-mine span { display: block; font-weight: 400; font-size: 11px; color: var(--gray2); margin-top: 2px; }
+.tr-daily-note { margin-top: 12px; font-size: 12px; color: var(--gray2); }
+.tr-daily-board { list-style: none; margin: 12px 0 0; padding: 0; }
+.tr-daily-board li { display: grid; grid-template-columns: 24px 1fr auto; gap: 8px; padding: 6px 0; font-size: 13px; border-top: 1px solid var(--border); color: var(--gray1); }
+.tr-daily-board li.me { color: var(--accent); font-weight: 600; }
+.tr-daily-pos { font-family: var(--mono); color: var(--gray3); }
+.tr-daily-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tr-daily-score { font-family: var(--mono); font-weight: 700; }
 .tr-sidebar-section .diff-pills button {
   padding: 4px 10px; border-radius: 999px; font-size: 12px;
   background: var(--bg3); color: var(--gray2);
