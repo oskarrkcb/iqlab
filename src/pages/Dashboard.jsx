@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import { getAllStats, getHighScore, getLeaderboard, getUserRank } from '../stats';
+import { recommendations, progress } from '../insights';
 import { useAuth } from '../context/AuthContext';
 import { useLang } from '../i18n/LanguageContext';
 import './Dashboard.css';
@@ -52,6 +53,49 @@ const GAME_LABELS = {
   tricks: 'Tricks',
 };
 
+// Game id → key in t.games for the full, translated name
+const NAME_KEYS = {
+  seq: 'numberSeries', ooo: 'oddOneOut', mat: 'matrixPuzzle', est: 'estimation', op: 'operatorPuzzle',
+  g24: 'game24', sp: 'speedMath', mem: 'numberMemory', 'dual-nback': 'dualNBack', ravens: 'ravens',
+  schulte: 'schulte', stroop: 'stroop', rotation: 'rotation', syllogisms: 'syllogisms', chimp: 'chimp',
+  algo: 'algo', corsi: 'corsi', trail: 'trail', gonogo: 'goNoGo', hanoi: 'hanoi', tricks: 'mathTricks',
+};
+
+const LEVEL_NAMES = { easy: 'Easy', medium: 'Medium', hard: 'Hard', 'really-hard': 'Really Hard' };
+
+const TEXT = {
+  de: {
+    recTitle: 'Heute empfohlen',
+    progTitle: 'Echter Fortschritt',
+    play: 'Spielen',
+    category: { math: 'Mathe', logic: 'Logik', iq: 'IQ', memory: 'Gedächtnis', focus: 'Fokus' },
+    why: {
+      'weak-category': d => `Deine schwächste Kategorie: ${d.categoryName} (${d.accuracy} % richtig)`,
+      dropping: d => `Zuletzt ${d.last} Punkte – sonst um ${d.usual}`,
+      'not-recently': d => `Seit ${d.days} Tagen nicht gespielt`,
+      never: () => 'Noch nie gespielt',
+    },
+    progEmpty: 'Sobald du ein Spiel mindestens 6-mal auf derselben Stufe gespielt hast, siehst du hier, wie viel besser du geworden bist.',
+    progDetail: r => `${r.before} → ${r.after} Punkte (Ø erste 3 vs. letzte 3 von ${r.games} Spielen, ${r.days} ${r.days === 1 ? 'Tag' : 'Tage'})${r.accBefore != null ? ` · Trefferquote ${r.accBefore} → ${r.accAfter} %` : ''}`,
+    honest: 'Das ist echte Verbesserung – in genau diesen Aufgaben. Dass sich so ein Training auf allgemeine Intelligenz oder den Alltag überträgt, ist laut Forschung kaum belegt. Nachweislich helfen dafür eher genug Schlaf, Bewegung und Neues lernen.',
+  },
+  en: {
+    recTitle: 'Recommended today',
+    progTitle: 'Real progress',
+    play: 'Play',
+    category: { math: 'Math', logic: 'Logic', iq: 'IQ', memory: 'Memory', focus: 'Focus' },
+    why: {
+      'weak-category': d => `Your weakest category: ${d.categoryName} (${d.accuracy}% correct)`,
+      dropping: d => `Last time ${d.last} points – usually around ${d.usual}`,
+      'not-recently': d => `Not played for ${d.days} days`,
+      never: () => 'Never played yet',
+    },
+    progEmpty: 'Once you have played a game at least 6 times at the same level, you will see here how much you have improved.',
+    progDetail: r => `${r.before} → ${r.after} points (avg of first 3 vs last 3 of ${r.games} games, ${r.days} ${r.days === 1 ? 'day' : 'days'})${r.accBefore != null ? ` · accuracy ${r.accBefore} → ${r.accAfter}%` : ''}`,
+    honest: 'This is real improvement – at these exact tasks. Research finds little evidence that this kind of training carries over to general intelligence or everyday life. Sleep, exercise and learning new things are what reliably help there.',
+  },
+};
+
 // ── Neuro Score Gauge SVG ──
 const NEURO_GAUGE = ({ score }) => {
   const pct = Math.min(1, score / 100);
@@ -76,7 +120,10 @@ const NEURO_GAUGE = ({ score }) => {
 };
 
 export default function Dashboard() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
+  const tx = TEXT[lang] || TEXT.en;
+  const navigate = useNavigate();
+  const gameName = (id) => t.games[NAME_KEYS[id]]?.name || GAME_LABELS[id] || id;
   const [sleep, setSleep]   = useState(7);
   const [stress, setStress] = useState(3);
   const { user } = useAuth();
@@ -116,6 +163,9 @@ export default function Dashboard() {
   }, [allStats]);
 
   const maxExScore = Math.max(...exerciseScores.map(e => e.highScore), 1);
+
+  const recs = useMemo(() => recommendations(allStats?.games ?? {}), [allStats]);
+  const progressRows = useMemo(() => progress(allStats?.games ?? {}).slice(0, 6), [allStats]);
 
   const realAccuracy = useMemo(() => {
     if (!allStats?.games) return 0;
@@ -300,6 +350,50 @@ export default function Dashboard() {
             <div className="db-kpi-label">{t.dashboard.points}</div>
             <div className="db-kpi-value">{realTotalPts.toLocaleString()}</div>
             <div className="db-kpi-sub">{t.dashboard.total}</div>
+          </div>
+        </div>
+
+        {/* ══ INSIGHTS — what to train next + honest progress ══ */}
+        <div className="db-insights">
+          <div className="db-card">
+            <div className="db-card-title">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+              {tx.recTitle}
+            </div>
+            {recs.map(r => (
+              <div key={r.gameId} className="db-rec">
+                <div className="db-rec-text">
+                  <div className="db-rec-name">{gameName(r.gameId)}</div>
+                  <div className="db-rec-why">
+                    {tx.why[r.reason]({ ...r.detail, categoryName: tx.category[r.detail.category] })}
+                  </div>
+                </div>
+                <button type="button" className="db-rec-btn" onClick={() => navigate('/training', { state: { start: r.gameId } })}>
+                  {tx.play}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="db-card">
+            <div className="db-card-title">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+              {tx.progTitle}
+            </div>
+            {progressRows.length === 0 ? (
+              <p className="db-scores-empty" style={{ lineHeight: 1.6 }}>{tx.progEmpty}</p>
+            ) : progressRows.map(r => (
+              <div key={r.gameId} className="db-prog-row">
+                <span className="db-prog-name">
+                  {gameName(r.gameId)} <span className="db-prog-level">· {LEVEL_NAMES[r.level] || r.level}</span>
+                </span>
+                <span className="db-prog-change" style={{ color: r.change > 0 ? 'var(--green)' : r.change < 0 ? 'var(--red)' : 'var(--gray2)' }}>
+                  {r.change == null ? '–' : `${r.change > 0 ? '+' : ''}${r.change} %`}
+                </span>
+                <span className="db-prog-detail">{tx.progDetail(r)}</span>
+              </div>
+            ))}
+            <div className="db-honest">{tx.honest}</div>
           </div>
         </div>
 

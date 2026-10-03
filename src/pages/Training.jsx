@@ -28,7 +28,7 @@ import TowerOfHanoi from '../games/TowerOfHanoi';
 import MathTricks from '../games/MathTricks';
 import { getHighScore, getHistory } from '../stats';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Training.css';
 
 const FREE_GAMES = ['sp', 'seq'];
@@ -131,6 +131,7 @@ export default function Training() {
   const { t } = useLang();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [timerMode, setTimerMode] = useState('timed');
   const [difficulty, setDifficulty] = useState('medium');
   // The level actually played — differs from `difficulty` in Auto mode
@@ -244,6 +245,15 @@ export default function Training() {
       setSessionTimeLeft(null);
     }
   };
+
+  // Started from elsewhere (e.g. a dashboard recommendation): navigate('/training', { state: { start: id } })
+  useEffect(() => {
+    const id = location.state?.start;
+    if (id && GAME_COMPONENTS[id]) {
+      navigate(location.pathname, { replace: true, state: null }); // don't restart on reload
+      startGame(id);
+    }
+  }, []); // eslint-disable-line
 
   const handleNextSet = useCallback(() => {
     setCurrentSet(s => s + 1);
