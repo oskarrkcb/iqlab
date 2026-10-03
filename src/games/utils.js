@@ -13,6 +13,35 @@ export const shuf = (a) => {
   return b;
 };
 
+// Answer options around `ans`. The correct answer lands at a random rank
+// (smallest, middle, largest …) so "always pick the middle one" doesn't work.
+// `gap()` returns a positive distance between neighbouring options.
+// Distractors stay positive when the answer is positive.
+export function spreadChoices(ans, count, gap) {
+  let below = R(0, count - 1);
+  for (;;) {
+    const opts = [ans];
+    let lo = ans, hi = ans;
+    for (let i = 0; i < below; i++) { lo -= gap(); opts.push(lo); }
+    for (let i = below; i < count - 1; i++) { hi += gap(); opts.push(hi); }
+    if (lo > 0 || ans <= 0 || below === 0) return shuf(opts);
+    below--;
+  }
+}
+
+// ── Helpers for the digit-trick and hidden-sequence patterns (48–63) ──
+const PRIMES = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
+const FIB = [1, 1, 2, 3, 5, 8, 13, 21, 34, 55];
+const digitSum = n => String(n).split('').reduce((s, d) => s + Number(d), 0);
+const digitProduct = n => String(n).split('').filter(d => d !== '0').reduce((p, d) => p * Number(d), 1);
+const reverseNum = n => Number(String(n).split('').reverse().join(''));
+const digitRuns = n => String(n).match(/(\d)\1*/g);
+const lookSay = n => Number(digitRuns(n).map(run => `${run.length}${run[0]}`).join(''));
+const hl = v => `<span class="hl">${v}</span>`;
+// Sequence whose differences are `diffs` (used by the "differences are …" patterns)
+const fromDiffs = (start, diffs) => diffs.reduce((q, d) => [...q, q[q.length - 1] + d], [start]);
+const diffSteps = (q, diffs) => q.slice(1).map((v, i) => `${q[i]} + ${diffs[i]} = ${hl(v)}`);
+
 // ── Sequence generators for Number Series ──
 export const seqGens = [
   // 1. Simple addition (+d)
@@ -497,7 +526,6 @@ export const seqGens = [
       })
     };
   },
-,
   // 35. Interleaved Fibonacci-style: two separate Fibonacci sequences merged
   () => {
     let a1 = R(1, 3), b1 = R(1, 3), a2 = R(10, 15), b2 = R(1, 3);
@@ -766,6 +794,211 @@ export const seqGens = [
     }
     return seqGens[27]();
   },
+
+  // ── Digit tricks ──
+  // 48. + digit sum: 23 → 23+2+3 = 28 → 28+2+8 = 38 …
+  () => {
+    const q = [R(10, 60)];
+    while (q.length < 6) q.push(q[q.length - 1] + digitSum(q[q.length - 1]));
+    return {
+      seq: q, rule: 'Add the digit sum of the number',
+      ex: () => ({
+        steps: q.slice(1).map((v, i) => `${q[i]} + (${String(q[i]).split('').join(' + ')}) = ${hl(v)}`),
+        f: 'a(n+1) = a(n) + digit sum of a(n)'
+      })
+    };
+  },
+  // 49. Reverse and add: 37 → 37+73 = 110 …
+  () => {
+    let q;
+    do {
+      q = [R(12, 79)];
+      while (q.length < 6) q.push(q[q.length - 1] + reverseNum(q[q.length - 1]));
+    } while (q.slice(0, 5).some(v => v % 10 === 0)); // no trailing zeros — reversing them is ambiguous
+    return {
+      seq: q, rule: 'Add the number read backwards',
+      ex: () => ({
+        steps: q.slice(1).map((v, i) => `${q[i]} + ${reverseNum(q[i])} = ${hl(v)}`),
+        f: 'a(n+1) = a(n) + reverse(a(n))'
+      })
+    };
+  },
+  // 50. Look-and-say: 1 → "one 1" = 11 → "two 1s" = 21 → 1211 …
+  () => {
+    const start = pick([1, 2, 3, 12, 13, 21, 31]);
+    const q = [start];
+    while (q.length < (start < 10 ? 6 : 5)) q.push(lookSay(q[q.length - 1]));
+    return {
+      seq: q, rule: 'Look and say: describe the previous number ("one 1" → 11, "two 1s" → 21)',
+      ex: () => ({
+        steps: q.slice(1).map((v, i) => `${q[i]}: ${digitRuns(q[i]).map(run => `${run.length}× ${run[0]}`).join(', ')} → ${hl(v)}`),
+        f: 'Read each group of equal digits aloud: count, then digit'
+      })
+    };
+  },
+  // 51. Digit rotation: 52814 → 28145 → 81452 …
+  () => {
+    const digits = shuf([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 5);
+    const left = Math.random() < 0.5;
+    const q = [];
+    let d = digits;
+    for (let i = 0; i < 6; i++) {
+      q.push(Number(d.join('')));
+      d = left ? [...d.slice(1), d[0]] : [d[d.length - 1], ...d.slice(0, -1)];
+    }
+    return {
+      seq: q, rule: left ? 'The first digit moves to the end' : 'The last digit moves to the front',
+      ex: () => ({
+        steps: q.slice(1).map((v, i) => `${q[i]} → ${hl(v)}`),
+        f: left ? 'Rotate digits left by one' : 'Rotate digits right by one'
+      })
+    };
+  },
+  // 52. Growing concatenation of a hidden base sequence: 1, 14, 149, 14916 …
+  () => {
+    const b = pick([
+      { name: 'squares', seq: [1, 4, 9, 16, 25] },
+      { name: 'odd numbers', seq: [1, 3, 5, 7, 9] },
+      { name: 'primes', seq: [2, 3, 5, 7, 11] },
+      { name: 'triangular numbers', seq: [1, 3, 6, 10, 15] },
+      { name: 'powers of 2', seq: [1, 2, 4, 8, 16] },
+      { name: 'multiples of 3', seq: [3, 6, 9, 12, 15] },
+    ]);
+    const q = b.seq.map((_, i) => Number(b.seq.slice(0, i + 1).join('')));
+    return {
+      seq: q, rule: `Write the ${b.name} one after another`,
+      ex: () => ({
+        steps: q.slice(1).map((v, i) => `${q[i]} ⧺ ${b.seq[i + 1]} = ${hl(v)}`),
+        f: `${b.seq.join(', ')} … glued together`
+      })
+    };
+  },
+  // 53. + product of the digits (zeros skipped)
+  () => {
+    const q = [R(11, 49)];
+    while (q.length < 6) q.push(q[q.length - 1] + digitProduct(q[q.length - 1]));
+    return {
+      seq: q, rule: 'Add the product of the digits (zeros are skipped)',
+      ex: () => ({
+        steps: q.slice(1).map((v, i) => `${q[i]} + (${String(q[i]).split('').filter(c => c !== '0').join(' × ')}) = ${hl(v)}`),
+        f: 'a(n+1) = a(n) + product of the digits of a(n)'
+      })
+    };
+  },
+
+  // ── Hidden sequences ──
+  // 54. Differences are consecutive primes
+  () => {
+    const k = R(0, 3), diffs = PRIMES.slice(k, k + 5);
+    const q = fromDiffs(R(1, 30), diffs);
+    return {
+      seq: q, rule: `The differences are primes: ${diffs.join(', ')}`,
+      ex: () => ({ steps: diffSteps(q, diffs), f: 'Differences: consecutive prime numbers' })
+    };
+  },
+  // 55. Differences are squares
+  () => {
+    const k = R(1, 4), diffs = [0, 1, 2, 3, 4].map(i => (k + i) ** 2);
+    const q = fromDiffs(R(1, 20), diffs);
+    return {
+      seq: q, rule: `The differences are squares: ${diffs.join(', ')}`,
+      ex: () => ({ steps: diffSteps(q, diffs), f: `Differences: ${k}², ${k + 1}², ${k + 2}² …` })
+    };
+  },
+  // 56. Differences are Fibonacci numbers
+  () => {
+    const k = R(0, 3), diffs = FIB.slice(k, k + 5);
+    const q = fromDiffs(R(1, 25), diffs);
+    return {
+      seq: q, rule: `The differences are Fibonacci numbers: ${diffs.join(', ')}`,
+      ex: () => ({ steps: diffSteps(q, diffs), f: 'Differences: each difference = sum of the two before' })
+    };
+  },
+  // 57. Differences are factorials: +1, +2, +6, +24, +120
+  () => {
+    const diffs = [1, 2, 6, 24, 120];
+    const q = fromDiffs(R(1, 20), diffs);
+    return {
+      seq: q, rule: 'The differences are factorials: 1!, 2!, 3!, 4!, 5!',
+      ex: () => ({ steps: diffSteps(q, diffs), f: 'Differences: 1, 2, 6, 24, 120 (n!)' })
+    };
+  },
+  // 58. Tribonacci: each term = sum of the three before
+  () => {
+    const q = [R(1, 4), R(1, 4), R(1, 5)];
+    while (q.length < 7) q.push(q[q.length - 1] + q[q.length - 2] + q[q.length - 3]);
+    return {
+      seq: q, rule: 'Each number is the sum of the three before it',
+      ex: () => ({
+        steps: q.slice(3).map((v, i) => `${q[i]} + ${q[i + 1]} + ${q[i + 2]} = ${hl(v)}`),
+        f: 'a(n) = a(n−1) + a(n−2) + a(n−3)'
+      })
+    };
+  },
+  // 59. Three interleaved sequences: +d, ×2 and −e take turns
+  () => {
+    const a = R(1, 9), d = R(2, 6), b = R(1, 5), c = R(40, 60), e = R(3, 9);
+    const A = [a, a + d, a + 2 * d], B = [b, 2 * b, 4 * b], C = [c, c - e, c - 2 * e];
+    const q = [0, 1, 2].flatMap(i => [A[i], B[i], C[i]]);
+    return {
+      seq: q, rule: `Three sequences take turns: +${d}, ×2 and −${e}`,
+      ex: () => ({
+        steps: [
+          `1st, 4th, 7th: ${A.join(' → ')} (${hl(`+${d}`)})`,
+          `2nd, 5th, 8th: ${B.join(' → ')} (${hl('×2')})`,
+          `3rd, 6th, 9th: ${C.join(' → ')} (${hl(`−${e}`)})`,
+        ],
+        f: 'Split the sequence into every third number'
+      })
+    };
+  },
+  // 60. Products of neighbouring primes: 2×3, 3×5, 5×7 …
+  () => {
+    const k = R(0, 2);
+    const q = [0, 1, 2, 3, 4, 5].map(i => PRIMES[k + i] * PRIMES[k + i + 1]);
+    return {
+      seq: q, rule: 'Products of neighbouring primes',
+      ex: () => ({
+        steps: q.map((v, i) => `${PRIMES[k + i]} × ${PRIMES[k + i + 1]} = ${hl(v)}`),
+        f: 'a(n) = pₙ × pₙ₊₁'
+      })
+    };
+  },
+  // 61. Squares of primes, shifted
+  () => {
+    const off = pick([-1, 1, 2, 3]);
+    const q = PRIMES.slice(0, 6).map(p => p * p + off);
+    const sign = off > 0 ? `+ ${off}` : `− ${-off}`;
+    return {
+      seq: q, rule: `Squares of the primes ${sign}`,
+      ex: () => ({
+        steps: q.map((v, i) => `${PRIMES[i]}² ${sign} = ${hl(v)}`),
+        f: `a(n) = pₙ² ${sign}`
+      })
+    };
+  },
+  // 62. Differences alternate between two growing sequences: +a, +b, +2a, +2b, +3a, +3b
+  () => {
+    const a = R(1, 4), b = R(6, 12);
+    const diffs = [a, b, 2 * a, 2 * b, 3 * a, 3 * b];
+    const q = fromDiffs(R(1, 15), diffs);
+    return {
+      seq: q, rule: `Differences alternate: +${a}, +${2 * a}, +${3 * a} and +${b}, +${2 * b}, +${3 * b}`,
+      ex: () => ({ steps: diffSteps(q, diffs), f: `Odd steps: +${a}·n, even steps: +${b}·n` })
+    };
+  },
+  // 63. Squares, alternately plus and minus k
+  () => {
+    const o = R(2, 5), k = R(1, 3);
+    const q = [0, 1, 2, 3, 4, 5].map(i => (o + i) ** 2 + (i % 2 === 0 ? -k : k));
+    return {
+      seq: q, rule: `Squares, alternately −${k} and +${k}`,
+      ex: () => ({
+        steps: q.map((v, i) => `${o + i}² ${i % 2 === 0 ? '−' : '+'} ${k} = ${hl(v)}`),
+        f: `a(n) = n² ± ${k}, sign alternates`
+      })
+    };
+  },
 ];
 
 // ── Difficulty-filtered sequence generators ──
@@ -778,10 +1011,12 @@ export const seqGens = [
 // Index tiers:
 //   Easy    (0–8):   basic arithmetic, squares, fibonacci
 //   Medium  (0–19):  + alternating, cubes, triangular, interleaved
-//   Hard    (9–31):  only non-trivial — no simple +d/−d/odds
-//   R-Hard  (20–43): only complex multi-step, compound, exponential (excl. 21)
+//   Hard    (9–31):  only non-trivial — no simple +d/−d/odds, plus the gentler patterns of 47–62
+//   R-Hard  (20–62): only complex multi-step, compound, exponential (excl. 21)
+//   47–52 digit tricks, 53–62 hidden sequences
 export function getSeqGens(difficulty = 'medium') {
   const TRIVIAL = new Set([0, 1, 5, 6, 21]); // +d, −d, incr.diff, primes, odds
+  const HARD_PATTERNS = new Set([47, 50, 51, 53, 54, 55]); // digit sum, rotation, concat, prime/square/fib diffs
   switch (difficulty) {
     case 'easy':
       return seqGens.slice(0, 9);
@@ -789,7 +1024,7 @@ export function getSeqGens(difficulty = 'medium') {
       return seqGens.slice(0, 20);
     case 'hard':
       // Non-trivial generators from medium range upward, capped before 3-step cycles
-      return seqGens.filter((_, i) => i >= 7 && i < 33 && !TRIVIAL.has(i));
+      return seqGens.filter((_, i) => (i >= 7 && i < 33 && !TRIVIAL.has(i)) || HARD_PATTERNS.has(i));
     case 'really-hard':
       // Only complex: starts at +d/×m alternating (20), skips trivial odds (21)
       // includes all new 3/4-step cycle generators (41–43)
@@ -805,7 +1040,7 @@ export function getSeqGens(difficulty = 'medium') {
 
 // ── Series-type metadata ──
 // Maps each generator to a type matching the seriesType selector in Training.jsx.
-// Types: 'mixed' | 'fibonacci' | 'exponential' | 'primes' | 'alternating' | 'sqrt-exp'
+// Types: 'mixed' | 'fibonacci' | 'exponential' | 'primes' | 'alternating' | 'sqrt-exp' | 'digits' | 'hidden'
 const seqGensMeta = [
   { fn: seqGens[0],  type: 'mixed' },        // 0.  +d
   { fn: seqGens[1],  type: 'mixed' },        // 1.  −d
@@ -854,6 +1089,22 @@ const seqGensMeta = [
   { fn: seqGens[44], type: 'alternating' },  // 44. +1,×2,+2,×3,+3 increasing operands
   { fn: seqGens[45], type: 'alternating' },  // 45. +a,×m,÷n with growing add per cycle
   { fn: seqGens[46], type: 'alternating' },  // 46. +a₁,×b₁,+a₂,×b₂ varying pairs
+  { fn: seqGens[47], type: 'digits' },       // 47. + digit sum
+  { fn: seqGens[48], type: 'digits' },       // 48. Reverse and add
+  { fn: seqGens[49], type: 'digits' },       // 49. Look-and-say
+  { fn: seqGens[50], type: 'digits' },       // 50. Digit rotation
+  { fn: seqGens[51], type: 'digits' },       // 51. Concatenated base sequence
+  { fn: seqGens[52], type: 'digits' },       // 52. + digit product
+  { fn: seqGens[53], type: 'hidden' },       // 53. Differences: primes
+  { fn: seqGens[54], type: 'hidden' },       // 54. Differences: squares
+  { fn: seqGens[55], type: 'hidden' },       // 55. Differences: Fibonacci
+  { fn: seqGens[56], type: 'hidden' },       // 56. Differences: factorials
+  { fn: seqGens[57], type: 'hidden' },       // 57. Tribonacci
+  { fn: seqGens[58], type: 'hidden' },       // 58. Three interleaved sequences
+  { fn: seqGens[59], type: 'hidden' },       // 59. Products of neighbouring primes
+  { fn: seqGens[60], type: 'hidden' },       // 60. Prime squares ± k
+  { fn: seqGens[61], type: 'hidden' },       // 61. Differences alternate between two sequences
+  { fn: seqGens[62], type: 'hidden' },       // 62. Squares ± k alternating
 ];
 
 /**
@@ -861,7 +1112,7 @@ const seqGensMeta = [
  * Falls back to the full seqGens array when type is 'mixed' or unrecognised,
  * so that the difficulty filter in getSeqGens() always has something to work with.
  *
- * @param {string} type - One of 'mixed' | 'fibonacci' | 'exponential' | 'primes' | 'alternating' | 'sqrt-exp'
+ * @param {string} type - One of 'mixed' | 'fibonacci' | 'exponential' | 'primes' | 'alternating' | 'sqrt-exp' | 'digits' | 'hidden'
  * @returns {Function[]}
  */
 export function getSeqGensByType(type) {

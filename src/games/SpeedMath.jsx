@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { GameStats, GameTimer, Feedback, GameEnd, HighScoreBanner } from './GameShell';
+import { GameStats, GameTimer, Feedback, GameEnd, HighScoreBanner, NumPad, applyNumKey } from './GameShell';
 import { R, pick } from './utils';
 
 const GAME_ID = 'sp';
@@ -110,7 +110,7 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
       ]} />
       <GameTimer timeLeft={timeLeft} maxTime={sessionDuration} />
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
-        Solve the math problem as fast as you can. Type your answer and press Enter.
+        Solve the math problem as fast as you can. Enter your answer and press OK.
       </p>
       <div className="g-spq" dangerouslySetInnerHTML={{ __html: question }} />
       <div style={{ display: 'flex', gap: 8 }}>
@@ -119,6 +119,7 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
           className="g-input"
           placeholder="?"
           autoComplete="off"
+          inputMode="none"
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') submit(); }}
@@ -126,6 +127,7 @@ export default function SpeedMath({ onBack, timeLimit = 60, difficulty = 'medium
         />
         <button className="btn btn-primary" onClick={submit}>OK</button>
       </div>
+      <NumPad onKey={k => setInput(v => applyNumKey(v, k))} />
       {fb && <Feedback type={fb.type} message={fb.msg} />}
     </div>
   );

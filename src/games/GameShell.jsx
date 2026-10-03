@@ -73,6 +73,27 @@ export function useGameTimer(maxTime, onTimeout) {
   return { start, stop, getTime, timeRef };
 }
 
+// On-screen number pad, so answers don't have to be typed on the phone keyboard
+export function applyNumKey(value, key) {
+  if (key === '⌫') return value.slice(0, -1);
+  if (key === '±') return value.startsWith('-') ? value.slice(1) : `-${value}`;
+  return value + key;
+}
+
+export function NumPad({ onKey, disabled, allowNegative = false }) {
+  const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', allowNegative ? '±' : '', '0', '⌫'];
+  return (
+    <div className="g-numpad">
+      {keys.map((k, i) => k ? (
+        <button key={i} type="button" className="g-numkey" disabled={disabled} onClick={() => onKey(k)}
+          aria-label={k === '⌫' ? 'Delete' : k === '±' ? 'Plus/minus' : k}>
+          {k}
+        </button>
+      ) : <span key={i} />)}
+    </div>
+  );
+}
+
 export function Feedback({ type, message }) {
   if (!message) return null;
   const cls = type === 'ok' ? 'g-fb-ok' : type === 'warn' ? 'g-fb-warn' : 'g-fb-err';

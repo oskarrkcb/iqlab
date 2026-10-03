@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameStats, GameTimer, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
 import { useKeySelect } from './useKeySelect';
-import { R, pick, shuf, matGens } from './utils';
+import { R, pick, shuf, spreadChoices, matGens } from './utils';
 const GAME_ID = 'mat';
 
 // ── Hard matrix generators ──
@@ -15,32 +15,29 @@ const hardMatGens = [
     }
     return { g, rule: 'Row: Col3 = Col1 + Col2 (Fibonacci-like)' };
   },
-  // Each cell = row_index * col_value + offset
+  // Times table: each cell = row factor × column factor
   () => {
-    const base = R(2, 5);
-    const g = [];
-    for (let r = 0; r < 3; r++) {
-      const row = [];
-      for (let c = 0; c < 3; c++) row.push((r + 1) * (c + 1) * base);
-      g.push(row);
-    }
-    return { g, rule: `Each cell = row × col × ${base}` };
+    const rf = shuf([2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3);
+    const cf = shuf([2, 3, 4, 5, 6, 7, 8, 9]).slice(0, 3);
+    const g = rf.map(a => cf.map(b => a * b));
+    return { g, rule: `Each cell = row factor × column factor (rows ×${rf.join(', ×')}, columns ×${cf.join(', ×')})` };
   },
   // Row: a * b - c = constant
   () => {
     const target = R(2, 15);
     const g = [];
     for (let r = 0; r < 3; r++) {
-      const a = R(2, 8), b = R(2, 8);
+      let a, b;
+      do { a = R(2, 8); b = R(2, 8); } while (a * b <= target);
       g.push([a, b, a * b - target]);
     }
     return { g, rule: `Row: Col1 × Col2 − Col3 = ${target}` };
   },
-  // Diagonal = constant, rest varies
+  // Diagonal = constant, rest varies — only diagonal cells are solvable
   () => {
     const d = R(5, 20);
     const g = [[d, R(1, 15), R(1, 15)], [R(1, 15), d, R(1, 15)], [R(1, 15), R(1, 15), d]];
-    return { g, rule: `Main diagonal = <b>${d}</b>` };
+    return { g, rule: `Main diagonal = <b>${d}</b>`, cells: [[0, 0], [1, 1], [2, 2]] };
   },
   // Col product: col1 * col2 = col3
   () => {
@@ -89,6 +86,7 @@ export default function MatrixPuzzle({ onBack, difficulty = 'medium' }) {
   const [ended, setEnded] = useState(false);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const timerRef = useRef(null);
+  const bagRef = useRef([]);
   const MX = 10;
 
   const stopTimer = useCallback(() => clearInterval(timerRef.current), []);
@@ -98,14 +96,14 @@ export default function MatrixPuzzle({ onBack, difficulty = 'medium' }) {
     if (rn > MX) { setEnded(true); return; }
     setState(s => ({ ...s, rn }));
     setAnswered(false); setSelected(-1); setFb(null); setExpl(null); setWaiting(false);
+    // Every rule type once before any repeats
     const gens = getMatGens(difficulty);
-    const p = pick(gens)();
-    const hr = R(0, 2), hc = R(0, 2);
+    if (bagRef.current.length === 0) bagRef.current = shuf(gens);
+    const p = bagRef.current.pop()();
+    const [hr, hc] = p.cells ? pick(p.cells) : [R(0, 2), R(0, 2)];
     const ans = p.g[hr][hc];
     const variance = VARIANCE[difficulty] || 7;
-    let opts = new Set([ans]);
-    while (opts.size < 4) { const o = ans + (Math.random() > 0.5 ? 1 : -1) * R(1, variance); if (o > 0) opts.add(o); }
-    const shuffled = shuf([...opts]);
+    const shuffled = spreadChoices(ans, 4, () => R(1, variance));
     setGrid(p.g); setHidden({ r: hr, c: hc }); setAnswer(ans);
     setOptions(shuffled); setCorrectIdx(shuffled.indexOf(ans)); setRule(p.rule);
     if (timeLimit) {

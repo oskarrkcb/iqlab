@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { GameStats, GameTimer, Feedback, Explanation, GameEnd, HighScoreBanner } from './GameShell';
+import { GameStats, GameTimer, Feedback, Explanation, GameEnd, HighScoreBanner, NumPad, applyNumKey } from './GameShell';
 import { pick, getSeqGens, getSeqGensByType, R } from './utils';
 
 const GAME_ID = 'seq';
@@ -116,7 +116,7 @@ export default function NumberSeries({ onBack, difficulty = 'medium', seriesType
       ]} />
       {timerMode !== 'zen' && <GameTimer timeLeft={timeLeft} maxTime={22} />}
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 12, lineHeight: 1.5 }}>
-        Find the missing number in the sequence. Select the correct answer from the options.
+        Find the missing number in the sequence and enter it.
       </p>
       {puzzle && (
         <>
@@ -140,6 +140,7 @@ export default function NumberSeries({ onBack, difficulty = 'medium', seriesType
               className="g-input"
               placeholder="?"
               autoComplete="off"
+              inputMode="none"
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { waiting ? nextRound() : submit(); } }}
@@ -148,6 +149,7 @@ export default function NumberSeries({ onBack, difficulty = 'medium', seriesType
             />
             <button className="btn btn-primary" onClick={submit} disabled={revealed}>Check</button>
           </div>
+          <NumPad onKey={k => setInput(v => applyNumKey(v, k))} disabled={revealed} allowNegative />
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
             <button className="btn btn-ghost btn-sm" onClick={hint} disabled={revealed} style={{ flex: 1 }}>Hint</button>
             <button className="btn btn-ghost btn-sm" onClick={skip} disabled={revealed} style={{ flex: 1 }}>Skip</button>

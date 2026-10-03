@@ -160,6 +160,8 @@ export default function Training() {
     { id: 'primes', label: t.training.primes },
     { id: 'alternating', label: 'Alternating Ops' },
     { id: 'sqrt-exp', label: '√ & Exponents' },
+    { id: 'digits', label: 'Digit Tricks' },
+    { id: 'hidden', label: 'Hidden Sequences' },
   ];
 
   const filterGames = (games) => {

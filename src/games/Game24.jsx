@@ -21,6 +21,18 @@ function hasSol(nums) {
   return solve(nums);
 }
 
+// Which number tiles are already used in the typed expression
+function usedTiles(input, nums) {
+  const used = new Set();
+  (input.match(/\d+/g) || []).map(Number).forEach(v => {
+    const i = nums.findIndex((n, k) => n === v && !used.has(k));
+    if (i >= 0) used.add(i);
+  });
+  return used;
+}
+
+const KEYS = ['(', ')', '+', '−', '×', '÷'];
+
 export default function Game24({ onBack, difficulty = 'medium' }) {
   const [state, setState] = useState({ sc: 0, rn: 0, sk: 0 });
   const [nums, setNums] = useState([]);
@@ -55,10 +67,10 @@ export default function Game24({ onBack, difficulty = 'medium' }) {
   const submit = () => {
     let expr = input.trim();
     if (!expr) return;
-    expr = expr.replace(/×/g, '*').replace(/÷/g, '/');
+    expr = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
     const san = expr.replace(/[^0-9+\-*/().]/g, '');
     const digs = (san.match(/\d+/g) || []).map(Number);
-    if (digs.length !== 4) { setFb({ type: 'err', msg: 'Use exactly 4 numbers!' }); return; }
+    if (digs.length !== nums.length) { setFb({ type: 'err', msg: `Use all ${nums.length} numbers exactly once!` }); return; }
     if ([...digs].sort((a, b) => a - b).join() !== [...nums].sort((a, b) => a - b).join()) {
       setFb({ type: 'err', msg: 'Wrong numbers!' }); return;
     }
@@ -75,6 +87,12 @@ export default function Game24({ onBack, difficulty = 'medium' }) {
       setFb({ type: 'err', msg: 'Invalid expression!' });
     }
   };
+
+  // On-screen keypad
+  const used = usedTiles(input, nums);
+  const endsWithNumber = /[\d)]\s*$/.test(input);
+  const press = (s) => { setInput(prev => prev + s); setFb(null); };
+  const backspace = () => setInput(prev => prev.trimEnd().replace(/(\d+|.)$/, ''));
 
   const skip = () => {
     setState(s => ({ ...s, sk: s.sk + 1 }));
@@ -95,29 +113,42 @@ export default function Game24({ onBack, difficulty = 'medium' }) {
         { label: 'Skips', value: state.sk, color: 'var(--red)' },
       ]} />
       <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 16, lineHeight: 1.5 }}>
-        Use all four numbers with +, −, ×, ÷ to make 24. Type your expression.
+        Use all {nums.length} numbers with +, −, ×, ÷ and brackets to make 24. Tap the numbers and signs.
       </p>
-      <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 16 }}>
+      <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 16 }}>
         {nums.map((n, i) => (
-          <div key={i} style={{
-            width: 56, height: 56, background: 'var(--bg4)', border: '2px solid var(--gray5)',
-            borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontFamily: 'var(--mono)', fontSize: 26, fontWeight: 700,
-          }}>{n}</div>
+          <button key={i} type="button" onClick={() => press(String(n))}
+            disabled={used.has(i) || endsWithNumber}
+            aria-label={`Number ${n}`}
+            style={{
+              width: 56, height: 56, background: 'var(--bg4)', border: '2px solid var(--gray5)',
+              borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'var(--mono)', fontSize: 26, fontWeight: 700, color: 'var(--white)',
+              cursor: used.has(i) || endsWithNumber ? 'default' : 'pointer',
+              opacity: used.has(i) ? 0.25 : endsWithNumber ? 0.6 : 1, transition: 'opacity 0.15s',
+            }}>{n}</button>
         ))}
       </div>
       <input
         ref={inputRef}
         className="g-input"
-        placeholder={`e.g. (${nums[0]}+${nums[1]})*(${nums[2]}-${nums[3]})`}
+        placeholder={`e.g. (${nums[0]}+${nums[1]})×(${nums[2]}−${nums[3]})`}
         autoComplete="off"
+        inputMode="none"
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={e => { if (e.key === 'Enter') submit(); }}
         style={{ fontSize: 17 }}
       />
+      <div className="g-opbs" style={{ flexWrap: 'wrap' }}>
+        {KEYS.map(k => (
+          <button key={k} type="button" className="g-opb" onClick={() => press(k)}>{k}</button>
+        ))}
+        <button type="button" className="g-opb" onClick={backspace} aria-label="Delete">⌫</button>
+      </div>
       <div style={{ display: 'flex', gap: 8, marginTop: 12, justifyContent: 'center' }}>
         <button className="btn btn-primary" onClick={submit}>Check</button>
+        <button className="btn btn-ghost" onClick={() => { setInput(''); setFb(null); }}>Clear</button>
         <button className="btn btn-ghost" onClick={skip}>Skip</button>
       </div>
       {fb && <Feedback type={fb.type} message={fb.msg} />}

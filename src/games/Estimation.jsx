@@ -1,7 +1,20 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GameStats, GameTimer, Feedback, GameEnd, HighScoreBanner } from './GameShell';
-import { R, shuf } from './utils';
+import { R, spreadChoices } from './utils';
 const GAME_ID = 'est';
+
+// Distance between neighbouring options in % of the result — closer = harder.
+const SPREAD = { easy: [20, 35], medium: [10, 20], hard: [5, 10], 'really-hard': [2, 5] };
+
+// Options share the result's last digits (gaps are multiples of 10, 100, …),
+// so you can't just compute the last digit — you have to estimate.
+function makeChoices(res, difficulty) {
+  const [lo, hi] = SPREAD[difficulty] || SPREAD.medium;
+  let step = 1;
+  while (step * 10 <= res * hi / 100) step *= 10;
+  const gap = () => Math.max(step, Math.round(res * R(lo, hi) / 100 / step) * step);
+  return spreadChoices(res, 3, gap);
+}
 
 function generate(difficulty = 'medium') {
   let q, res;
@@ -30,12 +43,7 @@ function generate(difficulty = 'medium') {
     else if (t === 3) { const a = R(4, 25); res = a * a; q = `${a}²`; }
     else { const a = R(11, 99), b = R(3, 9); res = a * b; q = `${a} × ${b}`; }
   }
-  let ch = new Set([res]);
-  while (ch.size < 3) {
-    const o = Math.max(1, Math.round(Math.abs(res) * R(10, 35) / 100));
-    ch.add(res + (Math.random() > 0.5 ? o : -o));
-  }
-  const choices = shuf([...ch]);
+  const choices = makeChoices(res, difficulty);
   return { q, res, choices, ci: choices.indexOf(res) };
 }
 
@@ -57,7 +65,7 @@ export default function Estimation({ onBack, difficulty = 'medium' }) {
     if (rn > MX) { setEnded(true); return; }
     setState(s => ({ ...s, rn }));
     setAnswered(false); setSelected(-1); setFb(null);
-    setPuzzle(generate());
+    setPuzzle(generate(difficulty));
     setTimeLeft(10);
     clearInterval(timerRef.current);
     timerRef.current = setInterval(() => {
@@ -66,7 +74,7 @@ export default function Estimation({ onBack, difficulty = 'medium' }) {
         return prev - 0.1;
       });
     }, 100);
-  }, [state.rn]);
+  }, [state.rn, difficulty]);
 
   useEffect(() => {
     if (timeLeft <= 0 && puzzle && !answered) {

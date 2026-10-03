@@ -19,8 +19,8 @@ export default function DualNBack({ onBack, difficulty = 'medium' }) {
   const [letterMatch, setLetterMatch] = useState(false);
   const [score, setScore] = useState(0);
   const [hits, setHits] = useState(0);
+  const [rejections, setRejections] = useState(0);
   const [misses, setMisses] = useState(0);
-  const [total, setTotal] = useState(0);
   const [fb, setFb] = useState(null);
   const [round, setRound] = useState(0);
   const timerRef = useRef(null);
@@ -45,7 +45,7 @@ export default function DualNBack({ onBack, difficulty = 'medium' }) {
     const seq = generateSequence(nLevel);
     setSequence(seq);
     setStep(-1);
-    setScore(0); setHits(0); setMisses(0); setTotal(0);
+    setScore(0); setHits(0); setRejections(0); setMisses(0);
     setPosMatch(false); setLetterMatch(false);
     setFb(null); setRound(0);
     setPhase('playing');
@@ -60,33 +60,37 @@ export default function DualNBack({ onBack, difficulty = 'medium' }) {
     return () => clearInterval(timerRef.current);
   }, [phase]);
 
+  // Scores the buttons pressed for step `idx`, per channel (position, letter):
+  // match pressed +10, "no match" correctly left alone +5, miss or false alarm −5
+  const evaluate = (idx) => {
+    if (idx < nLevel) return;
+    const back = sequence[idx - nLevel];
+    let h = 0, cr = 0, m = 0;
+    [
+      [sequence[idx].pos === back.pos, posMatch],
+      [sequence[idx].letter === back.letter, letterMatch],
+    ].forEach(([isMatch, pressed]) => {
+      if (isMatch && pressed) h++;
+      else if (!isMatch && !pressed) cr++;
+      else m++;
+    });
+    setHits(prev => prev + h);
+    setRejections(prev => prev + cr);
+    setMisses(prev => prev + m);
+    setScore(prev => prev + h * 10 + cr * 5 - m * 5);
+  };
+
   // Process each step
   useEffect(() => {
     if (step < 0 || phase !== 'playing') return;
+
+    // Score the answers given for the previous step (including the last one)
+    if (step > 0) evaluate(step - 1);
+
     if (step >= sequence.length) {
       clearInterval(timerRef.current);
       setPhase('ended');
       return;
-    }
-
-    // Check previous step answers
-    if (step >= nLevel + 1) {
-      const prevIdx = step - 1;
-      const matchIdx = prevIdx - nLevel;
-      const wasPosMatch = sequence[prevIdx].pos === sequence[matchIdx].pos;
-      const wasLetterMatch = sequence[prevIdx].letter === sequence[matchIdx].letter;
-      let h = 0, m = 0, t = 0;
-      if (wasPosMatch || wasLetterMatch) t++;
-      if (wasPosMatch && posMatch) h++;
-      else if (wasPosMatch && !posMatch) m++;
-      if (wasLetterMatch && letterMatch) h++;
-      else if (wasLetterMatch && !letterMatch) m++;
-      if (!wasPosMatch && posMatch) m++;
-      if (!wasLetterMatch && letterMatch) m++;
-      setHits(prev => prev + h);
-      setMisses(prev => prev + m);
-      setTotal(prev => prev + t);
-      setScore(prev => prev + h * 10 - m * 5);
     }
 
     setCurrentPos(sequence[step].pos);
@@ -121,7 +125,17 @@ export default function DualNBack({ onBack, difficulty = 'medium' }) {
   }
 
   if (phase === 'ended') {
-    return <GameEnd gameId={GAME_ID} score={score} label={`${hits} hits · ${misses} misses`} onReplay={startGame} onBack={onBack} />;
+    return (
+      <GameEnd
+        gameId={GAME_ID}
+        score={score}
+        correct={hits + rejections}
+        total={ROUNDS * 2}
+        label={`${hits} hits · ${rejections} correct "no match" · ${misses} errors`}
+        onReplay={startGame}
+        onBack={onBack}
+      />
+    );
   }
 
   return (

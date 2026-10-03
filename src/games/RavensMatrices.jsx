@@ -4,22 +4,60 @@ import { useKeySelect } from './useKeySelect';
 import { R, shuf, pick } from './utils';
 const GAME_ID = 'ravens';
 
+// Filled shapes 0–4, their outline versions at +5 (● ○, ■ □, ▲ △, ◆ ◇, ★ ☆)
 const SHAPES = ['●', '■', '▲', '◆', '★', '○', '□', '△', '◇', '☆'];
+const FILLED = SHAPES.slice(0, 5);
 const COLORS = ['var(--accent)', 'var(--green)', 'var(--blue)', 'var(--orange)', 'var(--red)'];
 const RAVENS_TIME = { hard: 25, 'really-hard': 18 };
 const RAVENS_OPTS = { easy: 4, medium: 4, hard: 5, 'really-hard': 5 };
 
-// Type ranges by difficulty
-const TYPE_RANGE = {
+// Rule types per difficulty (see generatePuzzle)
+const TYPES = {
   easy: [0, 1],
-  medium: [0, 3],
-  hard: [0, 6],
-  'really-hard': [4, 6],
+  medium: [0, 1, 2, 3, 7],
+  hard: [2, 4, 5, 6, 7, 8, 9, 10],
+  'really-hard': [6, 8, 9, 10, 11, 12, 13, 14],
 };
 
-function generatePuzzle(difficulty = 'medium') {
-  const range = TYPE_RANGE[difficulty] || [0, 3];
-  const type = R(range[0], range[1]);
+const cellKey = c => `${c.shape}|${c.size}|${c.color}|${c.count || 0}`;
+const uniq = a => [...new Set(a)];
+const toggleFill = s => SHAPES[(SHAPES.indexOf(s) + 5) % 10];
+
+// Wrong options: on hard levels each differs from the answer in exactly one
+// attribute (taken from values that appear in the grid), so you must apply every rule.
+function wrongChoices(answer, grid, n, difficulty) {
+  const variants = [];
+  if (difficulty === 'hard' || difficulty === 'really-hard') {
+    uniq(grid.map(c => c.shape)).forEach(shape => variants.push({ ...answer, shape }));
+    uniq(grid.map(c => c.color)).forEach(color => variants.push({ ...answer, color }));
+    uniq(grid.map(c => c.size)).forEach(size => variants.push({ ...answer, size }));
+    if (answer.count) {
+      uniq([...grid.map(c => c.count), answer.count - 1, answer.count + 1])
+        .filter(count => count >= 1 && count <= 9)
+        .forEach(count => variants.push({ ...answer, count }));
+    }
+    variants.push({ ...answer, shape: toggleFill(answer.shape) });
+  }
+  const seen = new Set([cellKey(answer)]);
+  const out = [];
+  for (const v of shuf(variants)) {
+    if (out.length === n) break;
+    if (!seen.has(cellKey(v))) { seen.add(cellKey(v)); out.push(v); }
+  }
+  // Pad with random cells (easy/medium, or grids with little variety)
+  while (out.length < n) {
+    const v = {
+      shape: difficulty === 'easy' ? pick(SHAPES) : pick([answer.shape, ...SHAPES]),
+      size: answer.count ? answer.size : pick([16, 22, 24, 30]),
+      color: pick(COLORS),
+      count: answer.count ? R(1, 9) : undefined,
+    };
+    if (!seen.has(cellKey(v))) { seen.add(cellKey(v)); out.push(v); }
+  }
+  return out;
+}
+
+function generatePuzzle(difficulty = 'medium', type = 0) {
   let grid, answer, rule, choices;
 
   if (type === 0) {
@@ -96,7 +134,7 @@ function generatePuzzle(difficulty = 'medium') {
     }
     answer = { shape: shapes[2], size: 18, color, count: 3 };
     rule = 'Each row adds one more of each shape (1→2→3)';
-  } else {
+  } else if (type === 6) {
     // XOR / set completion: each row uses all 3 shapes, each col uses all 3 colors
     const shapes = shuf(SHAPES).slice(0, 3);
     const colors = shuf(COLORS).slice(0, 3);
@@ -110,38 +148,105 @@ function generatePuzzle(difficulty = 'medium') {
     }
     answer = { shape: shapes[offsets[2][2]], size: 24, color: colors[2] };
     rule = 'Each row and column contains all 3 shapes exactly once (Latin square)';
-  }
-
-  const numWrong = (RAVENS_OPTS[difficulty] || 4) - 1;
-  const wrongChoices = [];
-  for (let i = 0; i < numWrong; i++) {
-    if (difficulty === 'really-hard') {
-      // Same shape + same color, only size/count differs
-      wrongChoices.push({
-        shape: answer.shape,
-        size: [16, 22, 24, 30].filter(s => s !== answer.size)[R(0, 2)],
-        color: answer.color,
-        count: answer.count ? R(1, 9) : undefined,
-      });
-    } else if (difficulty === 'hard') {
-      // Same shape, different size and color
-      wrongChoices.push({
-        shape: answer.shape,
-        size: [16, 22, 24, 30][R(0, 3)],
-        color: COLORS[R(0, COLORS.length - 1)],
-        count: answer.count ? R(1, 9) : undefined,
-      });
-    } else {
-      wrongChoices.push({
-        shape: SHAPES[R(0, SHAPES.length - 1)],
-        size: [16, 22, 24, 30][R(0, 3)],
-        color: COLORS[R(0, COLORS.length - 1)],
-        count: answer.count ? R(1, 9) : undefined,
-      });
+  } else if (type === 7) {
+    // Rows: one shape each; columns: 1, 2, 3 of it
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const color = pick(COLORS);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) grid.push({ shape: shapes[r], size: 18, color, count: c + 1 });
     }
+    rule = 'Each row keeps its shape; the count goes 1 → 2 → 3 from left to right';
+  } else if (type === 8) {
+    // Addition: count in column 3 = column 1 + column 2
+    const shapes = shuf(FILLED).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      const a = R(1, 4), b = R(1, 4);
+      [a, b, a + b].forEach(count => grid.push({ shape: shapes[r], size: 18, color: colors[r], count }));
+    }
+    rule = 'In every row: count in column 3 = column 1 + column 2';
+  } else if (type === 9) {
+    // Two independent Latin squares: shapes shift right, colors shift left
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        grid.push({ shape: shapes[(c + r) % 3], size: 24, color: colors[(c - r + 3) % 3] });
+      }
+    }
+    rule = 'Shapes shift one step right per row, colors shift one step left — every row and column has each shape and color once';
+  } else if (type === 10) {
+    // Diagonals: shape constant along ↙ diagonals, color constant along ↘ diagonals
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        grid.push({ shape: shapes[(r + c) % 3], size: 24, color: colors[(c - r + 3) % 3] });
+      }
+    }
+    rule = 'Shapes repeat along the ↙ diagonals, colors repeat along the ↘ diagonals';
+  } else if (type === 11) {
+    // Fill XOR: column 3 is filled when exactly one of column 1 and 2 is filled
+    const shapes = shuf(FILLED).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    const pairs = shuf([[true, true], [true, false], [false, true], [false, false]]).slice(0, 3);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      const [f1, f2] = pairs[r];
+      [f1, f2, f1 !== f2].forEach((filled, c) =>
+        grid.push({ shape: filled ? shapes[r] : toggleFill(shapes[r]), size: 26, color: colors[c] }));
+    }
+    rule = 'Each column has its own color. Column 3 is filled only if exactly one of columns 1 and 2 is filled (XOR)';
+  } else if (type === 12) {
+    // Three Latin squares at once: shape, color and count
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    const counts = shuf([1, 2, 3]);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        grid.push({
+          shape: shapes[(c + r) % 3],
+          size: 18,
+          color: colors[(c + 2 * r + 1) % 3],
+          count: counts[(c - r + 3) % 3],
+        });
+      }
+    }
+    rule = 'Shape, color and count each appear exactly once in every row and column — three rules at once';
+  } else if (type === 13) {
+    // Subtraction: count in column 3 = column 1 − column 2, colors rotate per row
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const colors = shuf(COLORS).slice(0, 3);
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      const b = R(1, 4), d = R(1, 4);
+      [b + d, b, d].forEach((count, c) =>
+        grid.push({ shape: shapes[c], size: 18, color: colors[(c + r) % 3], count }));
+    }
+    rule = 'Each column keeps its shape; count in column 3 = column 1 − column 2; colors rotate one step per row';
+  } else {
+    // Size grows per column, count grows per row, shapes form a Latin square
+    const shapes = shuf(SHAPES).slice(0, 3);
+    const color = pick(COLORS);
+    const sizes = [16, 22, 28];
+    grid = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        grid.push({ shape: shapes[(r + 2 * c) % 3], size: sizes[c], color, count: r + 1 });
+      }
+    }
+    rule = 'Size grows to the right, count grows downwards, and every row and column has each shape once';
   }
 
-  choices = shuf([answer, ...wrongChoices]);
+  // The missing piece is always the bottom-right cell
+  answer = grid[8];
+  const numWrong = (RAVENS_OPTS[difficulty] || 4) - 1;
+  choices = shuf([answer, ...wrongChoices(answer, grid, numWrong, difficulty)]);
   const ci = choices.indexOf(answer);
 
   return { grid, answer, choices, ci, rule };
@@ -178,6 +283,7 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
   const [ended, setEnded] = useState(false);
   const [timeLeft, setTimeLeft] = useState(timeLimit);
   const timerRef = useRef(null);
+  const bagRef = useRef([]);
   const MX = 10;
 
   const stopTimer = useCallback(() => clearInterval(timerRef.current), []);
@@ -187,7 +293,9 @@ export default function RavensMatrices({ onBack, difficulty = 'medium' }) {
     if (rn > MX) { setEnded(true); return; }
     setState(s => ({ ...s, rn }));
     setAnswered(false); setSelected(-1); setFb(null); setExpl(null); setWaiting(false);
-    setPuzzle(generatePuzzle(difficulty));
+    // Every rule type once before any repeats
+    if (bagRef.current.length === 0) bagRef.current = shuf(TYPES[difficulty] || TYPES.medium);
+    setPuzzle(generatePuzzle(difficulty, bagRef.current.pop()));
     if (timeLimit) {
       setTimeLeft(timeLimit);
       clearInterval(timerRef.current);

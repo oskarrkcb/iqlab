@@ -3,14 +3,40 @@ import { GameStats, GameTimer, Feedback, Explanation, GameEnd, HighScoreBanner }
 import { R, pick } from './utils';
 const GAME_ID = 'op';
 
+// Splits the expression into products/quotients (× and ÷ first), joined by + and −.
+// Returns null if a division doesn't come out even.
+function terms(nums, ops) {
+  const parts = [{ text: `${nums[0]}`, value: nums[0], calc: false }];
+  const signs = [];
+  for (let i = 0; i < ops.length; i++) {
+    const n = nums[i + 1], op = ops[i], cur = parts[parts.length - 1];
+    if (op === '×' || op === '÷') {
+      if (op === '÷' && cur.value % n !== 0) return null;
+      cur.value = op === '×' ? cur.value * n : cur.value / n;
+      cur.text += ` ${op} ${n}`;
+      cur.calc = true;
+    } else {
+      signs.push(op);
+      parts.push({ text: `${n}`, value: n, calc: false });
+    }
+  }
+  return { parts, signs };
+}
+
 function evalOps(nums, ops) {
-  try {
-    const map = { '+': '+', '−': '-', '×': '*', '÷': '/' };
-    let e = '';
-    nums.forEach((n, i) => { e += n; if (i < ops.length) e += map[ops[i]]; });
-    const r = Function('"use strict";return(' + e + ')')();
-    return Math.abs(r - Math.round(r)) < 1e-9 ? Math.round(r) : null;
-  } catch { return null; }
+  const t = terms(nums, ops);
+  if (!t) return null;
+  return t.parts.reduce((acc, p, i) => (i === 0 ? p.value : t.signs[i - 1] === '+' ? acc + p.value : acc - p.value), 0);
+}
+
+// Step-by-step solution: × and ÷ first, then + and − from left to right
+function solutionSteps(p) {
+  const { parts, signs } = terms(p.nums, p.ops);
+  const steps = parts.filter(x => x.calc).map(x => `${x.text} = <span class="hl">${x.value}</span>`);
+  if (signs.length > 0 && steps.length > 0) {
+    steps.push(parts.map((x, i) => (i ? `${signs[i - 1]} ` : '') + x.value).join(' ') + ` = <span class="hl">${p.target}</span>`);
+  }
+  return steps;
 }
 
 function generate(difficulty = 'medium') {
@@ -20,12 +46,15 @@ function generate(difficulty = 'medium') {
     difficulty === 'hard'        ? [1, 20, 4, 4] :
     difficulty === 'really-hard' ? [2, 30, 4, 5] :
                                    [1, 12, 3, 4];
-  for (let a = 0; a < 200; a++) {
+  // From hard on, at least one × or ÷ so "Punkt vor Strich" matters
+  const needsPoint = difficulty === 'hard' || difficulty === 'really-hard';
+  for (let a = 0; a < 500; a++) {
     const n = R(minN, maxN), nums = [], co = [];
     for (let i = 0; i < n; i++) nums.push(R(minV, maxV));
     for (let i = 0; i < n - 1; i++) co.push(pick(ops));
+    if (needsPoint && !co.some(o => o === '×' || o === '÷')) continue;
     const r = evalOps(nums, co);
-    if (r !== null && Number.isInteger(r) && r > 0 && r < 500) return { nums, ops: co, target: r };
+    if (r !== null && r > 0 && r < 500) return { nums, ops: co, target: r };
   }
   return { nums: [3, 4, 5], ops: ['+', '×'], target: 23 };
 }
@@ -71,6 +100,7 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
       setWaiting(true);
       setState(s => ({ ...s, sr: 0 }));
       setFb({ type: 'err', msg: `Time's up! ${fmtSol(puzzle)}` });
+      setExpl({ steps: solutionSteps(puzzle) });
     }
   }, [timeLeft, puzzle, waiting]);
 
@@ -96,8 +126,8 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
       setTimeout(nextRound, 1500);
     } else {
       setState(s => ({ ...s, sr: 0 }));
-      setFb({ type: 'err', msg: `Result: ${r ?? '?'} — not ${puzzle.target}` });
-      setExpl({ steps: [fmtSol(puzzle)] });
+      setFb({ type: 'err', msg: r === null ? "A division doesn't come out even" : `Result: ${r} — not ${puzzle.target}` });
+      setExpl({ steps: [fmtSol(puzzle), ...solutionSteps(puzzle)] });
     }
   };
 
@@ -105,6 +135,7 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
   const skip = () => {
     stopTimer(); setWaiting(true); setState(s => ({ ...s, sr: 0 }));
     setFb({ type: 'err', msg: fmtSol(puzzle) });
+    setExpl({ steps: solutionSteps(puzzle) });
   };
 
   if (ended) {
@@ -122,10 +153,10 @@ export default function OperatorPuzzle({ onBack, difficulty = 'medium' }) {
       <GameTimer timeLeft={timeLeft} maxTime={25} />
       {puzzle && (
         <>
-          <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 8 }}>Insert +, −, × or ÷</p>
+          <p style={{ textAlign: 'center', color: 'var(--gray3)', fontSize: 12, marginBottom: 8 }}>Insert +, −, × or ÷ — × and ÷ are calculated before + and −</p>
           <div className="g-opr">
             {puzzle.nums.map((n, i) => (
-              <span key={i}>
+              <span key={i} className="g-opp">
                 <span className="g-opn">{n}</span>
                 {i < slots.length && (
                   <span
