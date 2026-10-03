@@ -364,6 +364,11 @@ export const translations = {
       syllogisms: { name: 'Syllogisms', desc: 'Logical deduction chains' },
       chimp: { name: 'Chimp Test', desc: 'Short-term memory capacity' },
       algo: { name: 'Algorithmic Thinking', desc: 'Procedural problem solving' },
+      corsi: { name: 'Corsi Blocks', desc: 'Visual-spatial memory span' },
+      trail: { name: 'Trail Making', desc: 'Speed & switching: 1 → A → 2 → B' },
+      goNoGo: { name: 'Go / No-Go', desc: 'Impulse control & reaction' },
+      hanoi: { name: 'Tower of Hanoi', desc: 'Planning ahead' },
+      mathTricks: { name: 'Math Tricks', desc: 'Learn & practise mental shortcuts' },
     },
   },
 
@@ -732,6 +737,11 @@ export const translations = {
       syllogisms: { name: 'Syllogismen', desc: 'Logische Schlussfolgerungen' },
       chimp: { name: 'Chimp-Test', desc: 'Kurzzeitgedächtnis-Kapazität' },
       algo: { name: 'Algorithmisches Denken', desc: 'Prozedurales Problemlösen' },
+      corsi: { name: 'Corsi-Blöcke', desc: 'Räumliches Gedächtnis' },
+      trail: { name: 'Trail Making', desc: 'Tempo & Umschalten: 1 → A → 2 → B' },
+      goNoGo: { name: 'Go / No-Go', desc: 'Impulskontrolle & Reaktion' },
+      hanoi: { name: 'Turm von Hanoi', desc: 'Vorausplanen' },
+      mathTricks: { name: 'Rechentricks', desc: 'Kopfrechen-Abkürzungen lernen & üben' },
     },
   },
 };

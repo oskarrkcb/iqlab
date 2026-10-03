@@ -48,6 +48,8 @@ const GAME_LABELS = {
   'dual-nback': 'N-Back', ravens: 'Ravens', schulte: 'Schulte',
   stroop: 'Stroop', rotation: 'Rotation', syllogisms: 'Logic',
   chimp: 'Chimp',   algo: 'Algo',    'vs-bot': 'vs Bot',
+  corsi: 'Corsi',   trail: 'Trail',  gonogo: 'Go/No-Go', hanoi: 'Hanoi',
+  tricks: 'Tricks',
 };
 
 // ── Neuro Score Gauge SVG ──

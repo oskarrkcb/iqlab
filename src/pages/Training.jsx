@@ -21,6 +21,11 @@ import ChimpTest from '../games/ChimpTest';
 import AlgoThinking from '../games/AlgoThinking';
 import VsBot from '../games/VsBot';
 import MarathonMode from '../games/MarathonMode';
+import CorsiBlock from '../games/CorsiBlock';
+import TrailMaking from '../games/TrailMaking';
+import GoNoGo from '../games/GoNoGo';
+import TowerOfHanoi from '../games/TowerOfHanoi';
+import MathTricks from '../games/MathTricks';
 import { getHighScore, getHistory } from '../stats';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -46,6 +51,11 @@ const GAME_COMPONENTS = {
   chimp: ChimpTest,
   algo: AlgoThinking,
   'vs-bot': VsBot,
+  corsi: CorsiBlock,
+  trail: TrailMaking,
+  gonogo: GoNoGo,
+  hanoi: TowerOfHanoi,
+  tricks: MathTricks,
 };
 
 function GameIcon({ type }) {
@@ -67,6 +77,11 @@ function GameIcon({ type }) {
     case 'code': return <svg {...props}><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>;
     case 'swords': return <svg {...props}><path d="m14.5 17.5 3 3 4-4-3-3"/><path d="m3 6.5 3-3"/><path d="m2 5 7 7"/><path d="m14.5 6.5-8 8"/><path d="m6 14.5-3 3 4 4 3-3"/><path d="m21 3.5-3 3"/><path d="m22 5-7 7"/></svg>;
     case 'marathon': return <svg {...props}><path d="M13 4v16"/><path d="M17 4v16"/><path d="M19 4H9.5a4.5 4.5 0 0 0 0 9H17"/></svg>;
+    case 'blocks': return <svg {...props}><rect x="3" y="4" width="5" height="5" rx="1"/><rect x="14" y="3" width="5" height="5" rx="1"/><rect x="9" y="11" width="5" height="5" rx="1"/><rect x="4" y="16" width="5" height="5" rx="1"/><rect x="16" y="15" width="5" height="5" rx="1"/></svg>;
+    case 'trail': return <svg {...props}><circle cx="5" cy="6" r="2.5"/><circle cx="18" cy="9" r="2.5"/><circle cx="8" cy="18" r="2.5"/><path d="M7.4 6.6 15.6 8.4"/><path d="M16.3 11 9.7 16.2"/></svg>;
+    case 'stop': return <svg {...props}><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>;
+    case 'tower': return <svg {...props}><line x1="12" y1="4" x2="12" y2="20"/><rect x="8" y="12" width="8" height="3" rx="1"/><rect x="6" y="16" width="12" height="3" rx="1"/><line x1="3" y1="20" x2="21" y2="20"/></svg>;
+    case 'bulb': return <svg {...props}><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V16h8v-1.3A7 7 0 0 0 12 2z"/></svg>;
     default: return <svg {...props}><polygon points="5 3 19 12 5 21 5 3"/></svg>;
   }
 }
@@ -104,12 +119,12 @@ function ScoreChip({ gameId, difficulty }) {
 
 // Category → game IDs map for filtering
 const CATEGORY_MAP = {
-  math:   ['est', 'op', 'g24', 'sp', 'seq'],
-  logic:  ['ooo', 'mat', 'syllogisms', 'algo', 'seq'],
-  memory: ['mem', 'dual-nback', 'chimp'],
-  speed:  ['sp', 'schulte', 'stroop', 'rotation'],
+  math:   ['est', 'op', 'g24', 'sp', 'seq', 'tricks'],
+  logic:  ['ooo', 'mat', 'syllogisms', 'algo', 'seq', 'hanoi'],
+  memory: ['mem', 'dual-nback', 'chimp', 'corsi'],
+  speed:  ['sp', 'schulte', 'stroop', 'rotation', 'trail', 'gonogo'],
   iq:     ['ravens', 'mat', 'syllogisms', 'rotation'],
-  focus:  ['schulte', 'dual-nback', 'stroop'],
+  focus:  ['schulte', 'dual-nback', 'stroop', 'trail', 'gonogo'],
 };
 
 export default function Training() {
@@ -143,6 +158,7 @@ export default function Training() {
     { id: 'g24', name: t.games.game24.name, desc: t.games.game24.desc, category: 'Math', icon: 'bullseye' },
     { id: 'sp', name: t.games.speedMath.name, desc: t.games.speedMath.desc, category: 'Math', icon: 'zap' },
     { id: 'mem', name: t.games.numberMemory.name, desc: t.games.numberMemory.desc, category: 'Memory', icon: 'brain' },
+    { id: 'tricks', name: t.games.mathTricks.name, desc: t.games.mathTricks.desc, category: 'Math', icon: 'bulb' },
   ];
 
   const ADVANCED_MODES = [
@@ -154,6 +170,10 @@ export default function Training() {
     { id: 'syllogisms', name: t.games.syllogisms.name, desc: t.games.syllogisms.desc, category: 'Logic', icon: 'logic' },
     { id: 'chimp', name: t.games.chimp.name, desc: t.games.chimp.desc, category: 'Memory', icon: 'brain' },
     { id: 'algo', name: t.games.algo.name, desc: t.games.algo.desc, category: 'Logic', icon: 'code' },
+    { id: 'corsi', name: t.games.corsi.name, desc: t.games.corsi.desc, category: 'Memory', icon: 'blocks' },
+    { id: 'trail', name: t.games.trail.name, desc: t.games.trail.desc, category: 'Focus', icon: 'trail' },
+    { id: 'gonogo', name: t.games.goNoGo.name, desc: t.games.goNoGo.desc, category: 'Focus', icon: 'stop' },
+    { id: 'hanoi', name: t.games.hanoi.name, desc: t.games.hanoi.desc, category: 'Logic', icon: 'tower' },
   ];
 
   const seriesTypes = [
