@@ -94,7 +94,8 @@ function gatePage({ next, error, notConfigured }) {
 
 export default async function middleware(request) {
   const url = new URL(request.url);
-  const password = process.env.SITE_PASSWORD;
+  // Spaces at the start/end are ignored (they easily sneak in when copying)
+  const password = (process.env.SITE_PASSWORD || '').trim();
   if (!password) return gatePage({ next: '/', notConfigured: true });
 
   const token = await accessToken(password);
@@ -102,7 +103,7 @@ export default async function middleware(request) {
   if (url.pathname === LOGIN_PATH && request.method === 'POST') {
     const form = await request.formData();
     const next = safeNext(form.get('next'));
-    if (safeEqual(await accessToken(String(form.get('password') || '')), token)) {
+    if (safeEqual(await accessToken(String(form.get('password') || '').trim()), token)) {
       return new Response(null, {
         status: 303,
         headers: {
